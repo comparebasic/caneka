@@ -8,7 +8,8 @@ status Http_Tests(MemCh *m){
     void *args[5];
     status r = READY;
 
-    ProtoCtx *proto = HttpProto_Make(m);
+    IoCtx *ctx = IoCtx_Make(m);
+    HttpReq *req = (HttpReq *)HttpReq_Mk(ctx);
 
     StrVec *v = Sv(m, 
         "GET /fancy.html HTTP/1.1\r\n"
@@ -18,28 +19,27 @@ status Http_Tests(MemCh *m){
         "\r\n"
     );
     Cursor *curs = Cursor_Make(m, v);
-    Roebling *rbl = HttpRbl_Make(m, curs, proto);
+    Roebling *rbl = HttpRbl_Make(m, curs, req);
     Roebling_Run(rbl);
 
-    HttpCtx *ctx = (HttpCtx*)Ifc(m, proto->ctx, TYPE_HTTP_CTX);
     args[0] = I32_Wrapped(m, HTTP_METHOD_GET);
     args[1] = NULL;
-    r |= Test(ctx->method == HTTP_METHOD_GET, "Method is as expected $", args);
+    r |= Test(req->address.method == HTTP_METHOD_GET, "Method is as expected $", args);
 
     args[0] = K(m, "/fancy.html");
     args[1] = NULL;
-    r |= Test(Equals(ctx->path, args[0]), "Path is as expected $", args);
+    r |= Test(Equals(req->path, args[0]), "Path is as expected $", args);
 
     args[0] = K(m, "User-Agent");
     args[1] = K(m, "Firefudge/Aluminum");
     args[2] = NULL;
-    r |= Test(Equals(Table_Get(ctx->headersIt.p, args[0]), args[1]),
+    r |= Test(Equals(Table_Get(req->headersIt.p, args[0]), args[1]),
         "Header is as expected for $, $", args);
 
     args[0] = K(m, "Broken-Header");
     args[1] = K(m, "One,Two,Three,Four");
     args[2] = NULL;
-    r |= Test(Equals(Table_Get(ctx->headersIt.p, args[0]), args[1]),
+    r |= Test(Equals(Table_Get(req->headersIt.p, args[0]), args[1]),
         "Header is as expected for $, $", args);
 
     Return(m, r);
@@ -51,8 +51,8 @@ status HttpQuery_Tests(MemCh *m){
     void *args[5];
     status r = READY;
 
-    ProtoCtx *proto = HttpProto_Make(m);
-    HttpCtx *ctx = (HttpCtx*)Ifc(m, proto->ctx, TYPE_HTTP_CTX);
+    IoCtx *ctx = IoCtx_Make(m);
+    HttpReq *req = (HttpReq *)HttpReq_Mk(ctx);
 
     Str *content = S(m, 
         "{\"email\": \"fancy.pantsy@example.com\", \"first-name\": \"Fantsy\"}");
@@ -70,51 +70,51 @@ status HttpQuery_Tests(MemCh *m){
         "$", args);
 
     Cursor *curs = Cursor_Make(m, v);
-    Roebling *rbl = HttpRbl_Make(m, curs, proto);
+    Roebling *rbl = HttpRbl_Make(m, curs, req);
     Roebling_Run(rbl);
 
     r |= Test(rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
 
     Node *config = Inst_Make(m, TYPE_NODE);
-    HttpCtx_ParseBody(ctx, config, curs);
+    Buff *bf = Buff_Make(m, ZERO);
+    HttpReq_ParseBody(req, bf);
 
     args[0] = K(m, "POST");
-    args[1] = Lookup_Get(HttpMethods, ctx->method);
-    args[2] = NULL;
-    r |= Test(ctx->method == HTTP_METHOD_POST,
-        "HttpCtx method is expected @, have @", args); 
+    args[0] = NULL;
+    r |= Test(req->address.method == HTTP_METHOD_POST,
+        "HttpReq method is expected @", args); 
 
     args[0] = K(m, "/forms/signup");
-    args[1] = ctx->path;
+    args[1] = req->path;
     args[2] = NULL;
     r |= Test(Equals(args[0],args[1]), 
-        "HttpCtx path is expected @, have @", args); 
+        "HttpReq path is expected @, have @", args); 
 
     args[0] = K(m, "Firefudge/Aluminum");
-    args[1] = Table_Get(ctx->headersIt.p, K(m, "User-Agent"));
+    args[1] = Table_Get(req->headersIt.p, K(m, "User-Agent"));
     args[2] = NULL;
     r |= Test(Equals(args[0],args[1]), 
-        "HttpCtx User-Agent header is expected @, have @", args); 
+        "HttpReq User-Agent header is expected @, have @", args); 
 
     args[0] = K(m, "text/html");
-    args[1] = Table_Get(ctx->headersIt.p, K(m, "Accept"));
+    args[1] = Table_Get(req->headersIt.p, K(m, "Accept"));
     args[2] = NULL;
     r |= Test(Equals(args[0],args[1]), 
-        "HttpCtx User-Agent header is expected @, have @", args); 
+        "HttpReq User-Agent header is expected @, have @", args); 
 
-    Table *bodyData = (Table *)ctx->body;
+    Table *bodyData = (Table *)req->body;
 
     args[0] = K(m, "fancy.pantsy@example.com");
     args[1] = Table_Get(bodyData, K(m, "email"));
     args[2] = NULL;
     r |= Test(Equals(args[0],args[1]), 
-        "HttpCtx body#email is expected @, have @", args); 
+        "HttpReq body#email is expected @, have @", args); 
 
     args[0] = K(m, "Fantsy");
     args[1] = Table_Get(bodyData, K(m, "first-name"));
     args[2] = NULL;
     r |= Test(Equals(args[0],args[1]), 
-        "HttpCtx body#first-name is expected @, have @", args); 
+        "HttpReq body#first-name is expected @, have @", args); 
 
     Return(m, r);
 }

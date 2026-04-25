@@ -11,7 +11,5 @@ status Inter_Init(MemCh *m){
     _init = TRUE;
 
     InterTypeStrings_Init(m);
-    Http_ClsInit(m);
-    HttpCtx_Init(m);
     return r;
 }

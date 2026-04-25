@@ -124,9 +124,9 @@ static status method(MemCh *m, Roebling *rbl){
     Roebling_ResetPatterns(rbl);
 
     r |= Roebling_SetPattern(rbl,
-        getDef, HTTP_METHOD_GET, HTTP_PATH);
+        getDef, METHOD_HTTP_GET, HTTP_PATH);
     r |= Roebling_SetPattern(rbl,
-        postDef, HTTP_METHOD_POST, HTTP_PATH);
+        postDef, METHOD_HTTP_POST, HTTP_PATH);
 
     return r;
 }
@@ -210,48 +210,47 @@ static status headerValue(MemCh *m, Roebling *rbl){
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
     void *args[3];
-    ProtoCtx *proto = (ProtoCtx *)Ifc(rbl->m, rbl->source, TYPE_PROTO_CTX);
-    HttpCtx *ctx = (HttpCtx *)Ifc(rbl->m, proto->ctx, TYPE_HTTP_CTX);
+    HttpReq *req = (HttpReq *)Ifc(rbl->m, rbl->source, TYPE_HTTP_REQ);
     if(rbl->curs->type.state & DEBUG){
         args[0] = Type_ToStr(OutStream->m, captureKey);
         args[1] = v;
         args[2] = NULL;
         Out("^y.Token: $/@^0\n", args);
     }
-    if(captureKey == HTTP_METHOD_GET){
-        ctx->method = HTTP_METHOD_GET; 
-    }else if(captureKey == HTTP_METHOD_POST){
-        ctx->method = HTTP_METHOD_POST;
+    if(captureKey == METHOD_HTTP_GET){
+        req->address.method = METHOD_HTTP_GET; 
+    }else if(captureKey == METHOD_HTTP_POST){
+        req->address.method = METHOD_HTTP_POST;
     }else if(captureKey == HTTP_PATH){
-        ctx->path = v;
+        req->path = v;
     }else if(captureKey == HTTP_VERSION){
-        ctx->httpVersion = v;
+        req->address.proto = Bytes_ToHttpProto(m, v);
     }else if(captureKey == HTTP_HEADER_NAME){
-        Table_SetKey(&ctx->headersIt, v);
+        Table_SetKey(&req->headersIt, v);
     }else if(captureKey == HTTP_HEADER_VALUE){
-        i32 selected = ctx->headersIt.metrics.selected;
-        Table_SetValue(&ctx->headersIt, v);
-        ctx->headersIt.metrics.selected = selected;
+        i32 selected = req->headersIt.metrics.selected;
+        Table_SetValue(&req->headersIt, v);
+        req->headersIt.metrics.selected = selected;
     }else if(captureKey == HTTP_HEADER_INT_VALUE){
-        i32 selected = ctx->headersIt.metrics.selected;
-        Table_SetValue(&ctx->headersIt, I64_Wrapped(m, I64_FromStr(StrVec_Str(m, v))));
-        ctx->headersIt.metrics.selected = selected;
+        i32 selected = req->headersIt.metrics.selected;
+        Table_SetValue(&req->headersIt, I64_Wrapped(m, I64_FromStr(StrVec_Str(m, v))));
+        req->headersIt.metrics.selected = selected;
     }else if(captureKey == HTTP_QUERY_START){
         if(rbl->shelf == NULL){
             rbl->shelf = StrVec_Make(m);
         }
     }else if(captureKey == HTTP_QUERY_NEXT){
         if(rbl->shelf != NULL && rbl->shelf->total > 0){
-            Table_SetValue(&ctx->queryIt, rbl->shelf);
+            Table_SetValue(&req->queryIt, rbl->shelf);
             rbl->shelf = StrVec_Make(m);
         }
     }else if(captureKey == HTTP_QUERY_NEXT_VALUE || captureKey == HTTP_QUERY_END){
         if(rbl->shelf != NULL && rbl->shelf->total){
-            if(ctx->queryIt.metrics.selected == -1){
-                Table_SetKey(&ctx->queryIt, rbl->shelf);
+            if(req->queryIt.metrics.selected == -1){
+                Table_SetKey(&req->queryIt, rbl->shelf);
                 rbl->shelf = StrVec_Make(m);
             }else{
-                Table_SetValue(&ctx->queryIt, rbl->shelf);
+                Table_SetValue(&req->queryIt, rbl->shelf);
                 rbl->shelf = StrVec_Make(m);
             }
         }
@@ -262,12 +261,13 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     }else if(captureKey == HTTP_QUERY_SEG_KEY || captureKey == HTTP_QUERY_SEG_VALUE){
         StrVec_AddVec(rbl->shelf, v);
     }else if(captureKey == HTTP_HEADER_CONTINUED){
-        if(ctx->headersIt.metrics.selected >= 0){
-            Hashed *h = Span_Get(ctx->headersIt.p, ctx->headersIt.metrics.selected);
+        if(req->headersIt.metrics.selected >= 0){
+            Hashed *h = Span_Get(req->headersIt.p, req->headersIt.metrics.selected);
             StrVec *hdr = h->value;
             StrVec_AddVec(hdr, v);
         }
     }
+
     return SUCCESS;
 }
 
