@@ -4,27 +4,26 @@
 static boolean _init = FALSE;
 
 status Caneka_Init(MemCh *m){
-    status r = READY;
     if(_init){
-        r |= NOOP;
-        return r;
+        return NOOP;
     }
     _init = TRUE;
 
-    r |= Caneka_InitBase(m);
+    Caneka_InitBase(m);
 
-    r |= ExtTypes_ToSInit(m);
-    r |= Seel_Init(m);
-    r |= ExtTypeStrings_Init(m);
-    r |= Parser_Init(m);
-    r |= Persist_Init(m);
-    r |= Format_Init(m);
-    r |= BinSeg_Init(m);
-    r |= Navigate_ToSInit(m, ToStreamLookup);
-    r |= Serve_TosInit(m);
-    r |= Node_ClsInit(m);
-    r |= IterApi_Init(m);
-    r |= Cash_ToSInit(m, ToStreamLookup);
+    ExtTypes_ToSInit(m);
+    Seel_Init(m);
+    ExtTypeStrings_Init(m);
+    Parser_Init(m);
+    Persist_Init(m);
+    Format_Init(m);
+    BinSeg_Init(m);
+    Navigate_ToSInit(m, ToStreamLookup);
+    Serve_TosInit(m);
+    Http_TosInit(m);
+    Node_ClsInit(m);
+    IterApi_Init(m);
+    Cash_ToSInit(m, ToStreamLookup);
 
-    return r;
+    return m->type.state;
 }

@@ -27,6 +27,7 @@ status MatchReplace_Tests(MemCh *m);
 status Cash_Tests(MemCh *m);
 status Http_Tests(MemCh *m);
 status HttpQuery_Tests(MemCh *m);
+status Inet_Tests(MemCh *gm);
 #ifdef CNKOPT_FREEBSD
 status SysQuery_Tests(MemCh *m);
 #endif
@@ -192,6 +193,12 @@ static TestSet ExtTests[] = {
         "Cash Tests",
         Cash_Tests,
         "Cash templater testing.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Inet Tests",
+        Inet_Tests,
+        "Inet address translation tests.",
         FEATURE_COMPLETE,
     },
     {

@@ -2,45 +2,15 @@
 #include <caneka.h>
 #include <test_module.h>
 
-static status InetExample_finalize(Step *_st, Task *tsk){
-    struct pollfd *pfd = TcpTask_GetPollFd(tsk);
+static status InetExample_finalize(Req *req){
+    struct pollfd *pfd = (struct pollfd *)&req->u;
     close(pfd->fd);
     return SUCCESS;
 }
 
-static status InetExample_send(Step *st, Task *tsk){
-    Buff *content = Ifc(tsk->m, st->data, TYPE_BUFF);
-    StrVec *expected = Ifc(tsk->m, st->arg, TYPE_STRVEC);
-    MemCh *m = tsk->m;
 
-    struct pollfd *pfd = TcpTask_GetPollFd(tsk);
-    Buff *out = Buff_Make(m, BUFF_UNBUFFERED);
-    Buff_SetSocket(out, pfd->fd);
-    Buff_Pipe(out, content);
-    if(content->unsent.total == 0){
-        st->type.state |= SUCCESS;
-    }
-    return st->type.state;
-}
-
-static status InetExample_read(Step *st, Task *tsk){
-    Buff *in = Ifc(tsk->m, st->data, TYPE_BUFF);
-    StrVec *expected = Ifc(tsk->m, st->arg, TYPE_STRVEC);
-    Buff_ReadAmount(in, 1024);
-    MemCh *m = tsk->m;
-
-    if(Equals(in->v, expected)){
-        Task_AddDataStep(tsk,
-            InetExample_send, S(m, "Ho!"), Buff_Make(m, BUFF_UNBUFFERED), NULL, ZERO);
-        TcpTask_ExpectSend(NULL, tsk);
-        st->type.state |= SUCCESS;
-    }
-
-    return st->type.state;
-}
-
-static status InetExample_populate(MemCh *m, Task *tsk, void *arg, void *source){
-    Debug_Push(m, tsk);
+static status InetExample_populate(MemCh *m, Req *req, void *arg, void *source){
+    Debug_Push(m, req);
     /*
 
     struct pollfd *pfd = TcpTask_GetPollFd(tsk);

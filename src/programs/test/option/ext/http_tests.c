@@ -22,9 +22,10 @@ status Http_Tests(MemCh *m){
     Roebling *rbl = HttpRbl_Make(m, curs, req);
     Roebling_Run(rbl);
 
-    args[0] = I32_Wrapped(m, HTTP_METHOD_GET);
+    args[0] = HttpMethodStr(m, METHOD_HTTP_GET);
+    args[1] = HttpMethodStr(m, req->address.method);
     args[1] = NULL;
-    r |= Test(req->address.method == HTTP_METHOD_GET, "Method is as expected $", args);
+    r |= Test(req->address.method == METHOD_HTTP_GET, "Method is as expected $, have $", args);
 
     args[0] = K(m, "/fancy.html");
     args[1] = NULL;
@@ -81,7 +82,7 @@ status HttpQuery_Tests(MemCh *m){
 
     args[0] = K(m, "POST");
     args[0] = NULL;
-    r |= Test(req->address.method == HTTP_METHOD_POST,
+    r |= Test(req->address.method == METHOD_HTTP_POST,
         "HttpReq method is expected @", args); 
 
     args[0] = K(m, "/forms/signup");
