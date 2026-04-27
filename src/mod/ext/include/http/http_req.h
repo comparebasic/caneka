@@ -20,5 +20,5 @@ void HttpReq_ReadToRbl(HttpReq *req);
 void HttpReq_Write(HttpReq *req);
 void HttpReq_ExpectRecv(HttpReq *req);
 void HttpReq_ExpectSend(HttpReq *req);
-void HttpReq_ParseBody(HttpReq *req, Buff *bf);
+void HttpReq_ParseBody(HttpReq *req);
 Req *HttpReq_Mk(IoCtx *ctx);

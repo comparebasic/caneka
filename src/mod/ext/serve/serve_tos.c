@@ -1,7 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-static StrVec *getPollFlagVec(MemCh *m, struct pollfd *pfd){
+
+StrVec *Serve_PollFlagVec(MemCh *m, struct pollfd *pfd){
     StrVec *v = StrVec_Make(m);
     if(pfd->events & POLLIN){
         StrVec_Add(v, S(m, "IN"));

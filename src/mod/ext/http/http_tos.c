@@ -3,11 +3,48 @@
 
 static status HttpReq_Print(Buff *bf, void *a, cls type, word flags){
     HttpReq *req = (HttpReq *)a;
-    void *args[] = {
-        HttpMethodStr(bf->m, req->address.method),
-        NULL,
-    };
-    return Fmt(bf, "HttpReq<$>", args);
+    MemCh *m = bf->m;
+    struct pollfd *pfd = (struct pollfd *)&req->u;
+    if(flags & DEBUG){
+        void *args[] = {
+            Type_StateVec(m, req->type.of, req->type.state),
+            HttpMethodStr(m, req->address.method),
+            req->path,
+
+            Serve_PollFlagVec(m, pfd),
+            I32_Wrapped(m, pfd->fd),
+            req->headersIt.p,
+            req->queryIt.p,
+            req->body,
+            req->meta,
+            req->sections,
+            req->in,
+            req->out,
+            NULL
+        };
+        return Fmt(bf, "HttpReq<@ $"
+            " @ @/@ headers:@ query:@ body:@ meta:@"
+            " sections:@ in:& out:&>", args);
+    }else if(flags & MORE){
+        void *args[] = {
+            Type_StateVec(m, req->type.of, req->type.state),
+            HttpMethodStr(m, req->address.method),
+            req->path,
+            req->headersIt.p,
+            req->queryIt.p,
+            req->body,
+            NULL
+        };
+        return Fmt(bf, "HttpReq<@ $ @ headers:@ query:@ body:@>", args);
+    }else{
+        void *args[] = {
+            Type_StateVec(m, req->type.of, req->type.state),
+            HttpMethodStr(m, req->address.method),
+            req->path,
+            NULL
+        };
+        return Fmt(bf, "HttpReq<@ $ @>", args);
+    }
 }
 
 Str *HttpMethodStr(MemCh *m, cls method){

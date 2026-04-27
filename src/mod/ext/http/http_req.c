@@ -2,8 +2,42 @@
 #include <caneka.h>
 
 
-void HttpReq_ParseBody(HttpReq *req, Buff *bf){
-    return;
+void HttpReq_ParseBody(HttpReq *req){
+    MemCh *m = req->m;
+    Debug_Push(m, req);
+    Abstract *value = Table_Get(req->headersIt.p, K(m, "Content-Length"));
+    if(value != NULL){
+
+        i64 length = (i64)((Single *)value)->val.value;
+        Cursor *curs = req->rbl->curs;
+        Cursor_Incr(curs, 1); /* TODO: remove */
+
+        void *ar[] = {value, req->in->v, curs, NULL};
+        Out("^p.Length @ $ @^0\n", ar);
+
+        i32 remaining = length - (curs->v->total - curs->pos);
+        printf("hi %d of pos %ld total %ld\n", remaining, curs->pos, curs->v->total);
+        fflush(stdout);
+        while(remaining > 0 && (req->in->type.state & ERROR) == 0){
+            Buff_ReadAmount(req->in, remaining);
+            remaining = length - (curs->v->total - curs->pos);
+        }
+
+        Hashed *typeH = Table_Get(req->headersIt.p, K(m, "Content-Type"));
+        if(typeH != NULL){
+            /* parse stuff here such as json or form data */
+        }
+        printf("hi\n");
+        fflush(stdout);
+        Buff *bf = Buff_Make(m, ZERO);
+        Cursor_Remaining(curs, bf);
+        req->body = (void *)bf;
+    }
+
+    void *ar[] = {req, NULL};
+    Out("^p.ParseBody of &\n^0", ar);
+
+    ReturnVoid(m);
 }
 
 void HttpReq_ReadToRbl(HttpReq *req){
@@ -12,17 +46,21 @@ void HttpReq_ReadToRbl(HttpReq *req){
 
     struct pollfd *pfd = (struct pollfd *)&req->u;
     Buff_SetSocket(req->in, pfd->fd);
-    if((Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
+    if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
+            (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
         Roebling_Run(req->rbl);
     }
     
     req->type.state |= req->rbl->type.state & (SUCCESS|ERROR);
-    if((req->type.state & SUCCESS) && (req->type.state & DEBUG)){
-        void *args[] = {
-            req,
-            NULL,
-        };
-        Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
+    if(req->type.state & SUCCESS){
+        HttpReq_ParseBody(req);            
+        if(req->type.state & DEBUG){
+            void *args[] = {
+                req,
+                NULL,
+            };
+            Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
+        }
     }
 
     Debug_Pop(m);

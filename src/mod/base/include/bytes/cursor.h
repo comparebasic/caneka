@@ -5,6 +5,7 @@ enum cursor_flags {
 typedef struct cursor {
     Type type;
     i32 offset;
+    i64 pos;
     StrVec *v;
     util slot;
     byte *ptr;
@@ -31,3 +32,4 @@ status Cursor_FillStr(Cursor *curs, Str *s);
 status Cursor_RFillStr(Cursor *curs, Str *s);
 i64 Cursor_Pos(Cursor *curs);
 status Cursor_Reset(Cursor *curs);
+status Cursor_Remaining(Cursor *curs, struct buff *bf);

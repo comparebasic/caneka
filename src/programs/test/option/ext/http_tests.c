@@ -61,7 +61,7 @@ status HttpQuery_Tests(MemCh *m){
     args[0] = Str_FromI64(m, content->length);
     args[1] = content;
     args[2] = NULL;
-    StrVec *v = Fmt_ToStrVec(m, 
+    Fmt(req->in, 
         "POST /forms/signup?action=add HTTP/1.1\r\n"
         "User-Agent: Firefudge/Aluminum\r\n"
         "Content-Type: application/json\r\n"
@@ -69,16 +69,19 @@ status HttpQuery_Tests(MemCh *m){
         "Content-Length: $\r\n"
         "\r\n"
         "$", args);
+    
+    Roebling_Run(req->rbl);
 
-    Cursor *curs = Cursor_Make(m, v);
-    Roebling *rbl = HttpRbl_Make(m, curs, req);
-    Roebling_Run(rbl);
+    args[0] = req->in->v;
+    args[1] = req->rbl->curs;
+    args[2] = NULL;
+    Out("^y.Request body:\n^c.$^0\nread: ^y.&^0\n", args);
 
-    r |= Test(rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
+    r |= Test(req->rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
 
     Node *config = Inst_Make(m, TYPE_NODE);
     Buff *bf = Buff_Make(m, ZERO);
-    HttpReq_ParseBody(req, bf);
+    HttpReq_ParseBody(req);
 
     args[0] = K(m, "POST");
     args[0] = NULL;
