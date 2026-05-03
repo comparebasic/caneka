@@ -13,6 +13,7 @@
 #include "types/init.h"
 #include "types/combine.h"
 #include "types/empty.h"
+#include "types/none.h"
 #include "types/types_tos.h"
 #include "types/tos.h"
 #include "types/base_ifc.h"

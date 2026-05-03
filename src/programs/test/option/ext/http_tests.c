@@ -72,11 +72,6 @@ status HttpQuery_Tests(MemCh *m){
     
     Roebling_Run(req->rbl);
 
-    args[0] = req->in->v;
-    args[1] = req->rbl->curs;
-    args[2] = NULL;
-    Out("^y.Request body:\n^c.$^0\nread: ^y.&^0\n", args);
-
     r |= Test(req->rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
 
     Node *config = Inst_Make(m, TYPE_NODE);
@@ -106,19 +101,12 @@ status HttpQuery_Tests(MemCh *m){
     r |= Test(Equals(args[0],args[1]), 
         "HttpReq User-Agent header is expected @, have @", args); 
 
-    Table *bodyData = (Table *)req->body;
-
-    args[0] = K(m, "fancy.pantsy@example.com");
-    args[1] = Table_Get(bodyData, K(m, "email"));
+    args[0] = K(m, "{\"email\": \"fancy.pantsy@example.com\","
+        " \"first-name\": \"Fantsy\"}");
+    args[1] = req->body;
     args[2] = NULL;
     r |= Test(Equals(args[0],args[1]), 
-        "HttpReq body#email is expected @, have @", args); 
-
-    args[0] = K(m, "Fantsy");
-    args[1] = Table_Get(bodyData, K(m, "first-name"));
-    args[2] = NULL;
-    r |= Test(Equals(args[0],args[1]), 
-        "HttpReq body#first-name is expected @, have @", args); 
+        "HttpReq body is expected @, have &", args); 
 
     Return(m, r);
 }

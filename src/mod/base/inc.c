@@ -61,6 +61,7 @@
 #include "./types/error_msg.c"
 #include "./types/guard.c"
 #include "./types/empty.c"
+#include "./types/none.c"
 #include "./types/strings.c"
 #include "./types/map.c"
 #include "./types/clone.c"

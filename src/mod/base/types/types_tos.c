@@ -49,9 +49,22 @@ StrVec *Type_StateVec(MemCh *m, cls typeOf, word flags){
     return v;
 }
 
+status None_Print(Buff *bf, void *a, cls type, word flags){
+    if((flags & (DEBUG|MORE)) == 0){
+        return NOOP;
+    }
+
+    None *n = (None *)a;
+    void *args[] = {
+        Type_StateVec(bf->m, n->type.of, n->type.state),
+        NULL
+    };
+    return Fmt(bf, "None<@>", args);
+}
 
 status Types_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_ERROR_MSG, (void *)ErrorMsg_Print);
+    r |= Lookup_Add(m, lk, TYPE_NONE, (void *)None_Print);
     return r;
 }

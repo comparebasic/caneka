@@ -7,17 +7,11 @@ void HttpReq_ParseBody(HttpReq *req){
     Debug_Push(m, req);
     Abstract *value = Table_Get(req->headersIt.p, K(m, "Content-Length"));
     if(value != NULL){
-
         i64 length = (i64)((Single *)value)->val.value;
         Cursor *curs = req->rbl->curs;
         Cursor_Incr(curs, 1); /* TODO: remove */
 
-        void *ar[] = {value, req->in->v, curs, NULL};
-        Out("^p.Length @ $ @^0\n", ar);
-
         i32 remaining = length - (curs->v->total - curs->pos);
-        printf("hi %d of pos %ld total %ld\n", remaining, curs->pos, curs->v->total);
-        fflush(stdout);
         while(remaining > 0 && (req->in->type.state & ERROR) == 0){
             Buff_ReadAmount(req->in, remaining);
             remaining = length - (curs->v->total - curs->pos);
@@ -27,15 +21,10 @@ void HttpReq_ParseBody(HttpReq *req){
         if(typeH != NULL){
             /* parse stuff here such as json or form data */
         }
-        printf("hi\n");
-        fflush(stdout);
         Buff *bf = Buff_Make(m, ZERO);
         Cursor_Remaining(curs, bf);
         req->body = (void *)bf;
     }
-
-    void *ar[] = {req, NULL};
-    Out("^p.ParseBody of &\n^0", ar);
 
     ReturnVoid(m);
 }

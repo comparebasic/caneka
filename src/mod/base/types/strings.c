@@ -58,6 +58,7 @@ static char *baseTypeStrings[] = {
     "TYPE_MEMSLAB",
     "TYPE_MAKER",
     "TYPE_COMPRESULT",
+    "TYPE_NONE",
     "TYPE_COMP",
     "TYPE_CSTR",
     "TYPE_STR",

@@ -27,6 +27,10 @@ boolean Equals(void *_a, void *_b){
             return Str_EqualsStr((Str *)a, (Str *)b);
         }else if (b->type.of == TYPE_STRVEC){
             return Str_EqualsStrVec((Str *)a, (StrVec *)b);
+        }else if (b->type.of == TYPE_BUFF && 
+                (b->type.state & BUFF_UNBUFFERED) == 0){
+            Buff *bf = (Buff *)b;
+            return Str_EqualsStrVec((Str *)a, (StrVec *)bf->v);
         }
     }else if(a->type.of == TYPE_STRVEC){
         if(a->type.of == b->type.of){

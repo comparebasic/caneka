@@ -177,7 +177,8 @@ status Histo_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status Cursor_Print(Buff *bf, void *a, cls type, word flags){
-    Cursor *curs = (Cursor *)Ifc(bf->m, a, TYPE_CURSOR);
+    MemCh *m = bf->m;
+    Cursor *curs = (Cursor *)Ifc(m, a, TYPE_CURSOR);
     if((flags & (MORE|DEBUG)) == 0){
         return ToStream_NotImpl(bf, a, type, flags);
     }
@@ -186,63 +187,34 @@ status Cursor_Print(Buff *bf, void *a, cls type, word flags){
         return  Fmt(bf, "Curs<v:NULL>", NULL);
     }
 
-    Iter it;
-    Iter_Init(&it, curs->v->p);
-    i64 pos = 0;
-    if(curs->ptr != NULL){
-        while((Iter_Next(&it) & END) == 0){
-            Str *s = it.value;
-            if(it.idx == curs->it.idx){
-                pos += (i64)(curs->ptr - s->bytes);
-                break;
-            }
-            pos += (i64)s->length;
-        }
-    }
-
-    i32 preview = 8;
-    if(pos < 8){
-        preview = min(pos-1, 0);
-    }
-    
-    i64 length = (i64)(curs->end - curs->ptr)+1;
-    i64 endPos = 0;
-    Abstract *focus = (Abstract *)curs->v;
-    if((curs->type.state & PROCESSING) && curs->ptr != NULL){
-        endPos = pos+length;
-        focus = (Abstract *)Str_Ref(bf->m,
-            curs->ptr,
-            curs->end - curs->ptr + 1,
-            curs->end - curs->ptr + 1,
-            STRING_CONST|DEBUG);
-    }
+    void *focus = (curs->ptr != NULL ?
+        (void *)Str_Ref(m,
+            curs->ptr, 
+            (curs->end - curs->ptr)+1,
+            (curs->end - curs->ptr)+1,
+            ZERO) 
+                : (void *)None_Make(m, ZERO)
+    );
 
     if(flags & DEBUG){
         void *args[] = {
-            Type_StateVec(bf->m, curs->type.of, curs->type.state),
-            I64_Wrapped(bf->m, pos),
-            I64_Wrapped(bf->m, endPos),
-            I64_Wrapped(bf->m, length),
-            I64_Wrapped(bf->m, curs->v->total),
+            Type_StateVec(m, curs->type.of, curs->type.state),
+            I64_Wrapped(m, curs->pos),
+            I64_Wrapped(m, curs->v->total-1),
             focus,
+            curs->v,
             NULL
         };
-        return  Fmt(bf, "Curs<$ $..$ $of$ ^d.: \"^D.$^d.\">", args); 
+        return  Fmt(bf, "Curs<@ idx:$of$ ^E.@^e. of $>", args); 
     }else{
-        i64 length = (i64)(curs->end - curs->ptr)+1;
-
         void *args[] = {
-            Type_StateVec(bf->m, curs->type.of, curs->type.state),
-            I64_Wrapped(bf->m, pos),
-            I64_Wrapped(bf->m, curs->v->total),
-            ((pos >= 8) ? Str_CstrRef(bf->m, "...") : Str_CstrRef(bf->m, "")),
+            Type_StateVec(m, curs->type.of, curs->type.state),
+            I64_Wrapped(m, curs->pos),
+            I64_Wrapped(m, curs->v->total-1),
             focus,
-            ((endPos < curs->v->total) ? Str_CstrRef(bf->m, "...") 
-                : Str_CstrRef(bf->m, "")),
             NULL
         };
-
-        return  Fmt(bf, "Curs<$ $/$ ^D.\"$^EI.$^ei.$\"^id.>", args);
+        return  Fmt(bf, "Curs<@ idx:$of$ ^E.@^e.>", args); 
     }
 }
 

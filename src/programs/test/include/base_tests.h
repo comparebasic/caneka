@@ -24,6 +24,7 @@ status MemCh_Tests(MemCh *gm);
 status MemChLevel_Tests(MemCh *gm);
 status Hash_Tests(MemCh *gm);
 status Cursor_Tests(MemCh *gm);
+status CursorPos_Tests(MemCh *m);
 status Core_Tests(MemCh *gm);
 status Clone_Tests(MemCh *gm);
 status DebugStack_Tests(MemCh *gm);
@@ -153,6 +154,12 @@ static TestSet BaseTests[] = {
         "Cursor Tests",
         Cursor_Tests,
         "Cursor tests for adding and navigation the position of a StrVec",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Cursor Pos Tests",
+        CursorPos_Tests,
+        "Cursor tests for the pos property tracking the position of the cursor.",
         FEATURE_COMPLETE,
     },
     {
