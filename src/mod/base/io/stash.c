@@ -147,7 +147,7 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
     Table *tbl = Table_Make(m);
 
     MemIter mit;
-    MemIter_Init(&mit, persist);
+    MemIter_Init(m, &mit, persist);
     i32 count = 0;
     while((MemIter_Next(&mit) & END) == 0){
         Abstract *a = (Abstract *)MemIter_Get(&mit);
@@ -173,7 +173,7 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
         Span_Add(pages, a);
     }
 
-    MemIter_Init(&mit, persist);
+    MemIter_Init(m, &mit, persist);
     i16 checksum = Stash_PackMemCh(m, &mit, tbl, NULL);
 
     StashHeader hdr = {

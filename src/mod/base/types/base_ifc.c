@@ -80,6 +80,7 @@ void Base_IfcInit(MemCh *m){
         {TYPE_TABLE, sizeof(Table)},
         {TYPE_MEMCTX, sizeof(MemCh)},
         {TYPE_MEMSLAB, sizeof(MemPage)},
+        {TYPE_MEM_IDENT, sizeof(MemIdent)},
         {0, 0}
     };
 

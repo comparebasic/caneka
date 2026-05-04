@@ -59,15 +59,18 @@ status Addr_ToS(Buff *bf, void *a, word flags){
 
 status MemCh_Print(Buff *bf, void *a, cls type, word flags){
     MemCh *m = (MemCh*)Ifc(bf->m, a, TYPE_MEMCTX); 
+
     void *args[5];
     args[0] = I64_Wrapped(bf->m, m->it.p->nvalues);
     args[1] = MemCount_Wrapped(bf->m,  MemCh_Used(m, 0));
     args[2] = NULL;
 
-
     Table *tbl = Table_Make(bf->m);
 
     if(flags & MORE){
+        printf("hi\n");
+        fflush(stdout);
+
         Fmt(bf, "MemCh<$pages ^D.$^d.used [", args);
 
         Iter it;
@@ -82,12 +85,17 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                 Buff_AddBytes(bf, (byte *)", ", 2);
             }
         }
+
+        printf("hi there\n");
+        fflush(stdout);
         
         MemIter mit;
-        MemIter_Init(&mit, m);
+        MemIter_Init(bf->m, &mit, m);
         i32 idx = 0;
         i16 g = 0;
         while((MemIter_Next(&mit) & END) == 0){
+            printf("IV\n");
+            fflush(stdout);
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if((mit.type.state & MORE) == 0){
                 Single *key = Util_Wrapped(bf->m, (util)mit.current.content);
@@ -97,7 +105,10 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
             }
         }
 
-        MemIter_Init(&mit, m);
+        printf("V\n");
+        fflush(stdout);
+
+        MemIter_Init(bf->m, &mit, m);
         g = 0;
         while((MemIter_Next(&mit) & END) == 0){
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
@@ -288,6 +299,36 @@ status Span_Print(Buff *bf, void *a, cls type, word flags){
     return SUCCESS;
 }
 
+status MemIter_Print(Buff *bf, void *a, cls type, word flags){
+    MemIter *mi = (MemIter *)a;
+
+    void *args[] = {
+        Type_StateVec(bf->m, mi->type.of, mi->type.state),
+        Type_ToStr(bf->m, mi->current.type.of),
+        NULL
+    };
+
+    Fmt(bf, "MemIter<@ $>", args);
+
+    return ZERO;
+}
+
+status MemIdent_Print(Buff *bf, void *a, cls type, word flags){
+    MemIdent *mid = (MemIdent *)a;
+
+    void *args[] = {
+        Type_ToStr(bf->m, mid->rtype.of),
+        I16_Wrapped(bf->m, mid->rtype.range),
+        I32_Wrapped(bf->m, mid->idx),
+        I32_Wrapped(bf->m, mid->slIdx),
+        NULL
+    };
+
+    Fmt(bf, "MemIdent<$/$ $/$>", args);
+
+    return ZERO;
+}
+
 status Iter_Print(Buff *bf, void *a, cls type, word flags){
     Iter *it = (Iter *)Ifc(bf->m, a, TYPE_ITER);
     if(flags & DEBUG){
@@ -370,6 +411,8 @@ status Mem_InitLabels(MemCh *m, Lookup *lk){
 status Mem_ToSInit(MemCh *m, Lookup *lk){
     status r = READY;
     r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCh_Print);
+    r |= Lookup_Add(m, lk, TYPE_MEM_ITER, (void *)MemIter_Print);
+    r |= Lookup_Add(m, lk, TYPE_MEM_IDENT, (void *)MemIdent_Print);
     r |= Lookup_Add(m, lk, TYPE_BOOK, (void *)MemBook_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);

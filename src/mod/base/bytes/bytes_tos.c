@@ -42,14 +42,15 @@ status Bytes_Debug(Buff *bf, byte *start, byte *end){
 status BytesLit_Print(Buff *bf, void *a, cls type, word flags){
     BytesLit *sl = (BytesLit*)Ifc(bf->m, a, TYPE_BYTES_POINTER); 
     if(flags & (MORE|DEBUG)){
-        Buff_AddBytes(bf, (byte *)"BytesLit<", 7);
+        Buff_AddBytes(bf, (byte *)"BytesLit<", 9);
     }
     if(flags & MORE){
         void *args[] = {
+            Type_ToStr(bf->m, sl->type.of),
             I16_Wrapped(bf->m, sl->type.range),
             NULL
         };
-        Fmt(bf, "x/$", args);
+        Fmt(bf, "$/$", args);
     }
     if(flags & DEBUG){
         Buff_AddBytes(bf, (byte *)" ", 1);

@@ -3,7 +3,12 @@ enum mem_ite_flags {
 };
 
 typedef struct mem_ident {
-    ;
+    Type type;
+    RangeType rtype;
+    void *ptr;
+    void *content;
+    i32 slIdx;
+    i32 idx;
 } MemIdent;
 
 typedef struct mem_iter {
@@ -13,21 +18,14 @@ typedef struct mem_iter {
         MemCh *target;
         void **arr;
     } input;
-    struct {
-        Type type;
-        RangeType rtype;
-        void *ptr;
-        void *content;
-        i32 slIdx;
-        i32 idx;
-    } current;
+    MemIdent current;
     i32 maxSlIdx;
     void *end;
 } MemIter;
 
 MemIter *MemIter_Make(MemCh *m, MemCh *target);
 MemIter *MemIter_MakeFromArr(MemCh *m, void **arr, i32 maxSlIdx);
-void MemIter_Init(MemIter *mit, MemCh *target);
+void MemIter_Init(MemCh *m, MemIter *mit, MemCh *target);
 void MemIter_InitArr(MemIter *mit, void **arr, i32 maxSlIdx);
 status MemIter_Next(MemIter *mit);
 MemIdent *MemIter_Get(MemIter *mit);

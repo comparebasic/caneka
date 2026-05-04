@@ -2,7 +2,13 @@
 #include "base_module.h"
 
 static void setLastFlag(MemIter *mit){
-    Abstract *a = (Abstract *)MemIter_Get(mit);
+    MemIdent *mi = MemIter_Get(mit);
+
+    void *ar[] = {mi, NULL};
+    Out("^p.@^0\n", ar);
+
+    Abstract *a = mi->ptr;
+
     i64 sz = 0;
     if(a != NULL){
         if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
@@ -24,20 +30,21 @@ static void setLastFlag(MemIter *mit){
 }
 
 MemIdent *MemIter_CloneCurrent(MemCh *m, MemIter *mit){
-    MemIter *mi = MemCh_AllocOf(m, sizeof(MemIdent), TYPE_MEM_IDENT);
+    MemIdent *mi = MemCh_AllocOf(m, sizeof(MemIdent), TYPE_MEM_IDENT);
     memcpy(mi, &mit->current, sizeof(MemIdent));
     return mi;
 }
 
 MemIdent *MemIter_Get(MemIter *mit){
+    Debug_Push(mit->m, mit->current.ptr);
     if(mit->end != NULL && mit->current.ptr != NULL){
-        Abstract *a = mit->current.ptr
+        Abstract *a = mit->current.ptr;
         if(a != NULL){
-            mit->current.rtype.of = a->type.of
+            mit->current.rtype.of = a->type.of;
             mit->current.idx++;
             if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
-                bytes *b = (bytes *)a;
-                mit->current.rtype.range = ((RangeType)a->type).range;
+                byte *b = (byte *)a;
+                mit->current.rtype.range = a->type.state;
                 mit->current.content = b-sizeof(RangeType);
             }else{
                 IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
@@ -48,15 +55,30 @@ MemIdent *MemIter_Get(MemIter *mit){
             mit->current.content = NULL;
         }
 
-        return &mit->current;
+        printf("Returning current\n");
+        fflush(stdout);
+
+        void *ar[] = {&mit->current, NULL};
+        Out("^y.@^0\n", ar);
+
+        Return(mit->m, &mit->current);
     }
 
-    return NULL;
+    printf("NULL!\n");
+    fflush(stdout);
+
+    Return(mit->m, NULL);
 }
 
 status MemIter_Next(MemIter *mit){
+
     mit->type.state &= ~LAST;
     void *args[5];
+    Debug_Push(mit->m, mit);
+
+    printf("Next\n");
+    fflush(stdout);
+
     if(mit->current.ptr == NULL && (mit->type.state & (MORE|PROCESSING)) == MORE){
         MemPage *pg = NULL;
         if(mit->type.state & MEM_ITER_STREAM){
@@ -68,7 +90,8 @@ status MemIter_Next(MemIter *mit){
             Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error: unable to find page", args);
             mit->type.state |= ERROR;
-            return mit->type.state;
+
+            Return(mit->m, mit->type.state);
         }
         mit->current.ptr = ((void *)pg)+sizeof(MemPage)+((util)pg->remaining);
         mit->end = ((void *)pg) + PAGE_SIZE-1;
@@ -87,7 +110,7 @@ status MemIter_Next(MemIter *mit){
                 void *ar[] = {Type_ToStr(mit->m, a->type.of), NULL};
                 Error(mit->m, FUNCNAME, FILENAME, LINENUMBER,
                     "IfcMap not found for type @", ar);
-                return ERROR;
+                Return(mit->m, ERROR);
             }
             sz = imap->size;
         }
@@ -124,14 +147,18 @@ status MemIter_Next(MemIter *mit){
             mit->type.state |= PROCESSING;
         }
     }
-    return mit->type.state;
+
+    Return(mit->m, mit->type.state);
 }
 
-void MemIter_Init(MemIter *mit, MemCh *target){
+void MemIter_Init(MemCh *m, MemIter *mit, MemCh *target){
     memset(mit, 0, sizeof(MemIter));
     mit->type.of = TYPE_MEM_ITER;
+    mit->m = m;
     mit->input.target = target;
     mit->current.slIdx = 0;
+    mit->current.type.of = TYPE_MEM_IDENT;
+    mit->current.idx = -1;
     mit->type.state = MORE;
     mit->current.ptr = NULL;
     mit->end = NULL;
@@ -143,6 +170,8 @@ void MemIter_InitArr(MemIter *mit, void **arr, i32 maxSlIdx){
     mit->type.of = TYPE_MEM_ITER;
     mit->input.arr = arr;
     mit->current.slIdx = 0;
+    mit->current.type.of = TYPE_MEM_IDENT;
+    mit->current.idx = -1;
     mit->maxSlIdx = maxSlIdx;
     mit->type.state = MORE|MEM_ITER_STREAM;
     mit->current.ptr = NULL;
