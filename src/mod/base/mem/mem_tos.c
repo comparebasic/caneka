@@ -90,10 +90,8 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
         while((MemIter_Next(&mit) & END) == 0){
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if((mit.type.state & MORE) == 0){
-                Abstract *a = (Abstract *)MemIter_Get(&mit);
-                byte *ptr = (byte *)a;
-                Table_Set(tbl, contentAddrWrapped(bf->m, ptr), 
-                    I32_Wrapped(bf->m, idx++));
+                Single *key = Util_Wrapped(bf->m, (util)mit.current.content);
+                Table_Set(tbl, key, MemIter_CloneCurrent(bf->m, &mit));
             }else{
                 idx = 0;
             }
@@ -104,14 +102,14 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
         while((MemIter_Next(&mit) & END) == 0){
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if(mit.type.state & MORE){
-                if(mit.slIdx > 0){
+                if(mit.current.slIdx > 0){
                     if(mit.type.state & LAST){
                         Buff_AddBytes(bf, (byte *)"]", 1);
                     }else{
                         Buff_AddBytes(bf, (byte *)"], ", 3);
                     }
                 }
-                args[0] = I32_Wrapped(bf->m, mit.slIdx);
+                args[0] = I32_Wrapped(bf->m, mit.current.slIdx);
                 args[1] = NULL;
                 Fmt(bf, "Page#$[", args);
             }else{
@@ -184,7 +182,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                         args[0] = count;
                         args[1] = Type_ToStr(bf->m, a->type.of);
                         args[2] = NULL;
-                        BytesLit *bt = (BytesLit*)mit.ptr;
+                        BytesLit *bt = (BytesLit*)mit.current.ptr;
                         if(bt->type.of == TYPE_BYTES_POINTER){
                             args[2] = Str_Ref(bf->m, Bytes_Ptr(bt), bt->type.range, bt->type.range, DEBUG);
                             args[3] = I16_Wrapped(bf->m, bt->type.range);

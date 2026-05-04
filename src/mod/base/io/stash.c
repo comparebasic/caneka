@@ -159,7 +159,7 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
             }
 
             Table_Set(tbl, Util_Wrapped(m, (util)ptr), 
-                StashItem_Make(m, mit.slIdx, (void *)ptr, a->type.of));
+                StashItem_Make(m, mit.current.slIdx, (void *)ptr, a->type.of));
             void *ar[] = {bf->m, Util_Wrapped(m, (util)ptr), tbl, NULL};
         }
     }

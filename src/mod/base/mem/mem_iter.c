@@ -18,27 +18,51 @@ static void setLastFlag(MemIter *mit){
             sz = imap->size;
         }
     }
-    if(sz > 0 && mit->ptr+sz-1 == mit->end){
+    if(sz > 0 && mit->current.ptr+sz-1 == mit->end){
         mit->type.state |= LAST; 
     }
 }
 
-void *MemIter_Get(MemIter *mit){
-    if(mit->end != NULL && mit->ptr != NULL){
-        return mit->ptr;
+MemIdent *MemIter_CloneCurrent(MemCh *m, MemIter *mit){
+    MemIter *mi = MemCh_AllocOf(m, sizeof(MemIdent), TYPE_MEM_IDENT);
+    memcpy(mi, &mit->current, sizeof(MemIdent));
+    return mi;
+}
+
+MemIdent *MemIter_Get(MemIter *mit){
+    if(mit->end != NULL && mit->current.ptr != NULL){
+        Abstract *a = mit->current.ptr
+        if(a != NULL){
+            mit->current.rtype.of = a->type.of
+            mit->current.idx++;
+            if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
+                bytes *b = (bytes *)a;
+                mit->current.rtype.range = ((RangeType)a->type).range;
+                mit->current.content = b-sizeof(RangeType);
+            }else{
+                IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
+                mit->current.rtype.range = imap->size;
+                mit->current.content = a;
+            }
+        }else{
+            mit->current.content = NULL;
+        }
+
+        return &mit->current;
     }
+
     return NULL;
 }
 
 status MemIter_Next(MemIter *mit){
     mit->type.state &= ~LAST;
     void *args[5];
-    if(mit->ptr == NULL && (mit->type.state & (MORE|PROCESSING)) == MORE){
+    if(mit->current.ptr == NULL && (mit->type.state & (MORE|PROCESSING)) == MORE){
         MemPage *pg = NULL;
         if(mit->type.state & MEM_ITER_STREAM){
-            pg = (MemPage *)mit->input.arr[mit->slIdx];
+            pg = (MemPage *)mit->input.arr[mit->current.slIdx];
         }else{
-            pg = (MemPage *)Span_Get(mit->input.target->it.p, mit->slIdx);
+            pg = (MemPage *)Span_Get(mit->input.target->it.p, mit->current.slIdx);
         }
         if(pg == NULL){
             Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -46,7 +70,7 @@ status MemIter_Next(MemIter *mit){
             mit->type.state |= ERROR;
             return mit->type.state;
         }
-        mit->ptr = ((void *)pg)+sizeof(MemPage)+((util)pg->remaining);
+        mit->current.ptr = ((void *)pg)+sizeof(MemPage)+((util)pg->remaining);
         mit->end = ((void *)pg) + PAGE_SIZE-1;
         mit->type.state |= PROCESSING;
         setLastFlag(mit);
@@ -76,25 +100,26 @@ status MemIter_Next(MemIter *mit){
                 "Error: type $ of object does not have a registered size", args);
             mit->type.state |= (ERROR|END);
         }
-        if(mit->end == NULL || (void *)(mit->ptr+sz-1) > mit->end){
-            args[0] = Util_Wrapped(ErrStream->m, mit->ptr+sz-1 - mit->end);
+        if(mit->end == NULL || (void *)(mit->current.ptr+sz-1) > mit->end){
+            args[0] = Util_Wrapped(ErrStream->m, mit->current.ptr+sz-1 - mit->end);
             args[1] = NULL;
             Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error: type to large to increment address is off the page by $", args);
         }
-        if(mit->ptr+sz-1 == mit->end){
-            if(mit->slIdx < mit->maxSlIdx){
+        if(mit->current.ptr+sz-1 == mit->end){
+            if(mit->current.slIdx < mit->maxSlIdx){
                 mit->type.state = (mit->type.state & UPPER_FLAGS) | MORE;
-                mit->ptr = mit->end = NULL;
-                mit->slIdx++;
-                if(mit->slIdx == mit->maxSlIdx){
+                mit->current.ptr = mit->end = NULL;
+                mit->current.slIdx++;
+                mit->current.idx = -1;
+                if(mit->current.slIdx == mit->maxSlIdx){
                     mit->type.state |= LAST;
                 }
             }else{
                 mit->type.state |= END;
             }
         }else{
-            mit->ptr += sz;
+            mit->current.ptr += sz;
             setLastFlag(mit);
             mit->type.state |= PROCESSING;
         }
@@ -106,9 +131,9 @@ void MemIter_Init(MemIter *mit, MemCh *target){
     memset(mit, 0, sizeof(MemIter));
     mit->type.of = TYPE_MEM_ITER;
     mit->input.target = target;
-    mit->slIdx = 0;
+    mit->current.slIdx = 0;
     mit->type.state = MORE;
-    mit->ptr = NULL;
+    mit->current.ptr = NULL;
     mit->end = NULL;
     mit->maxSlIdx = target->it.p->max_idx;
 }
@@ -117,10 +142,10 @@ void MemIter_InitArr(MemIter *mit, void **arr, i32 maxSlIdx){
     memset(mit, 0, sizeof(MemIter));
     mit->type.of = TYPE_MEM_ITER;
     mit->input.arr = arr;
-    mit->slIdx = 0;
+    mit->current.slIdx = 0;
     mit->maxSlIdx = maxSlIdx;
     mit->type.state = MORE|MEM_ITER_STREAM;
-    mit->ptr = NULL;
+    mit->current.ptr = NULL;
     mit->end = NULL;
 }
 
@@ -131,6 +156,8 @@ MemIter *MemIter_Make(MemCh *m, MemCh *target){
     mit->type.state = MORE;
     mit->input.target = target;
     mit->maxSlIdx = target->it.p->max_idx;
+    mit->current.type.of = TYPE_MEM_IDENT;
+    mit->current.idx = -1;
     return mit;
 }
 
@@ -141,5 +168,7 @@ MemIter *MemIter_MakeFromArr(MemCh *m, void **arr, i32 maxSlIdx){
     mit->type.state = MORE|MEM_ITER_STREAM;
     mit->input.arr = arr;
     mit->maxSlIdx = maxSlIdx;
+    mit->current.type.of = TYPE_MEM_IDENT;
+    mit->current.idx = -1;
     return mit;
 }

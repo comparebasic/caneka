@@ -44,6 +44,7 @@ enum types {
     TYPE_BOOK_STATS,
     TYPE_MEMCTX,
     TYPE_MEM_ITER,
+    TYPE_MEM_IDENT,
     TYPE_STASH_ITEM,
     TYPE_MAP,
     TYPE_IFC_MAP,
