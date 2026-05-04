@@ -24,6 +24,15 @@ static boolean Iter_Empty(void *_a){
     return Span_Empty(it->p);
 }
 
+static Single *contentAddrWrapped(MemCh *m, void *a){
+    byte *ptr = (byte *)a;
+    if(a != NULL && (((Abstract *)a)->type.of == TYPE_BYTES_POINTER ||
+            ((Abstract *)a)->type.of == TYPE_POINTER_ARRAY)){
+       ptr += sizeof(RangeType); 
+    }
+    return Util_Wrapped(m, (util)ptr);
+}
+
 status Addr_ToS(Buff *bf, void *a, word flags){
     if(flags & DEBUG){
         Fmt(bf, "^D.", NULL);
@@ -82,7 +91,8 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if((mit.type.state & MORE) == 0){
                 Abstract *a = (Abstract *)MemIter_Get(&mit);
-                Table_Set(tbl, Util_Wrapped(bf->m, (util)a), 
+                byte *ptr = (byte *)a;
+                Table_Set(tbl, contentAddrWrapped(bf->m, ptr), 
                     I32_Wrapped(bf->m, idx++));
             }else{
                 idx = 0;
@@ -108,14 +118,21 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                 Abstract *a = (Abstract *)MemIter_Get(&mit);
                 Map *map = Lookup_Get(MapsLookup, a->type.of);
                 Single *count = (Single *)Table_Get(tbl, 
-                    Util_Wrapped(bf->m, (util)a));
+                    contentAddrWrapped(bf->m, a));
 
                 if(map != NULL){
                     if(count != NULL){
                         args[0] = count;
                         args[1] = map->keys[0];
                         args[2] = NULL;
-                        Fmt(bf, "$:$", args);
+                        if(a->type.of == TYPE_STR){
+                            Str *s = (Str *)a;
+                            args[2] = I16_Wrapped(bf->m, s->length);
+                            args[3] = NULL;
+                            Fmt(bf, "$:$/$", args);
+                        }else{
+                            Fmt(bf, "$:$", args);
+                        }
                     }else{
                         args[0] = map->keys[0];
                         args[1] = NULL;
@@ -136,24 +153,28 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                             void *ptr = NULL;
                             if(dptr != NULL && *dptr != NULL){
                                 ptr = *dptr;
-                                if(att->of > _TYPE_RANGE_TYPE_START && att->of < _TYPE_RANGE_TYPE_END){
-                                    ptr -= sizeof(RangeType);
-                                }
                                 Single *attCount = (Single *)Table_Get(tbl,
-                                    Util_Wrapped(bf->m, (util)ptr));
+                                    contentAddrWrapped(bf->m, ptr));
 
                                 Abstract *aa = (Abstract *)ptr;
-                                Map *amap = Lookup_Get(MapsLookup, aa->type.of);
-                                if(amap != NULL){
-                                    args[1] = amap->keys[0];
+                                if(aa == NULL){
+                                    Fmt(bf, "$=NULL", args);
                                 }else{
-                                    args[1] = Type_ToStr(bf->m, aa->type.of);
-                                }
-                                args[2] = (attCount != NULL ? 
-                                    I16_Wrapped(bf->m, attCount->val.i) : Util_Wrapped(bf->m, (util)aa));
+                                    if(att->of > _TYPE_RANGE_TYPE_START && att->of < _TYPE_RANGE_TYPE_END){
+                                        aa = (Abstract *)(((byte *)aa)- sizeof(RangeType));
+                                    }
+                                    Map *amap = Lookup_Get(MapsLookup, aa->type.of);
+                                    if(amap != NULL){
+                                        args[1] = amap->keys[0];
+                                    }else{
+                                        args[1] = Type_ToStr(bf->m, aa->type.of);
+                                    }
+                                    args[2] = (attCount != NULL ? 
+                                        I16_Wrapped(bf->m, attCount->val.i) : Util_Wrapped(bf->m, (util)aa));
 
-                                args[3] = NULL;
-                                Fmt(bf, "$=$:$", args);
+                                    args[3] = NULL;
+                                    Fmt(bf, "$=$:$", args);
+                                }
                             }
                         }
                     }
@@ -163,7 +184,36 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                         args[0] = count;
                         args[1] = Type_ToStr(bf->m, a->type.of);
                         args[2] = NULL;
-                        Fmt(bf, "$:$", args);
+                        BytesLit *bt = (BytesLit*)mit.ptr;
+                        if(bt->type.of == TYPE_BYTES_POINTER){
+                            args[2] = Str_Ref(bf->m, Bytes_Ptr(bt), bt->type.range, bt->type.range, DEBUG);
+                            args[3] = I16_Wrapped(bf->m, bt->type.range);
+                            args[4] = NULL;
+                            Fmt(bf, "$:$[^D.\"$\"^d./$]", args);
+                        }else if(bt->type.of == TYPE_POINTER_ARRAY){
+                            Fmt(bf, "$:$[", args);
+
+                            i16 total = bt->type.range / sizeof(void *);
+                            void **dptr = (void **)Bytes_Ptr(bt);
+                            for(i16 i = 0; i < total; i++){
+                                void *ptr = *dptr;
+                                Single *idx = (Single *)Table_Get(tbl, 
+                                    contentAddrWrapped(bf->m, ptr));
+                                args[0] = (idx != NULL ? Util_Wrapped(bf->m, idx->val.i) : Util_Wrapped(bf->m, (util)ptr));
+                                args[1] = NULL;
+                                if(i == 0){
+                                    Fmt(bf, "$", args);
+                                }else{
+                                    Fmt(bf, ", $", args);
+                                }
+                                dptr++;
+                            }
+
+                            Buff_Add(bf, K(m, "]"));
+                        }else{
+                            args[2] = NULL;
+                            Fmt(bf, "$:$", args);
+                        }
                     }else{
                         args[0] = Type_ToStr(bf->m, a->type.of);
                         args[1] = NULL;

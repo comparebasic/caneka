@@ -10,6 +10,18 @@ static MemPage *MemCh_AddPage(MemCh *m, i16 level){
     return pg;
 }
 
+void MemCh_CountBytes(MemCh *m, i64 *_count){
+    Iter it;
+    memcpy(&it, &m->it, sizeof(Iter));
+    Iter_Reset(&it);
+    i64 count = 0;
+    while((Iter_Next(&it) & END) == 0){
+        MemPage *sl = (MemPage *)Iter_Get(&it); 
+        count += (PAGE_SIZE - sl->remaining);
+    }
+    *_count = count;
+}
+
 void *MemCh_Alloc(MemCh *m, size_t sz){
     return MemCh_AllocOf(m, sz, 0);
 }

@@ -12,10 +12,12 @@ status Table_Tests(MemCh *gm);
 status TableResize_Tests(MemCh *gm);
 status TableUtilKey_Tests(MemCh *gm);
 status TableHKey_Tests(MemCh *gm);
-status StrVec_Tests(MemCh *gm);
 status Stash_Tests(MemCh *gm);
 status Str_Tests(MemCh *gm);
 status Str_EndMatchTests(MemCh *gm);
+status StrVec_Tests(MemCh *gm);
+status Fmt_Tests(MemCh *m);
+status FmtMem_Tests(MemCh *m);
 status Span_Tests(MemCh *gm);
 status SpanClone_Tests(MemCh *gm);
 status SpanMax_Tests(MemCh *gm);
@@ -100,6 +102,18 @@ static TestSet BaseTests[] = {
         "StrVec",
         StrVec_Tests,
         "Testing String Vectors",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Fmt",
+        Fmt_Tests,
+        "Fmt formatting tests",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Fmt Memory Tests",
+        FmtMem_Tests,
+        "Fmt memory clennup tests",
         FEATURE_COMPLETE,
     },
     {

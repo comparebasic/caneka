@@ -84,43 +84,5 @@ status StrVec_Tests(MemCh *m){
     };
     r |= Test(Equals(vr, s), "Testing ReAligned StrVec and Str '$' vs '$'", args2);
 
-    Str *st = Str_CstrRef(m, "time");
-    Str *sa = Str_CstrRef(m, "afterwards");
-    Str *sf = Str_CstrRef(m, "four");
-    Str *sf2 = Str_Clone(m, sf);
-    sf2->type.state |= DEBUG;
-    char *cstr = ", all alone";
-    Buff *bf = Buff_Make(m, ZERO);
-
-    i32 twentyNine = 29;
-    i64 fiveK = 5987263;
-    void *args3[] = {
-        st,
-        sa,
-        sf,
-        sf2,
-        I32_Wrapped(m, twentyNine),
-        I64_Wrapped(m, fiveK),
-        vc,
-        NULL
-    };
-
-    
-    Fmt(bf, "^DRy.Bold|Red|Yellow^0 then so quit '$' '@' @ & $ $ $", args3);
-
-    if(Ansi_HasColor()){
-        s = Str_FromCstr(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time'"
-            " '\"\x1b[1mafterwards\x1b[22m\"' \"\x1b[1mfour\x1b[22m\" Str<DEBUG"
-            " 4/5:\"\x1b[1mfour\x1b[22m\"> 29 5987263 hi dude, what a wild ride!",
-            ZERO);
-
-        s->type.state |= DEBUG;
-        void *args[] = {
-            s, bf->v, NULL
-        };
-        r |= Test(Equals(bf->v, s),
-            "Testing StrVec and StrVec from Fmt via Buff expected:$, have:$", args);
-    }
-
     return r;
 }

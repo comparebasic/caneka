@@ -28,3 +28,5 @@ status MemCh_FreeTemp(MemCh *m);
 MemCh *MemCh_OnPage();
 status MemCh_Setup(MemCh *m, MemPage *pg);
 MemCh *MemCh_Make();
+
+void MemCh_CountBytes(MemCh *m, i64 *count);

@@ -1,6 +1,11 @@
 #include <external.h>
 #include "base_module.h"
 
+typedef struct sztype {
+    cls typeOf;
+    ssize_t sz;
+} szType;
+
 static void *Str_Conv(MemCh *m, void *_a, IfcMap *imap){
     Abstract *a = (Abstract *)_a;
     if(a->type.of == TYPE_STR){
@@ -49,6 +54,7 @@ void Base_IfcInit(MemCh *m){
             TYPE_STR - TYPE_STRVEC,
             sizeof(StrVec),
             StrVec_Conv));
+
     Lookup_Add(m, IfcLookup, TYPE_CSTR,
         IfcMap_Make(m,
             TYPE_CSTR,
@@ -57,21 +63,32 @@ void Base_IfcInit(MemCh *m){
             -1,
             CStr_Conv));
 
-    Lookup_Add(m, IfcLookup, TYPE_SPAN,
-        IfcMap_Make(m,
-            TYPE_SPAN,
-            ZERO,
-            ZERO,
-            sizeof(Span),
-            NULL));
 
-    Lookup_Add(m, IfcLookup, TYPE_MEMCTX,
-        IfcMap_Make(m,
-            TYPE_MEMCTX,
-            ZERO,
-            ZERO,
-            sizeof(MemCh),
-            NULL));
+    szType nonPolyTypes[] = {
+        {TYPE_WRAPPED, sizeof(Single)},
+        {TYPE_WRAPPED_UTIL, sizeof(Single)},
+        {TYPE_WRAPPED_I64, sizeof(Single)},
+        {TYPE_WRAPPED_U32, sizeof(Single)},
+        {TYPE_WRAPPED_I32, sizeof(Single)},
+        {TYPE_WRAPPED_WORD, sizeof(Single)},
+        {TYPE_WRAPPED_I16, sizeof(Single)},
+        {TYPE_WRAPPED_BYTE, sizeof(Single)},
+        {TYPE_WRAPPED_I8, sizeof(Single)},
+        {TYPE_WRAPPED_CSTR, sizeof(Single)},
+        {TYPE_BUFF, sizeof(Buff)},
+        {TYPE_SPAN, sizeof(Span)},
+        {TYPE_TABLE, sizeof(Table)},
+        {TYPE_MEMCTX, sizeof(MemCh)},
+        {TYPE_MEMSLAB, sizeof(MemPage)},
+        {0, 0}
+    };
+
+    szType *t = nonPolyTypes;
+    while(t->sz != 0){
+        Lookup_Add(m, IfcLookup, t->typeOf,
+            IfcMap_Make(m, t->typeOf, ZERO, ZERO, t->sz, NULL));
+        t++;
+    }
     
     /*
     Lookup_Add(m, IfcLookup, TYPE_WRAPPED, (i64)sizeof(Single));

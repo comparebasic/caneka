@@ -162,20 +162,32 @@ i64 Str_AddMemCount(Str *s, i64 mem) {
     if(mem == 0){
        return Str_AddCstr(s, "0b"); 
     }
+
     char *abbrev = "bkmg";
     i64 total = 0;
     i64 value = 0;
     boolean exactly = FALSE;
+
+    boolean negative = mem < 0;
+    if(negative){
+       total += Str_Add(s, (byte *)"(", 1); 
+       mem = labs(mem);
+    }
+
     for(int i = 0; i < 4; i++){
         value = mem & 1023;
         if(value){
-           if(s->length > 0){
+           if(s->length > 0 && (s->length > 1 || s->bytes[0] != '(')){
                total += Str_AddCstr(s, " ");
            }
            total += Str_AddI64(s, value); 
            total += Str_Add(s, (byte *)abbrev+i, 1); 
         }
         mem = mem >> 10;
+    }
+
+    if(negative){
+       total += Str_Add(s, (byte *)")", 1); 
     }
 
     return total;

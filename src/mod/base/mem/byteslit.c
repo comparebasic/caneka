@@ -14,10 +14,14 @@ byte *Bytes_AllocOnPage(MemPage *pg, word sz, cls typeOf){
     BytesLit *sl = (BytesLit *)MemPage_Alloc(pg, sz);
     sl->type.of = typeOf; 
     sl->type.range = alloc;
-    return (byte *)((void *)sl+sizeof(RangeType));
+    return Bytes_Ptr(sl);
 }
 
 byte *Bytes_Alloc(MemCh *m, word alloc, cls typeOf){
-    byte *ptr = (byte *)BytesLit_Make(m, alloc, typeOf);
-    return ptr+sizeof(RangeType);
+    return Bytes_Ptr(BytesLit_Make(m, alloc, typeOf));
+}
+
+byte *Bytes_Ptr(BytesLit *bt){
+    byte *b = (byte *)bt;
+    return b+sizeof(RangeType);
 }
