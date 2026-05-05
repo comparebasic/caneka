@@ -24,15 +24,6 @@ static boolean Iter_Empty(void *_a){
     return Span_Empty(it->p);
 }
 
-static Single *contentAddrWrapped(MemCh *m, void *a){
-    byte *ptr = (byte *)a;
-    if(a != NULL && (((Abstract *)a)->type.of == TYPE_BYTES_POINTER ||
-            ((Abstract *)a)->type.of == TYPE_POINTER_ARRAY)){
-       ptr += sizeof(RangeType); 
-    }
-    return Util_Wrapped(m, (util)ptr);
-}
-
 status Addr_ToS(Buff *bf, void *a, word flags){
     if(flags & DEBUG){
         Fmt(bf, "^D.", NULL);
@@ -58,14 +49,15 @@ status Addr_ToS(Buff *bf, void *a, word flags){
 }
 
 status MemCh_Print(Buff *bf, void *a, cls type, word flags){
-    MemCh *m = (MemCh*)Ifc(bf->m, a, TYPE_MEMCTX); 
+    MemCh *target = (MemCh*)Ifc(bf->m, a, TYPE_MEMCTX); 
+    MemCh *m = bf->m;
 
     void *args[5];
-    args[0] = I64_Wrapped(bf->m, m->it.p->nvalues);
-    args[1] = MemCount_Wrapped(bf->m,  MemCh_Used(m, 0));
+    args[0] = I64_Wrapped(m, target->it.p->nvalues);
+    args[1] = MemCount_Wrapped(m,  MemCh_Used(target, 0));
     args[2] = NULL;
 
-    Table *tbl = Table_Make(bf->m);
+    Table *tbl = Table_Make(m);
 
     if(flags & MORE){
         printf("hi\n");
@@ -74,7 +66,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
         Fmt(bf, "MemCh<$pages ^D.$^d.used [", args);
 
         Iter it;
-        Iter_Init(&it, m->it.p);
+        Iter_Init(&it, target->it.p);
         while((Iter_Next(&it) & END) == 0){
             MemPage *sl = (MemPage *)Iter_Get(&it);
             args[0] = I32_Wrapped(bf->m, it.idx);
@@ -90,7 +82,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
         fflush(stdout);
         
         MemIter mit;
-        MemIter_Init(bf->m, &mit, m);
+        MemIter_Init(m, &mit, target);
         i32 idx = 0;
         i16 g = 0;
         while((MemIter_Next(&mit) & END) == 0){
@@ -98,7 +90,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
             fflush(stdout);
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if((mit.type.state & MORE) == 0){
-                Single *key = Util_Wrapped(bf->m, (util)mit.current.content);
+                Single *key = Util_Wrapped(m, (util)mit.current.content);
                 Table_Set(tbl, key, MemIter_CloneCurrent(bf->m, &mit));
             }else{
                 idx = 0;
@@ -108,7 +100,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
         printf("V\n");
         fflush(stdout);
 
-        MemIter_Init(bf->m, &mit, m);
+        MemIter_Init(m, &mit, target);
         g = 0;
         while((MemIter_Next(&mit) & END) == 0){
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
@@ -120,23 +112,28 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                         Buff_AddBytes(bf, (byte *)"], ", 3);
                     }
                 }
-                args[0] = I32_Wrapped(bf->m, mit.current.slIdx);
+                args[0] = I32_Wrapped(m, mit.current.slIdx);
                 args[1] = NULL;
                 Fmt(bf, "Page#$[", args);
             }else{
-                Abstract *a = (Abstract *)MemIter_Get(&mit);
-                Map *map = Lookup_Get(MapsLookup, a->type.of);
-                Single *count = (Single *)Table_Get(tbl, 
-                    contentAddrWrapped(bf->m, a));
+                MemIdent *mid = MemIter_Get(&mit);
+                Map *map = Lookup_Get(MapsLookup, mid->rtype.of);
+                if(mid->content == NULL){
+                    Error(m, FUNCNAME, FILENAME, LINENUMBER, 
+                        "content is null for a MemIter item", NULL);
+                    Return(m, ERROR);
+                }
+                Single *key = Util_Wrapped(m, (util)mit.current.content);
+                Single *count = (Single *)Table_Get(tbl, key); 
 
                 if(map != NULL){
                     if(count != NULL){
                         args[0] = count;
                         args[1] = map->keys[0];
                         args[2] = NULL;
-                        if(a->type.of == TYPE_STR){
-                            Str *s = (Str *)a;
-                            args[2] = I16_Wrapped(bf->m, s->length);
+                        if(mid->rtype.of == TYPE_STR){
+                            Str *s = (Str *)mid->content;
+                            args[2] = I16_Wrapped(m, s->length);
                             args[3] = NULL;
                             Fmt(bf, "$:$/$", args);
                         }else{
@@ -162,8 +159,10 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                             void *ptr = NULL;
                             if(dptr != NULL && *dptr != NULL){
                                 ptr = *dptr;
-                                Single *attCount = (Single *)Table_Get(tbl,
-                                    contentAddrWrapped(bf->m, ptr));
+                                Single *key = Util_Wrapped(m,
+                                    (util)mit.current.content);
+                                Single *attCount = 
+                                    (Single *)Table_Get(tbl, key);
 
                                 Abstract *aa = (Abstract *)ptr;
                                 if(aa == NULL){
@@ -176,10 +175,10 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                                     if(amap != NULL){
                                         args[1] = amap->keys[0];
                                     }else{
-                                        args[1] = Type_ToStr(bf->m, aa->type.of);
+                                        args[1] = Type_ToStr(m, aa->type.of);
                                     }
                                     args[2] = (attCount != NULL ? 
-                                        I16_Wrapped(bf->m, attCount->val.i) : Util_Wrapped(bf->m, (util)aa));
+                                        I16_Wrapped(m, attCount->val.i) : Util_Wrapped(m, (util)aa));
 
                                     args[3] = NULL;
                                     Fmt(bf, "$=$:$", args);
@@ -191,12 +190,12 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                 }else{
                     if(count != NULL){
                         args[0] = count;
-                        args[1] = Type_ToStr(bf->m, a->type.of);
+                        args[1] = Type_ToStr(m, mid->rtype.of);
                         args[2] = NULL;
                         BytesLit *bt = (BytesLit*)mit.current.ptr;
                         if(bt->type.of == TYPE_BYTES_POINTER){
-                            args[2] = Str_Ref(bf->m, Bytes_Ptr(bt), bt->type.range, bt->type.range, DEBUG);
-                            args[3] = I16_Wrapped(bf->m, bt->type.range);
+                            args[2] = Str_Ref(m, Bytes_Ptr(bt), bt->type.range, bt->type.range, DEBUG);
+                            args[3] = I16_Wrapped(m, bt->type.range);
                             args[4] = NULL;
                             Fmt(bf, "$:$[^D.\"$\"^d./$]", args);
                         }else if(bt->type.of == TYPE_POINTER_ARRAY){
@@ -206,9 +205,13 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                             void **dptr = (void **)Bytes_Ptr(bt);
                             for(i16 i = 0; i < total; i++){
                                 void *ptr = *dptr;
-                                Single *idx = (Single *)Table_Get(tbl, 
-                                    contentAddrWrapped(bf->m, ptr));
-                                args[0] = (idx != NULL ? Util_Wrapped(bf->m, idx->val.i) : Util_Wrapped(bf->m, (util)ptr));
+                                Single *key = 
+                                    Util_Wrapped(m, (util)mit.current.content);
+                                Single *idx = (Single *)Table_Get(tbl, key);
+                                args[0] = (idx != NULL ?
+                                    Util_Wrapped(m, idx->val.i) :
+                                    Util_Wrapped(bf->m, (util)ptr)
+                                );
                                 args[1] = NULL;
                                 if(i == 0){
                                     Fmt(bf, "$", args);
@@ -224,7 +227,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                             Fmt(bf, "$:$", args);
                         }
                     }else{
-                        args[0] = Type_ToStr(bf->m, a->type.of);
+                        args[0] = Type_ToStr(m, mid->rtype.of);
                         args[1] = NULL;
                         Fmt(bf, "$", args);
                     }

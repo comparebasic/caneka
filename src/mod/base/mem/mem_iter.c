@@ -5,7 +5,7 @@ static void setLastFlag(MemIter *mit){
     MemIdent *mi = MemIter_Get(mit);
 
     void *ar[] = {mi, NULL};
-    Out("^p.@^0\n", ar);
+    Out("^p.Set last Flag@^0\n", ar);
 
     Abstract *a = mi->ptr;
 
@@ -48,6 +48,14 @@ MemIdent *MemIter_Get(MemIter *mit){
                 mit->current.content = b-sizeof(RangeType);
             }else{
                 IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
+                if(imap == NULL){
+                    void *ar[] = {
+                        a, NULL
+                    };
+                    Error(mit->m, FUNCNAME, FILENAME, LINENUMBER,
+                        "imap map for interfaces not found MemIter_Get, @", ar);
+                    Return(mit->m, NULL);
+                }
                 mit->current.rtype.range = imap->size;
                 mit->current.content = a;
             }
@@ -55,11 +63,8 @@ MemIdent *MemIter_Get(MemIter *mit){
             mit->current.content = NULL;
         }
 
-        printf("Returning current\n");
-        fflush(stdout);
-
         void *ar[] = {&mit->current, NULL};
-        Out("^y.@^0\n", ar);
+        Out("^y.Returning Current @^0\n", ar);
 
         Return(mit->m, &mit->current);
     }
