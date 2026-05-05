@@ -4,9 +4,6 @@
 static void setLastFlag(MemIter *mit){
     MemIdent *mi = MemIter_Get(mit);
 
-    void *ar[] = {mi, NULL};
-    Out("^p.Set last Flag@^0\n", ar);
-
     Abstract *a = mi->ptr;
 
     i64 sz = 0;
@@ -63,26 +60,18 @@ MemIdent *MemIter_Get(MemIter *mit){
             mit->current.content = NULL;
         }
 
-        void *ar[] = {&mit->current, NULL};
-        Out("^y.Returning Current @^0\n", ar);
-
         Return(mit->m, &mit->current);
     }
-
-    printf("NULL!\n");
-    fflush(stdout);
 
     Return(mit->m, NULL);
 }
 
 status MemIter_Next(MemIter *mit){
+    MemCh *m = mit->m;
 
     mit->type.state &= ~LAST;
     void *args[5];
-    Debug_Push(mit->m, mit);
-
-    printf("Next\n");
-    fflush(stdout);
+    Debug_Push(m, mit);
 
     if(mit->current.ptr == NULL && (mit->type.state & (MORE|PROCESSING)) == MORE){
         MemPage *pg = NULL;
@@ -96,7 +85,7 @@ status MemIter_Next(MemIter *mit){
                 "Error: unable to find page", args);
             mit->type.state |= ERROR;
 
-            Return(mit->m, mit->type.state);
+            Return(m, mit->type.state);
         }
         mit->current.ptr = ((void *)pg)+sizeof(MemPage)+((util)pg->remaining);
         mit->end = ((void *)pg) + PAGE_SIZE-1;
@@ -105,11 +94,13 @@ status MemIter_Next(MemIter *mit){
     }else if((mit->type.state & (MORE|PROCESSING)) == (MORE|PROCESSING)){
         mit->type.state &= ~MORE;
     }else{
-        Abstract *a = (Abstract *)MemIter_Get(mit);
         i64 sz = 0;
-        if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
+        Abstract *a = (Abstract *)mit->current.ptr;
+        cls typeOf = a->type.of;
+        if(typeOf > _TYPE_RANGE_TYPE_START && typeOf < _TYPE_RANGE_TYPE_END){
             sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
         }else{
+            a = (Abstract *)mit->current.content;
             IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
             if(imap == NULL){
                 void *ar[] = {Type_ToStr(mit->m, a->type.of), NULL};
@@ -159,12 +150,12 @@ status MemIter_Next(MemIter *mit){
 void MemIter_Init(MemCh *m, MemIter *mit, MemCh *target){
     memset(mit, 0, sizeof(MemIter));
     mit->type.of = TYPE_MEM_ITER;
+    mit->type.state = MORE;
     mit->m = m;
     mit->input.target = target;
     mit->current.slIdx = 0;
     mit->current.type.of = TYPE_MEM_IDENT;
     mit->current.idx = -1;
-    mit->type.state = MORE;
     mit->current.ptr = NULL;
     mit->end = NULL;
     mit->maxSlIdx = target->it.p->max_idx;

@@ -60,9 +60,6 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
     Table *tbl = Table_Make(m);
 
     if(flags & MORE){
-        printf("hi\n");
-        fflush(stdout);
-
         Fmt(bf, "MemCh<$pages ^D.$^d.used [", args);
 
         Iter it;
@@ -78,16 +75,11 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
             }
         }
 
-        printf("hi there\n");
-        fflush(stdout);
-        
         MemIter mit;
         MemIter_Init(m, &mit, target);
         i32 idx = 0;
         i16 g = 0;
         while((MemIter_Next(&mit) & END) == 0){
-            printf("IV\n");
-            fflush(stdout);
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if((mit.type.state & MORE) == 0){
                 Single *key = Util_Wrapped(m, (util)mit.current.content);
@@ -96,9 +88,6 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                 idx = 0;
             }
         }
-
-        printf("V\n");
-        fflush(stdout);
 
         MemIter_Init(m, &mit, target);
         g = 0;

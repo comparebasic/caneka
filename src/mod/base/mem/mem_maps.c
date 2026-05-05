@@ -32,6 +32,17 @@ static Map *Span_Map(MemCh *m){
     return Map_Make(m, size-1, atts, keys);
 }
 
+static Map *Bytes_Map(MemCh *m){
+    i32 size = 0;
+    RangeType *atts = (RangeType *)Bytes_Alloc(m, 
+        (word)(sizeof(RangeType)*(size+1)), TYPE_RANGE_ARRAY);
+    Str **keys = (Str **)Bytes_Alloc(m, sizeof(Str *)*(size+1), TYPE_POINTER_ARRAY);
+    keys[0] = Str_CstrRef(m, "Bytes");
+    atts->of = TYPE_BYTES_POINTER;
+    atts->range = size+1;
+    return Map_Make(m, size-1, atts, keys);
+}
+
 static Map *MemCh_Map(MemCh *m){
     MemCh _m;
     word offset = 0;
@@ -89,5 +100,6 @@ status Mem_MapsInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Map(m));
     r |= Lookup_Add(m, lk, TYPE_MEMCTX, (void *)MemCh_Map(m));
     r |= Lookup_Add(m, lk, TYPE_BOOK_STATS, (void *)MemBookStats_Map(m));
+    r |= Lookup_Add(m, lk, TYPE_BYTES_POINTER, (void *)Bytes_Map(m));
     return r;
 }
