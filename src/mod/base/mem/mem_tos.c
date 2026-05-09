@@ -57,7 +57,6 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
     args[1] = MemCount_Wrapped(m,  MemCh_Used(target, 0));
     args[2] = NULL;
 
-    Table *tbl = Table_Make(m);
 
     if(flags & MORE){
         Fmt(bf, "MemCh<$pages ^D.$^d.used [", args);
@@ -77,21 +76,10 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
 
         MemIter mit;
         MemIter_Init(m, &mit, target);
-        i32 idx = 0;
-        i16 g = 0;
-        while((MemIter_Next(&mit) & END) == 0){
-            Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
-            if((mit.type.state & MORE) == 0){
-                Single *key = Util_Wrapped(m, (util)mit.current.content);
-
-                Table_Set(tbl, key, MemIter_CloneCurrent(bf->m, &mit));
-            }else{
-                idx = 0;
-            }
-        }
+        Table *tbl = MemIter_GetTable(m, target);
 
         MemIter_Init(m, &mit, target);
-        g = 0;
+        i16 g = 0;
         while((MemIter_Next(&mit) & END) == 0){
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if(mit.type.state & MORE){

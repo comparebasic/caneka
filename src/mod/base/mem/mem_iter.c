@@ -68,6 +68,22 @@ MemIdent *MemIter_Get(MemIter *mit){
     Return(mit->m, NULL);
 }
 
+Table *MemIter_GetTable(MemCh *m, MemCh *target){
+    MemIter mit;
+    MemIter_Init(m, &mit, target);
+    Table *tbl = Table_Make(m);
+    i16 g = 0;
+    while((MemIter_Next(&mit) & END) == 0){
+        Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
+        if((mit.type.state & MORE) == 0){
+            Single *key = Util_Wrapped(m, (util)mit.current.content);
+
+            Table_Set(tbl, key, MemIter_CloneCurrent(m, &mit));
+        }
+    }
+    return tbl;
+}
+
 status MemIter_Next(MemIter *mit){
     MemCh *m = mit->m;
 

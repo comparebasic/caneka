@@ -30,3 +30,4 @@ void MemIter_InitArr(MemIter *mit, void **arr, i32 maxSlIdx);
 status MemIter_Next(MemIter *mit);
 MemIdent *MemIter_Get(MemIter *mit);
 MemIdent *MemIter_CloneCurrent(MemCh *m, MemIter *mit);
+struct span *MemIter_GetTable(MemCh *m, MemCh *target);
