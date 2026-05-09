@@ -384,6 +384,7 @@ read:
 int main(int argc, char *argv[]){
     char *cmd[12];
     char **runcmd[4];
+    int showMenu = 0;
 
     char *choice = menuKeys[0];
     if(argc > 1){
@@ -398,6 +399,7 @@ int main(int argc, char *argv[]){
                 }
             }else if(compareCstr("--menu", argv[i])){
                 choice = NULL;
+                showMenu = 1;
             }
         }
     }
@@ -549,8 +551,10 @@ int main(int argc, char *argv[]){
     }
 
     if(compareCstr("buildeka-only", choice)){
-        printf("%s", buildekaExamples);
-        fflush(stdout);
+        if(showMenu){
+            printf("%s", buildekaExamples);
+            fflush(stdout);
+        }
     }else if(compareCstr("build-only", choice)){
         printf("Caneka has been built!\n");
         fflush(stdout);

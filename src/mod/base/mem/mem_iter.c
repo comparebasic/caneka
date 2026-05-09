@@ -38,7 +38,6 @@ MemIdent *MemIter_Get(MemIter *mit){
         Abstract *a = mit->current.ptr;
         if(a != NULL){
             mit->current.rtype.of = a->type.of;
-            mit->current.idx++;
             if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
                 byte *b = (byte *)a;
                 mit->current.rtype.range = a->type.state;
@@ -88,6 +87,7 @@ status MemIter_Next(MemIter *mit){
             Return(m, mit->type.state);
         }
         mit->current.ptr = ((void *)pg)+sizeof(MemPage)+((util)pg->remaining);
+        mit->current.idx = 0;
         mit->end = ((void *)pg) + PAGE_SIZE-1;
         mit->type.state |= PROCESSING;
         setLastFlag(mit);
@@ -139,6 +139,7 @@ status MemIter_Next(MemIter *mit){
             }
         }else{
             mit->current.ptr += sz;
+            mit->current.idx++;
             setLastFlag(mit);
             mit->type.state |= PROCESSING;
         }

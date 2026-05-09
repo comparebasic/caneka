@@ -69,7 +69,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
             args[0] = I32_Wrapped(bf->m, it.idx);
             args[1] = I16_Wrapped(bf->m, sl->remaining);
             args[2] = NULL;
-            Fmt(bf, "Page#$/@remaining", args);
+            Fmt(bf, "(Page#$/$remaining)", args);
             if((it.type.state & LAST) == 0){
                 Buff_AddBytes(bf, (byte *)", ", 2);
             }
@@ -83,6 +83,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
             Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
             if((mit.type.state & MORE) == 0){
                 Single *key = Util_Wrapped(m, (util)mit.current.content);
+
                 Table_Set(tbl, key, MemIter_CloneCurrent(bf->m, &mit));
             }else{
                 idx = 0;
@@ -103,123 +104,116 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                 }
                 args[0] = I32_Wrapped(m, mit.current.slIdx);
                 args[1] = NULL;
-                Fmt(bf, "Page#$[", args);
+                Fmt(bf, " Page#$[", args);
             }else{
                 MemIdent *mid = MemIter_Get(&mit);
+                args[0] = I32_Wrapped(m, mid->idx);
+                args[1] = I32_Wrapped(m, mid->slIdx);
+                args[2] = NULL;
+                Fmt(bf, "$/$:", args);
                 Map *map = Lookup_Get(MapsLookup, mid->rtype.of);
+                Abstract *a = mid->content;
                 if(mid->content == NULL){
                     Error(m, FUNCNAME, FILENAME, LINENUMBER, 
                         "content is null for a MemIter item", NULL);
                     Return(m, ERROR);
                 }
                 Single *key = Util_Wrapped(m, (util)mit.current.content);
-                Single *count = (Single *)Table_Get(tbl, key); 
-
                 if(map != NULL){
-                    if(count != NULL){
-                        args[0] = count;
-                        args[1] = map->keys[0];
+                    args[0] = map->keys[0];
+                    args[1] = NULL;
+                    if(mid->rtype.of == TYPE_STR){
+                        Str *s = (Str *)mid->content;
+                        args[1] = I16_Wrapped(m, s->length);
                         args[2] = NULL;
-                        if(mid->rtype.of == TYPE_STR){
-                            Str *s = (Str *)mid->content;
-                            args[2] = I16_Wrapped(m, s->length);
-                            args[3] = NULL;
-                            Fmt(bf, "$:$/$", args);
-                        }else{
-                            Fmt(bf, "$:$", args);
+                        Fmt(bf, "$/$", args);
+                    }else if(mid->rtype.of == TYPE_BYTES_POINTER){
+                        BytesLit *bt = (BytesLit*)mit.current.ptr;
+                        args[1] = Str_Ref(m, Bytes_Ptr(bt), bt->type.range, bt->type.range, DEBUG);
+                        args[2] = I16_Wrapped(m, bt->type.range);
+                        args[3] = NULL;
+                        Fmt(bf, "$[^D.\"$\"^d./$]", args);
+                    }else if(mid->rtype.of == TYPE_POINTER_ARRAY){
+                        BytesLit *bt = (BytesLit*)mit.current.ptr;
+                        Fmt(bf, "$[", args);
+                        i16 total = bt->type.range / sizeof(void *);
+                        void **dptr = (void **)Bytes_Ptr(bt);
+                        for(i16 i = 0; i < total; i++){
+                            void *ptr = *dptr;
+                            Single *key = 
+                                Util_Wrapped(m, (util)mit.current.content);
+                            Single *idx = (Single *)Table_Get(tbl, key);
+                            args[0] = (idx != NULL ?
+                                Util_Wrapped(m, idx->val.i) :
+                                Util_Wrapped(bf->m, (util)ptr)
+                            );
+                            args[1] = NULL;
+                            if(i == 0){
+                                Fmt(bf, "$", args);
+                            }else{
+                                Fmt(bf, ", $", args);
+                            }
+                            dptr++;
                         }
-                    }else{
-                        args[0] = map->keys[0];
-                        args[1] = NULL;
-                        Fmt(bf, "$", args);
+
+                        Buff_Add(bf, K(m, "]"));
                     }
                     i32 max = (i32)((RangeType *)map)->range;
-                    Buff_AddBytes(bf, (byte *)"(", 1);
-                    boolean first = TRUE;
-                    for(i32 i = 1; i <= max; i++){
-                        RangeType *att = map->atts+i;
-                        if(att->of > _TYPE_RAW_END){
-                            if(!first){
-                                Buff_AddBytes(bf, (byte *)", ", 2);
-                            }
-                            first = FALSE;
-                            args[0] = map->keys[i];
-                            void **dptr = ((void *)a)+att->range;
-                            void *ptr = NULL;
-                            if(dptr != NULL && *dptr != NULL){
-                                ptr = *dptr;
-                                Single *key = Util_Wrapped(m,
-                                    (util)mit.current.content);
-                                Single *attCount = 
-                                    (Single *)Table_Get(tbl, key);
+                    if(max > 1){
+                        Buff_AddBytes(bf, (byte *)"(", 1);
+                        boolean first = TRUE;
+                        for(i32 i = 1; i <= max; i++){
+                            RangeType *att = map->atts+i;
+                            if(att->of > _TYPE_RAW_END){
+                                if(!first){
+                                    Buff_AddBytes(bf, (byte *)", ", 2);
+                                }
+                                first = FALSE;
+                                args[0] = map->keys[i];
+                                void **dptr = ((void *)a)+att->range;
+                                void *ptr = NULL;
 
-                                Abstract *aa = (Abstract *)ptr;
-                                if(aa == NULL){
-                                    Fmt(bf, "$=NULL", args);
-                                }else{
-                                    if(att->of > _TYPE_RANGE_TYPE_START && att->of < _TYPE_RANGE_TYPE_END){
-                                        aa = (Abstract *)(((byte *)aa)- sizeof(RangeType));
-                                    }
-                                    Map *amap = Lookup_Get(MapsLookup, aa->type.of);
-                                    if(amap != NULL){
-                                        args[1] = amap->keys[0];
+                                if(dptr != NULL && *dptr != NULL){
+                                    ptr = *dptr;
+
+                                    Abstract *aa = (Abstract *)ptr;
+                                    if(aa == NULL){
+                                        Fmt(bf, "$=NULL", args);
                                     }else{
-                                        args[1] = Type_ToStr(m, aa->type.of);
+                                        if(att->of > _TYPE_RANGE_TYPE_START && att->of < _TYPE_RANGE_TYPE_END){
+                                            aa = (Abstract *)(((byte *)aa)- sizeof(RangeType));
+                                        }
+
+
+                                        Map *amap = Lookup_Get(MapsLookup, aa->type.of);
+                                        if(amap != NULL){
+                                            args[1] = amap->keys[0];
+                                        }else{
+                                            args[1] = Type_ToStr(m, aa->type.of);
+                                        }
+
+                                        Single *key = Util_Wrapped(m, (util)aa);
+                                        MemIdent *amid = (MemIdent *)Table_Get(tbl, key);
+
+                                        if(amid != NULL){
+                                            args[2] = I32_Wrapped(m, amid->idx);
+                                            args[3] = I32_Wrapped(m, amid->slIdx);
+                                            args[4] = NULL;
+                                            Fmt(bf, "$=$:^D$/$^d.", args);
+                                        }else{
+                                            args[3] = NULL;
+                                            Fmt(bf, "$=$", args);
+                                        }
                                     }
-                                    args[2] = (attCount != NULL ? 
-                                        I16_Wrapped(m, attCount->val.i) : Util_Wrapped(m, (util)aa));
-
-                                    args[3] = NULL;
-                                    Fmt(bf, "$=$:$", args);
                                 }
                             }
                         }
+                        Buff_AddBytes(bf, (byte *)")", 1);
                     }
-                    Buff_AddBytes(bf, (byte *)")", 1);
                 }else{
-                    if(count != NULL){
-                        args[0] = count;
-                        args[1] = Type_ToStr(m, mid->rtype.of);
-                        args[2] = NULL;
-                        BytesLit *bt = (BytesLit*)mit.current.ptr;
-                        if(bt->type.of == TYPE_BYTES_POINTER){
-                            args[2] = Str_Ref(m, Bytes_Ptr(bt), bt->type.range, bt->type.range, DEBUG);
-                            args[3] = I16_Wrapped(m, bt->type.range);
-                            args[4] = NULL;
-                            Fmt(bf, "$:$[^D.\"$\"^d./$]", args);
-                        }else if(bt->type.of == TYPE_POINTER_ARRAY){
-                            Fmt(bf, "$:$[", args);
-
-                            i16 total = bt->type.range / sizeof(void *);
-                            void **dptr = (void **)Bytes_Ptr(bt);
-                            for(i16 i = 0; i < total; i++){
-                                void *ptr = *dptr;
-                                Single *key = 
-                                    Util_Wrapped(m, (util)mit.current.content);
-                                Single *idx = (Single *)Table_Get(tbl, key);
-                                args[0] = (idx != NULL ?
-                                    Util_Wrapped(m, idx->val.i) :
-                                    Util_Wrapped(bf->m, (util)ptr)
-                                );
-                                args[1] = NULL;
-                                if(i == 0){
-                                    Fmt(bf, "$", args);
-                                }else{
-                                    Fmt(bf, ", $", args);
-                                }
-                                dptr++;
-                            }
-
-                            Buff_Add(bf, K(m, "]"));
-                        }else{
-                            args[2] = NULL;
-                            Fmt(bf, "$:$", args);
-                        }
-                    }else{
-                        args[0] = Type_ToStr(m, mid->rtype.of);
-                        args[1] = NULL;
-                        Fmt(bf, "$", args);
-                    }
+                    args[0] = Type_ToStr(m, mid->rtype.of);
+                    args[1] = NULL;
+                    Fmt(bf, "$", args);
                 }
                 if((mit.type.state & (MORE|LAST)) != LAST){
                     Buff_AddBytes(bf, (byte *)", ", 2);
