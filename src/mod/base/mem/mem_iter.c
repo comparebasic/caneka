@@ -1,6 +1,34 @@
 #include <external.h>
 #include "base_module.h"
 
+static void setMemIdent(MemIter *mit, MemIdent *d){
+    Abstract *a = mit->current.ptr;
+
+    if(a != NULL){
+        mit->current.rtype.of = a->type.of;
+        if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
+            byte *b = (byte *)a;
+            mit->current.rtype.range = a->type.state;
+            mit->current.content = b-sizeof(RangeType);
+        }else{
+            IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
+            if(imap == NULL){
+                void *ar[] = {
+                    a, NULL
+                };
+                Error(mit->m, FUNCNAME, FILENAME, LINENUMBER,
+                    "imap map for interfaces not found MemIter_Get, @", ar);
+                mit->type.state |= ERROR;
+                return;
+            }
+            mit->current.rtype.range = imap->size;
+            mit->current.content = a;
+        }
+    }else{
+        mit->current.content = NULL;
+    }
+}
+
 static void setLastFlag(MemIter *mit){
     MemIdent *mi = MemIter_Get(mit);
 
@@ -35,33 +63,8 @@ MemIdent *MemIter_CloneCurrent(MemCh *m, MemIter *mit){
 MemIdent *MemIter_Get(MemIter *mit){
     Debug_Push(mit->m, mit->current.ptr);
     if(mit->end != NULL && mit->current.ptr != NULL){
-        Abstract *a = mit->current.ptr;
-        if(a != NULL){
-            mit->current.rtype.of = a->type.of;
-            if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
-                byte *b = (byte *)a;
-                mit->current.rtype.range = a->type.state;
-                mit->current.content = b-sizeof(RangeType);
-            }else{
-                IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
-                if(imap == NULL){
-                    void *ar[] = {
-                        a, NULL
-                    };
-                    Error(mit->m, FUNCNAME, FILENAME, LINENUMBER,
-                        "imap map for interfaces not found MemIter_Get, @", ar);
-                    Return(mit->m, NULL);
-                }
-                mit->current.rtype.range = imap->size;
-                mit->current.content = a;
-            }
-        }else{
-            mit->current.content = NULL;
-        }
-
         Return(mit->m, &mit->current);
     }
-
     Return(mit->m, NULL);
 }
 
@@ -91,12 +94,14 @@ status MemIter_Next(MemIter *mit){
         mit->end = ((void *)pg) + PAGE_SIZE-1;
         mit->type.state |= PROCESSING;
         setLastFlag(mit);
+        setMemIdent(mit, &mit->current);
     }else if((mit->type.state & (MORE|PROCESSING)) == (MORE|PROCESSING)){
         mit->type.state &= ~MORE;
     }else{
         i64 sz = 0;
         Abstract *a = (Abstract *)mit->current.ptr;
         cls typeOf = a->type.of;
+
         if(typeOf > _TYPE_RANGE_TYPE_START && typeOf < _TYPE_RANGE_TYPE_END){
             sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);
         }else{
@@ -110,6 +115,7 @@ status MemIter_Next(MemIter *mit){
             }
             sz = imap->size;
         }
+
         if(sz <= 0){
             void *args[] = {
                 Type_ToStr(ErrStream->m, a->type.of),
@@ -119,12 +125,14 @@ status MemIter_Next(MemIter *mit){
                 "Error: type $ of object does not have a registered size", args);
             mit->type.state |= (ERROR|END);
         }
+
         if(mit->end == NULL || (void *)(mit->current.ptr+sz-1) > mit->end){
             args[0] = Util_Wrapped(ErrStream->m, mit->current.ptr+sz-1 - mit->end);
             args[1] = NULL;
             Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error: type to large to increment address is off the page by $", args);
         }
+
         if(mit->current.ptr+sz-1 == mit->end){
             if(mit->current.slIdx < mit->maxSlIdx){
                 mit->type.state = (mit->type.state & UPPER_FLAGS) | MORE;
@@ -137,11 +145,15 @@ status MemIter_Next(MemIter *mit){
             }else{
                 mit->type.state |= END;
             }
+            memset(&mit->current, 0, sizeof(MemIdent));
+            mit->current.type.of = TYPE_MEM_IDENT;
         }else{
+            mit->type.state |= PROCESSING;
             mit->current.ptr += sz;
             mit->current.idx++;
             setLastFlag(mit);
-            mit->type.state |= PROCESSING;
+
+            setMemIdent(mit, &mit->current);
         }
     }
 

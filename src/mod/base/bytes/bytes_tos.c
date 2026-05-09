@@ -87,7 +87,7 @@ status Str_Print(Buff *bf, void *a, cls type, word flags){
     args[3] = NULL;
 
     if(flags & DEBUG){
-        Fmt(bf, "Str<$ $/$:\"^D", args);
+        Fmt(bf, "Str<@ $/$:\"^D", args);
     }else{
         Fmt(bf, "\"^D", NULL); 
     }
