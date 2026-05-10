@@ -3,13 +3,15 @@
 
 static void setMemIdent(MemIter *mit, MemIdent *d){
     Abstract *a = mit->current.ptr;
+    d->type.of = TYPE_MEM_IDENT;
+    d->ptr = a;
 
     if(a != NULL){
-        mit->current.rtype.of = a->type.of;
+        d->rtype.of = a->type.of;
         if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
             byte *b = (byte *)a;
-            mit->current.rtype.range = a->type.state;
-            mit->current.content = b-sizeof(RangeType);
+            d->rtype.range = a->type.state;
+            d->content = b+sizeof(RangeType);
         }else{
             IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
             if(imap == NULL){
@@ -21,11 +23,13 @@ static void setMemIdent(MemIter *mit, MemIdent *d){
                 mit->type.state |= ERROR;
                 return;
             }
-            mit->current.rtype.range = imap->size;
-            mit->current.content = a;
+            d->rtype.range = imap->size;
+            d->content = a;
         }
     }else{
-        mit->current.content = NULL;
+        d->rtype.of = ZERO;
+        d->rtype.range = 0;
+        d->content = NULL;
     }
 }
 
@@ -54,12 +58,6 @@ static void setLastFlag(MemIter *mit){
     }
 }
 
-MemIdent *MemIter_CloneCurrent(MemCh *m, MemIter *mit){
-    MemIdent *mi = MemCh_AllocOf(m, sizeof(MemIdent), TYPE_MEM_IDENT);
-    memcpy(mi, &mit->current, sizeof(MemIdent));
-    return mi;
-}
-
 MemIdent *MemIter_Get(MemIter *mit){
     Debug_Push(mit->m, mit->current.ptr);
     if(mit->end != NULL && mit->current.ptr != NULL){
@@ -69,18 +67,32 @@ MemIdent *MemIter_Get(MemIter *mit){
 }
 
 Table *MemIter_GetTable(MemCh *m, MemCh *target){
+    printf("\n>>>Getting Table\n");
+    fflush(stdout);
     MemIter mit;
     MemIter_Init(m, &mit, target);
     Table *tbl = Table_Make(m);
     i16 g = 0;
+    i32 slIdx = 0;
+    i32 idx = 0;
     while((MemIter_Next(&mit) & END) == 0){
         Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
-        if((mit.type.state & MORE) == 0){
-            Single *key = Util_Wrapped(m, (util)mit.current.content);
-
-            Table_Set(tbl, key, MemIter_CloneCurrent(m, &mit));
+        if(mit.type.state & MORE){
+            slIdx++;
+        }else{
+            if((mit.type.state & MORE) == 0){
+                MemIdent *mid = MemCh_AllocOf(m, sizeof(MemIdent), TYPE_MEM_IDENT);
+                setMemIdent(&mit, mid);
+                mid->idx = idx++;
+                Single *key = Util_Wrapped(m, (util)mid->content);
+                Table_Set(tbl, key, mid);
+            }
         }
     }
+
+    printf("\n>>> END Getting Table\n");
+    fflush(stdout);
+
     return tbl;
 }
 

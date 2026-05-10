@@ -74,10 +74,9 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
             }
         }
 
-        MemIter mit;
-        MemIter_Init(m, &mit, target);
         Table *tbl = MemIter_GetTable(m, target);
 
+        MemIter mit;
         MemIter_Init(m, &mit, target);
         i16 g = 0;
         while((MemIter_Next(&mit) & END) == 0){
@@ -130,6 +129,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                             void *ptr = *dptr;
                             Single *key = 
                                 Util_Wrapped(m, (util)mit.current.content);
+
                             Single *idx = (Single *)Table_Get(tbl, key);
                             args[0] = (idx != NULL ?
                                 Util_Wrapped(m, idx->val.i) :
@@ -168,16 +168,16 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                                     if(aa == NULL){
                                         Fmt(bf, "$=NULL", args);
                                     }else{
+                                        Abstract *hdr = aa;
                                         if(att->of > _TYPE_RANGE_TYPE_START && att->of < _TYPE_RANGE_TYPE_END){
-                                            aa = (Abstract *)(((byte *)aa)- sizeof(RangeType));
+                                            hdr = (Abstract *)(((byte *)aa) - sizeof(RangeType));
                                         }
 
-
-                                        Map *amap = Lookup_Get(MapsLookup, aa->type.of);
+                                        Map *amap = Lookup_Get(MapsLookup, hdr->type.of);
                                         if(amap != NULL){
                                             args[1] = amap->keys[0];
                                         }else{
-                                            args[1] = Type_ToStr(m, aa->type.of);
+                                            args[1] = Type_ToStr(m, hdr->type.of);
                                         }
 
                                         Single *key = Util_Wrapped(m, (util)aa);
