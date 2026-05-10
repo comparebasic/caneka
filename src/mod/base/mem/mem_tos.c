@@ -127,25 +127,30 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
                         void **dptr = (void **)Bytes_Ptr(bt);
                         for(i16 i = 0; i < total; i++){
                             void *ptr = *dptr;
-                            Single *key = 
-                                Util_Wrapped(m, (util)mit.current.content);
+                            Single *key = Util_Wrapped(m, (util)ptr);
+                            MemIdent *mid = (MemIdent *)Table_Get(tbl, key);
+                            if(i > 0){
+                                Buff_Add(bf, K(m, ", "));
+                            }
 
-                            Single *idx = (Single *)Table_Get(tbl, key);
-                            args[0] = (idx != NULL ?
-                                Util_Wrapped(m, idx->val.i) :
-                                Util_Wrapped(bf->m, (util)ptr)
-                            );
-                            args[1] = NULL;
-                            if(i == 0){
-                                Fmt(bf, "$", args);
+                            if(mid != NULL){
+                                args[0] = I32_Wrapped(m, mid->idx);
+                                args[1] = I32_Wrapped(m, mid->slIdx);
+                                args[2] = 0;
+                                Fmt(bf, "$/$", args);
                             }else{
-                                Fmt(bf, ", $", args);
+                                if(ptr != NULL){
+                                    Buff_Add(bf, K(m, "Ext"));
+                                }
                             }
                             dptr++;
                         }
 
                         Buff_Add(bf, K(m, "]"));
+                    }else{
+                        Fmt(bf, "$", args);
                     }
+
                     i32 max = (i32)((RangeType *)map)->range;
                     if(max > 1){
                         Buff_AddBytes(bf, (byte *)"(", 1);

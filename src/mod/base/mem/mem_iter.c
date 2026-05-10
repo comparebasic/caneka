@@ -67,8 +67,6 @@ MemIdent *MemIter_Get(MemIter *mit){
 }
 
 Table *MemIter_GetTable(MemCh *m, MemCh *target){
-    printf("\n>>>Getting Table\n");
-    fflush(stdout);
     MemIter mit;
     MemIter_Init(m, &mit, target);
     Table *tbl = Table_Make(m);
@@ -89,9 +87,6 @@ Table *MemIter_GetTable(MemCh *m, MemCh *target){
             }
         }
     }
-
-    printf("\n>>> END Getting Table\n");
-    fflush(stdout);
 
     return tbl;
 }

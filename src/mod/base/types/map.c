@@ -113,6 +113,7 @@ status Maps_Init(MemCh *m){
         MapsLookup = Lookup_Make(m, ZERO);
         r |= Str_MapsInit(m, MapsLookup); 
         r |= Mem_MapsInit(m, MapsLookup); 
+        r |= Io_MapsInit(m, MapsLookup); 
         r |= Sequence_MapsInit(m, MapsLookup); 
     }
     if(r == READY){

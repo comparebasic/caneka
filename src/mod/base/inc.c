@@ -9,6 +9,7 @@
 #include "./io/file.c"
 #include "./io/sock.c"
 #include "./io/io_tos.c"
+#include "./io/io_maps.c"
 #include "./io/procdets.c"
 #include "./io/subprocess.c"
 #include "./io/stash_coord.c"
