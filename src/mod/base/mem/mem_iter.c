@@ -74,7 +74,7 @@ Table *MemIter_GetTable(MemCh *m, MemCh *target){
     i32 slIdx = 0;
     i32 idx = 0;
     while((MemIter_Next(&mit) & END) == 0){
-        Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
+        Guard_Incr(m, &g, MEM_ITER_MAX, FUNCNAME, FILENAME, LINENUMBER);
         if(mit.type.state & MORE){
             slIdx++;
         }else{
@@ -168,8 +168,9 @@ status MemIter_Next(MemIter *mit){
             }else{
                 mit->type.state |= END;
             }
-            memset(&mit->current, 0, sizeof(MemIdent));
-            mit->current.type.of = TYPE_MEM_IDENT;
+
+            mit->current.ptr = mit->current.content = NULL;
+            mit->current.rtype.of = ZERO;
         }else{
             mit->type.state |= PROCESSING;
             mit->current.ptr += sz;

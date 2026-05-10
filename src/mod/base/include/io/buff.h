@@ -5,7 +5,7 @@ enum send_recv_flags {
     BUFF_FD = 1 << 9,
     BUFF_SOCKET = 1 << 10,
     BUFF_DATASYNC = 1 << 11,
-    BUFF_FLUSH = 1 << 12,
+    BUFF_TEMP_MEM = 1 << 12,
     BUFF_UNBUFFERED = 1 << 13,
     BUFF_SLURP = 1 << 14,
     BUFF_CLOBBER = 1 << 15,
@@ -51,6 +51,8 @@ status Buff_Flush(Buff *bf);
 status Buff_Read(Buff *bf);
 status Buff_ReadAmount(Buff *bf, i64 amount);
 status Buff_ReadToStr(Buff *bf, Str *s);
+status Buff_Rinse(Buff *bf);
+void Buff_SetTemp(Buff *bf);
 
 status Buff_Pipe(Buff *to, Buff *from);
 

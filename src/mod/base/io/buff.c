@@ -196,6 +196,7 @@ static status Buff_bytesToFd(Buff *bf, i32 fd, byte *bytes, i64 length, i64 *off
     }else{
         bf->type.state |= PROCESSING;
     }
+
     return bf->type.state;
 }
 
@@ -236,20 +237,6 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
                     bf->type.state |= PROCESSING;
                     bf->unsent.s = NULL;
                     bf->unsent.total -= offset;
-                    if(bf->type.state & BUFF_FLUSH){
-                        Iter it;                    
-                        Iter_Init(&it, bf->v->p);
-                        while((Iter_Next(&it) & END) == 0){
-                            if(it.idx == 0){
-                                bf->tail.idx = 0;
-                                bf->tail.s = (Str *)Iter_Get(&it);
-                            }
-                            Str_Wipe(Iter_Get(&it));
-                        }
-                        bf->unsent.idx = 0;
-                        bf->unsent.s = bf->tail.s;
-                        bf->unsent.total = 0;
-                    }
                 }
             }
         }else if(offset > 0){
@@ -262,6 +249,28 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
         bf->type.state |= (SUCCESS|END);
     }
     return bf->type.state;
+}
+
+void Buff_SetTemp(Buff *bf){
+    bf->type.state |= BUFF_TEMP_MEM;
+    bf->m->level++;
+}
+
+status Buff_Rinse(Buff *bf){
+    /* wipe all strings of the StrVec but leave them in place for re-use */
+    Iter it;                    
+    Iter_Init(&it, bf->v->p);
+    while((Iter_Next(&it) & END) == 0){
+        if(it.idx == 0){
+            bf->tail.idx = 0;
+            bf->tail.s = (Str *)Iter_Get(&it);
+        }
+        Str_Wipe(Iter_Get(&it));
+    }
+    bf->unsent.idx = 0;
+    bf->unsent.s = bf->tail.s;
+    bf->unsent.total = 0;
+    return ZERO;
 }
 
 status Buff_SetFd(Buff *bf, i32 fd){

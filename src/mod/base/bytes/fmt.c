@@ -70,6 +70,13 @@ status Fmt(Buff *bf, char *fmt, void *args[]){
      * 
      *
      */
+
+    boolean temp = FALSE;
+    if((bf->type.state & (BUFF_TEMP_MEM))){
+        temp = TRUE;
+        bf->type.state &= ~(BUFF_TEMP_MEM);
+    }
+
     MemCh *m = bf->m;
     char *ptr = fmt;
     char *end = fmt+(strlen(fmt)-1);
@@ -203,7 +210,12 @@ next:
         }
     }
 
-    return SUCCESS; 
+    if(temp){
+        bf->m->level--;
+        MemCh_FreeTemp(m);
+    }
+
+    return ZERO;
 }
 
 FmtLine *FmtLine_FromSpan(MemCh *m, char *fmt, Span *p){

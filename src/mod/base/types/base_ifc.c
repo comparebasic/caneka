@@ -63,7 +63,6 @@ void Base_IfcInit(MemCh *m){
             -1,
             CStr_Conv));
 
-
     szType nonPolyTypes[] = {
         {TYPE_WRAPPED, sizeof(Single)},
         {TYPE_WRAPPED_UTIL, sizeof(Single)},
@@ -81,6 +80,8 @@ void Base_IfcInit(MemCh *m){
         {TYPE_MEMCTX, sizeof(MemCh)},
         {TYPE_MEMSLAB, sizeof(MemPage)},
         {TYPE_MEM_IDENT, sizeof(MemIdent)},
+        {TYPE_DEBUG_STACK_ENTRY, sizeof(StackEntry)},
+        {TYPE_HASHED, sizeof(Hashed)},
         {0, 0}
     };
 

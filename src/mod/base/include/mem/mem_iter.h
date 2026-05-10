@@ -1,3 +1,4 @@
+#define MEM_ITER_MAX (1 << 12)
 enum mem_ite_flags {
     MEM_ITER_STREAM = 1 << 8,
 };

@@ -62,14 +62,12 @@ status FmtMem_Tests(MemCh *m){
     StrVec_Add(v, S(m, "Hi there, this is really cool."));
 
     MemCh *mm = MemCh_Make();
+    mm->type.state |= DEBUG;
     Buff *bf = Buff_Make(mm, BUFF_UNBUFFERED|BUFF_CLOBBER);
+    Buff_SetTemp(bf);
 
     Span *p = Span_Make(mm);
     Span_Add(p, S(mm, "Halo?"));
-
-    args[0] = mm;
-    args[1] = NULL;
-    Out("^p.MemCh:&\n", args);
 
     File_Open(bf, S(m, "dist/test/fmt-output.txt"), O_CREAT|O_TRUNC|O_WRONLY);  
     r |= Test((bf->type.state & ERROR) == 0, "Destination file opened", NULL);
@@ -77,8 +75,9 @@ status FmtMem_Tests(MemCh *m){
     i64 orig = 0;
     MemCh_CountBytes(bf->m, &orig);
 
-    args[0] = S(m, "a number");
-    args[1] = I32_Wrapped(m, 27);
+    Buff_SetTemp(bf);
+    args[0] = S(bf->m, "a number");
+    args[1] = I32_Wrapped(bf->m, 27);
     args[2] = NULL;
 
     Fmt(bf, "^p.@ ^E.@^0\n", args);
@@ -92,10 +91,5 @@ status FmtMem_Tests(MemCh *m){
     args[3] = NULL;
     r |= Test(updated == orig, "Memory has remained consistent after Fmt, Start:@ Updated:@ Delta:@", args);
 
-    args[0] = mm;
-    args[1] = NULL;
-    Out("^p.MemCh:&\n", args);
-
-    r |= ERROR;
     return r;
 }

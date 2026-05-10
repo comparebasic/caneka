@@ -27,6 +27,7 @@ void *MemCh_Alloc(MemCh *m, size_t sz){
 }
 
 void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
+    void *args[3];
     if(m == NULL){
         Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "MemCh is NULL", NULL);
         return NULL;
@@ -76,10 +77,18 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
 
     if(sl == NULL){
         sl = MemCh_AddPage(m, level);
+        if(m->type.state & DEBUG){
+            args[0] = sl;
+            args[1] = I32_Wrapped(ErrStream->m, m->it.p->nvalues);
+            args[2] = NULL;
+            Out("New slab @ slabs $\n", args);
+        }
     }
 
     if(sl->level != level){
         sl = MemCh_AddPage(m, level);
+        printf("Allocating level %d nvalue %d\n", (i32)level, m->it.p->nvalues);
+        fflush(stdout);
     }
 
     m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;

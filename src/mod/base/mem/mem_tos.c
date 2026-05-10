@@ -53,22 +53,22 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
     MemCh *m = bf->m;
 
     void *args[5];
-    args[0] = I64_Wrapped(m, target->it.p->nvalues);
-    args[1] = MemCount_Wrapped(m,  MemCh_Used(target, 0));
-    args[2] = NULL;
-
+    args[0] = Type_StateVec(m, target->type.of, target->type.state);
+    args[1] = I64_Wrapped(m, target->it.p->nvalues);
+    args[2] = MemCount_Wrapped(m,  MemCh_Used(target, 0));
+    args[3] = NULL;
 
     if(flags & MORE){
-        Fmt(bf, "MemCh<$pages ^D.$^d.used [", args);
+        Fmt(bf, "MemCh<@ $pages ^D.$^d.used [", args);
 
         Iter it;
         Iter_Init(&it, target->it.p);
         while((Iter_Next(&it) & END) == 0){
             MemPage *sl = (MemPage *)Iter_Get(&it);
             args[0] = I32_Wrapped(bf->m, it.idx);
-            args[1] = I16_Wrapped(bf->m, sl->remaining);
+            args[1] = sl;
             args[2] = NULL;
-            Fmt(bf, "(Page#$/$remaining)", args);
+            Fmt(bf, "(Page#$/$)", args);
             if((it.type.state & LAST) == 0){
                 Buff_AddBytes(bf, (byte *)", ", 2);
             }
@@ -80,7 +80,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
         MemIter_Init(m, &mit, target);
         i16 g = 0;
         while((MemIter_Next(&mit) & END) == 0){
-            Guard_Incr(m, &g, 100, FUNCNAME, FILENAME, LINENUMBER);
+            Guard_Incr(m, &g, MEM_ITER_MAX, FUNCNAME, FILENAME, LINENUMBER);
             if(mit.type.state & MORE){
                 if(mit.current.slIdx > 0){
                     if(mit.type.state & LAST){
@@ -308,6 +308,30 @@ status MemIdent_Print(Buff *bf, void *a, cls type, word flags){
     return ZERO;
 }
 
+status MemPage_Print(Buff *bf, void *a, cls type, word flags){
+    MemPage *pg = (MemPage *)a;
+
+
+    if(flags & (MORE|DEBUG)){
+        void *args[] = {
+            Type_StateVec(bf->m, pg->type.of, pg->type.state),
+            I16_Wrapped(bf->m, pg->level),
+            I32_Wrapped(bf->m, pg->remaining),
+            NULL
+        };
+        Fmt(bf, "MemPage<@ ^D.$^d.level ^D.$^d.remaining>", args);
+    }else{
+        void *args[] = {
+            I16_Wrapped(bf->m, pg->level),
+            I32_Wrapped(bf->m, pg->remaining),
+            NULL
+        };
+        Fmt(bf, "(^D.$^d.level/^D.$^d.remaining)", args);
+    }
+
+    return ZERO;
+}
+
 status Iter_Print(Buff *bf, void *a, cls type, word flags){
     Iter *it = (Iter *)Ifc(bf->m, a, TYPE_ITER);
     if(flags & DEBUG){
@@ -393,6 +417,7 @@ status Mem_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_MEM_ITER, (void *)MemIter_Print);
     r |= Lookup_Add(m, lk, TYPE_MEM_IDENT, (void *)MemIdent_Print);
     r |= Lookup_Add(m, lk, TYPE_BOOK, (void *)MemBook_Print);
+    r |= Lookup_Add(m, lk, TYPE_MEMSLAB, (void *)MemPage_Print);
     r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Print);
     r |= Lookup_Add(m, lk, TYPE_ITER, (void *)Iter_Print);
 
