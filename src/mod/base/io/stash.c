@@ -47,18 +47,19 @@ status Stash_PackAddr(cls typeOf, i32 slIdx, void **ptr){
 }
 
 i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
+    Debug_Push(m, persist);
     boolean pack = (mit->type.state & MEM_ITER_STREAM) == 0;
     void *args[5];
     i16 checksum = 0;
     i32 count = 0;
     while((MemIter_Next(mit) & END) == 0){
-        Abstract *a = (Abstract *)MemIter_Get(mit);
+        MemIdent *mid = (MemIdent *)MemIter_Get(mit);
         if((mit->type.state & MORE) == 0){
-            if(a->type.of == TYPE_POINTER_ARRAY){
-                void **dptr = (void **)(((void *)a)+sizeof(RangeType));
-                i32 slots = ((RangeType *)a)->range / sizeof(void *);
-                void **end = dptr+slots-1;
-                while(dptr <= end){
+            if(mid->rtype.of == TYPE_POINTER_ARRAY){
+                BytesLit *bt = (BytesLit*)mid->ptr;
+                i16 total = bt->type.range / sizeof(void *);
+                void **dptr = (void **)Bytes_Ptr(bt);
+                for(i16 i = 0; i < total; i++){
                     void *ptr = *dptr;
                     if(ptr == NULL){
                         break;
@@ -85,23 +86,23 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                     checksum++;
                     dptr++;
                 }
-            }else if(a->type.of > _TYPE_ABSTRACT_BEGIN){
-                Map *map = (Map *)Lookup_Get(MapsLookup, a->type.of);
+            }else if(mid->rtype.of > _TYPE_ABSTRACT_BEGIN){
+                Map *map = (Map *)Lookup_Get(MapsLookup, mid->rtype.of);
                 if(map == NULL){
-                    args[0] = Type_ToStr(m, a->type.of);
+                    args[0] = Type_ToStr(m, mid->rtype.of);
                     args[1] = NULL;
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
                         "Map not found for type $, needed for mem persist", args);
-                    return ERROR;
+                    Return(m, ERROR);
                 }
-                if(a->type.of == TYPE_ITER){
-                    Iter *itp = (Iter *)a;
+                if(mid->rtype.of == TYPE_ITER){
+                    Iter *itp = (Iter *)mid->content;
                     Iter_Init(itp, itp->p);
                 }
                 for(i16 i = 1; i <= map->type.range; i++){
                     RangeType *att = map->atts+i;
                     if(att->of > _TYPE_RANGE_TYPE_START){
-                        void **aa = ((void *)a)+att->range;
+                        void **aa = ((void *)mid->content)+att->range;
                         if(pack){
                             StashItem *item = (StashItem *)Table_Get(tbl, 
                                 Util_Wrapped(m, (util)*aa));
@@ -124,14 +125,14 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                         checksum++;
                     }
                 }
-                if(!pack && a->type.of == TYPE_MEMCTX){
-                    *persist = (MemCh *)a;
+                if(!pack && mid->rtype.of == TYPE_MEMCTX){
+                    *persist = (MemCh *)mid->content;
                 }
             }
         }
     }
 
-    return checksum;
+    Return(m, checksum);
 }
 
 status Stash_FlushFree(Buff *bf, MemCh *persist){
@@ -144,28 +145,12 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
     void *args[5];
     Iter it;
 
-    Table *tbl = Table_Make(m);
+    Table *tbl = MemIter_GetTable(m, persist);
 
+    i32 count = 0;
+    Span *pages = Span_Make(m);
     MemIter mit;
     MemIter_Init(m, &mit, persist);
-    i32 count = 0;
-    while((MemIter_Next(&mit) & END) == 0){
-        Abstract *a = (Abstract *)MemIter_Get(&mit);
-        if((mit.type.state & MORE) == 0){
-            void *ptr = (void *)a;
-            if(a->type.of < _TYPE_RANGE_TYPE_END){
-                void *orig = ptr;
-                ptr += sizeof(RangeType);
-            }
-
-            Table_Set(tbl, Util_Wrapped(m, (util)ptr), 
-                StashItem_Make(m, mit.current.slIdx, (void *)ptr, a->type.of));
-            void *ar[] = {bf->m, Util_Wrapped(m, (util)ptr), tbl, NULL};
-        }
-    }
-
-    Span *pages = Span_Make(m);
-    Iter_Reset(&persist->it);
     while((Iter_Next(&persist->it) & END) == 0){
         Abstract *a = (Abstract *)Iter_Get(&persist->it);
         Table_Set(tbl, Util_Wrapped(m, (util)a), 
@@ -264,7 +249,7 @@ MemCh *Stash_FromStream(Buff *bf){
     if(r & SUCCESS){
         r &= ~SUCCESS;
         MemIter mit;
-        MemIter_InitArr(&mit, pages, hdr.pages-1);
+        MemIter_InitArr(bf->m, &mit, pages, hdr.pages-1);
         checksum = Stash_PackMemCh(m, &mit, NULL, &persist);
     }
 

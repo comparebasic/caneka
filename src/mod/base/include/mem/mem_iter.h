@@ -27,7 +27,7 @@ typedef struct mem_iter {
 MemIter *MemIter_Make(MemCh *m, MemCh *target);
 MemIter *MemIter_MakeFromArr(MemCh *m, void **arr, i32 maxSlIdx);
 void MemIter_Init(MemCh *m, MemIter *mit, MemCh *target);
-void MemIter_InitArr(MemIter *mit, void **arr, i32 maxSlIdx);
+void MemIter_InitArr(MemCh *m, MemIter *mit, void **arr, i32 maxSlIdx);
 status MemIter_Next(MemIter *mit);
 MemIdent *MemIter_Get(MemIter *mit);
 MemIdent *MemIter_CloneCurrent(MemCh *m, MemIter *mit);

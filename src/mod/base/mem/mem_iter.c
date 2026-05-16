@@ -198,9 +198,10 @@ void MemIter_Init(MemCh *m, MemIter *mit, MemCh *target){
     mit->maxSlIdx = target->it.p->max_idx;
 }
 
-void MemIter_InitArr(MemIter *mit, void **arr, i32 maxSlIdx){
+void MemIter_InitArr(MemCh *m, MemIter *mit, void **arr, i32 maxSlIdx){
     memset(mit, 0, sizeof(MemIter));
     mit->type.of = TYPE_MEM_ITER;
+    mit->m = m;
     mit->input.arr = arr;
     mit->current.slIdx = 0;
     mit->current.type.of = TYPE_MEM_IDENT;
