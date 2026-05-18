@@ -10,6 +10,7 @@ typedef struct mem_ident {
     void *content;
     i32 slIdx;
     i32 idx;
+    i16 offset;
 } MemIdent;
 
 typedef struct mem_iter {
@@ -20,6 +21,7 @@ typedef struct mem_iter {
         void **arr;
     } input;
     MemIdent current;
+    MemPage *page;
     i32 maxSlIdx;
     void *end;
 } MemIter;

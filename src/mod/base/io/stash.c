@@ -20,6 +20,10 @@ struct lookup *BlankerLookup = NULL;
 struct lookup *RepointerLookup = NULL;
 
 cls Stash_UnpackAddr(MemCh *m, StashCoord *coord, void **arr){
+    Out("^c.Unpack Coord: ", NULL);
+    StashCoords_Print(OutStream, coord, MORE);
+    Out("^0.\n", NULL);
+
     cls typeOf = coord->typeOf;
     MemPage *pg = (MemPage *)arr[coord->idx];
     if(pg == NULL){
@@ -42,6 +46,11 @@ status Stash_PackAddr(cls typeOf, i32 slIdx, void **ptr){
        .idx = slIdx,
        .offset = (quad)u,
     };
+    
+    Out("^c.Packed Coord: ", NULL);
+    StashCoords_Print(OutStream, &coord, MORE);
+    Out("^0.\n", NULL);
+
     memcpy(ptr, &coord, sizeof(void *));
     return SUCCESS;
 }
@@ -65,11 +74,15 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                         break;
                     }
                     if(pack){
-                        StashItem *item = (StashItem *)Table_Get(tbl, 
+                        MemIdent *item = (MemIdent *)Table_Get(tbl, 
                             Util_Wrapped(m, (util)ptr));
-                        if(item != NULL){
-                            Stash_PackAddr(item->coord.typeOf,
-                                item->coord.idx, (void **)dptr);
+
+                        void *ar[] = {item, NULL};
+                        Out("^y.Item @^0\n", ar);
+
+                        if(item != NULL && item->content != NULL){
+                            Stash_PackAddr(item->rtype.of,
+                                item->slIdx, (void **)item->content);
 
                             StashCoord *coord = (StashCoord *)dptr;
                         }else{
@@ -108,11 +121,11 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                     if(att->of > _TYPE_RANGE_TYPE_START){
                         void **aa = ((void *)mid->content)+att->range;
                         if(pack){
-                            StashItem *item = (StashItem *)Table_Get(tbl, 
+                            MemIdent *item = (MemIdent *)Table_Get(tbl, 
                                 Util_Wrapped(m, (util)*aa));
-                            if(item != NULL){
-                                Stash_PackAddr(item->coord.typeOf,
-                                    item->coord.idx, (void **)aa);
+                            if(item != NULL && item->content != NULL){
+                                Stash_PackAddr(item->rtype.of,
+                                    item->slIdx, (void **)aa);
                                 StashCoord *coord = (StashCoord *)aa;
                             }else{
                                 args[0] = Util_Wrapped(m, (util)aa);
@@ -153,15 +166,8 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
 
     i32 count = 0;
     Span *pages = Span_Make(m);
-    MemIter mit;
-    MemIter_Init(m, &mit, persist);
-    while((Iter_Next(&persist->it) & END) == 0){
-        Abstract *a = (Abstract *)Iter_Get(&persist->it);
-        Table_Set(tbl, Util_Wrapped(m, (util)a), 
-            StashItem_Make(m, persist->it.idx, (void *)a, a->type.of));
-        Span_Add(pages, a);
-    }
 
+    MemIter mit;
     MemIter_Init(m, &mit, persist);
     i16 checksum = Stash_PackMemCh(m, &mit, tbl, NULL);
 

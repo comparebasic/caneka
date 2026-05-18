@@ -26,10 +26,14 @@ static void setMemIdent(MemIter *mit, MemIdent *d){
             d->rtype.range = imap->size;
             d->content = a;
         }
+
+        util u = (util)d->content;
+        d->offset = u &= MEM_STASH_MASK;
     }else{
         d->rtype.of = ZERO;
         d->rtype.range = 0;
         d->content = NULL;
+        d->offset = 0;
     }
 }
 
@@ -99,24 +103,24 @@ status MemIter_Next(MemIter *mit){
     Debug_Push(m, mit);
 
     if(mit->current.ptr == NULL && (mit->type.state & (MORE|PROCESSING)) == MORE){
-        MemPage *pg = NULL;
+        mit->page = NULL;
         if(mit->type.state & MEM_ITER_STREAM){
             printf("Getting page %d\n", mit->current.slIdx);
             fflush(stdout);
-            pg = (MemPage *)mit->input.arr[mit->current.slIdx];
+            mit->page = (MemPage *)mit->input.arr[mit->current.slIdx];
         }else{
-            pg = (MemPage *)Span_Get(mit->input.target->it.p, mit->current.slIdx);
+            mit->page = (MemPage *)Span_Get(mit->input.target->it.p, mit->current.slIdx);
         }
-        if(pg == NULL){
+        if(mit->page == NULL){
             Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error: unable to find page", args);
             mit->type.state |= ERROR;
 
             Return(m, mit->type.state);
         }
-        mit->current.ptr = ((void *)pg)+sizeof(MemPage)+((util)pg->remaining);
+        mit->current.ptr = ((void *)mit->page)+sizeof(MemPage)+((util)mit->page->remaining);
         mit->current.idx = 0;
-        mit->end = ((void *)pg) + PAGE_SIZE-1;
+        mit->end = ((void *)mit->page) + PAGE_SIZE-1;
         mit->type.state |= PROCESSING;
         setLastFlag(mit);
         setMemIdent(mit, &mit->current);
