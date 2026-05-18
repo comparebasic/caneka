@@ -95,5 +95,6 @@ status Stash_Tests(MemCh *m){
     args[1] = s;
     r |= Test(Equals(s, expected), "Str has equivilent value, expected &, have &", args);
 
+    r |= ERROR;
     Return(m, r);
 }

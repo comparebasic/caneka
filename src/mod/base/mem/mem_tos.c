@@ -58,7 +58,7 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
     args[2] = MemCount_Wrapped(m,  MemCh_Used(target, 0));
     args[3] = NULL;
 
-    if(flags & MORE){
+    if(flags & DEBUG){
         Fmt(bf, "MemCh<@ $pages ^D.$^d.used [", args);
 
         Iter it;

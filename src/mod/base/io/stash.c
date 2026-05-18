@@ -81,6 +81,10 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                         }
                     }else{
                         StashCoord *coord = (StashCoord *)dptr;
+
+                        void *ar[] = {coord, NULL};
+                        Out("^p.About to Unpack Coord @^0\n", ar);
+
                         Stash_UnpackAddr(m, coord, mit->input.arr);
                     }
                     checksum++;
@@ -187,6 +191,9 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
 MemCh *Stash_FromStream(Buff *bf){
     Debug_Push(bf->m, bf);
 
+    printf("alo?\n");
+    fflush(stdout);
+
     status r = READY;
 
     void *args[5];
@@ -241,8 +248,14 @@ MemCh *Stash_FromStream(Buff *bf){
             r |= ERROR;
         }
 
+        printf("adding page idx:%d of total:%d\n", count, hdr.pages);
+        fflush(stdout);
+
         count++;
     }
+
+    printf("alo? II\n");
+    fflush(stdout);
 
     i16 checksum = 0;
 
@@ -252,6 +265,9 @@ MemCh *Stash_FromStream(Buff *bf){
         MemIter_InitArr(bf->m, &mit, pages, hdr.pages-1);
         checksum = Stash_PackMemCh(m, &mit, NULL, &persist);
     }
+
+    printf("checksum %d\n", checksum);
+    fflush(stdout);
 
     if(checksum != hdr.checksum){
         args[0] = I16_Wrapped(bf->m, hdr.checksum);
@@ -268,6 +284,9 @@ MemCh *Stash_FromStream(Buff *bf){
     if((r & (SUCCESS|ERROR)) == SUCCESS){
         Return(m, persist);
     }
+
+    void *ar[] = {persist, NULL};
+    Out("^p.Returning @^0\n", ar);
     
     Return(m, persist);
 }

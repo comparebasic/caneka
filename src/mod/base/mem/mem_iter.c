@@ -101,6 +101,8 @@ status MemIter_Next(MemIter *mit){
     if(mit->current.ptr == NULL && (mit->type.state & (MORE|PROCESSING)) == MORE){
         MemPage *pg = NULL;
         if(mit->type.state & MEM_ITER_STREAM){
+            printf("Getting page %d\n", mit->current.slIdx);
+            fflush(stdout);
             pg = (MemPage *)mit->input.arr[mit->current.slIdx];
         }else{
             pg = (MemPage *)Span_Get(mit->input.target->it.p, mit->current.slIdx);
@@ -201,13 +203,13 @@ void MemIter_Init(MemCh *m, MemIter *mit, MemCh *target){
 void MemIter_InitArr(MemCh *m, MemIter *mit, void **arr, i32 maxSlIdx){
     memset(mit, 0, sizeof(MemIter));
     mit->type.of = TYPE_MEM_ITER;
+    mit->type.state = MORE|MEM_ITER_STREAM;
     mit->m = m;
     mit->input.arr = arr;
     mit->current.slIdx = 0;
     mit->current.type.of = TYPE_MEM_IDENT;
     mit->current.idx = -1;
     mit->maxSlIdx = maxSlIdx;
-    mit->type.state = MORE|MEM_ITER_STREAM;
     mit->current.ptr = NULL;
     mit->end = NULL;
 }
