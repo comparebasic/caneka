@@ -216,7 +216,11 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
 
         Buff_AddBytes(bf, (byte *)"]>", 2);
     }else{
-        return  Fmt(bf, "MemCh<used:$>", args);
+        args[0] = Type_StateVec(m, target->type.of, target->type.state);
+        args[1] = MemCount_Wrapped(m,  MemCh_Used(target, 0));
+        args[2] = NULL;
+
+        return  Fmt(bf, "MemCh<@ used:$>", args);
     }
     return SUCCESS;
 }
@@ -303,7 +307,7 @@ status MemIdent_Print(Buff *bf, void *a, cls type, word flags){
         NULL
     };
 
-    Fmt(bf, "MemIdent<$/$ $/$>", args);
+    Fmt(bf, "MemIdent<$/size$ idx$/sl$>", args);
 
     return ZERO;
 }

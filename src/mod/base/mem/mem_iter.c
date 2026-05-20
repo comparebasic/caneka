@@ -6,7 +6,13 @@ static void setMemIdent(MemIter *mit, MemIdent *d){
     d->type.of = TYPE_MEM_IDENT;
     d->ptr = a;
 
-    if(a != NULL){
+    if(mit->type.state & MORE){
+        /* mem page record */
+        d->rtype.of = TYPE_MEMSLAB;
+        d->rtype.range = MEM_SLAB_SIZE;
+        d->ptr = d->content = mit->page;
+        d->offset = 0;
+    }else if(a != NULL){
         d->rtype.of = a->type.of;
         if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
             byte *b = (byte *)a;
@@ -40,6 +46,10 @@ static void setMemIdent(MemIter *mit, MemIdent *d){
 static void setLastFlag(MemIter *mit){
     MemIdent *mi = MemIter_Get(mit);
 
+    if(mi == NULL || mi->rtype.of == TYPE_MEMSLAB){
+        return;
+    }
+
     Abstract *a = mi->ptr;
 
     i64 sz = 0;
@@ -49,9 +59,9 @@ static void setLastFlag(MemIter *mit){
         }else{
             IfcMap *imap = Lookup_Get(IfcLookup, a->type.of);
             if(imap == NULL){
-                void *ar[] = {Type_ToStr(ErrStream->m, a->type.of), NULL};
+                void *ar[] = {Type_ToStr(ErrStream->m, a->type.of), mi, NULL};
                 Error(mit->m, FUNCNAME, FILENAME, LINENUMBER,
-                    "IfcMap not found for type @", ar);
+                    "IfcMap not found for type @, MemIdent @", ar);
                 return;
             }
             sz = imap->size;
@@ -75,21 +85,23 @@ Table *MemIter_GetTable(MemCh *m, MemCh *target){
     MemIter_Init(m, &mit, target);
     Table *tbl = Table_Make(m);
     i16 g = 0;
-    i32 slIdx = 0;
+    i32 slIdx = -1;
     i32 idx = 0;
     while((MemIter_Next(&mit) & END) == 0){
         Guard_Incr(m, &g, MEM_ITER_MAX, FUNCNAME, FILENAME, LINENUMBER);
+        MemIdent *mid = MemCh_AllocOf(m, sizeof(MemIdent), TYPE_MEM_IDENT);
         if(mit.type.state & MORE){
             slIdx++;
+            idx = 0;
         }else{
-            if((mit.type.state & MORE) == 0){
-                MemIdent *mid = MemCh_AllocOf(m, sizeof(MemIdent), TYPE_MEM_IDENT);
-                setMemIdent(&mit, mid);
-                mid->idx = idx++;
-                Single *key = Util_Wrapped(m, (util)mid->content);
-                Table_Set(tbl, key, mid);
-            }
+            idx++;
         }
+
+        setMemIdent(&mit, mid);
+        mid->idx = idx;
+        mid->slIdx = slIdx;
+        Single *key = Util_Wrapped(m, (util)mid->content);
+        Table_Set(tbl, key, mid);
     }
 
     return tbl;
@@ -105,8 +117,6 @@ status MemIter_Next(MemIter *mit){
     if(mit->current.ptr == NULL && (mit->type.state & (MORE|PROCESSING)) == MORE){
         mit->page = NULL;
         if(mit->type.state & MEM_ITER_STREAM){
-            printf("Getting page %d\n", mit->current.slIdx);
-            fflush(stdout);
             mit->page = (MemPage *)mit->input.arr[mit->current.slIdx];
         }else{
             mit->page = (MemPage *)Span_Get(mit->input.target->it.p, mit->current.slIdx);
@@ -118,12 +128,12 @@ status MemIter_Next(MemIter *mit){
 
             Return(m, mit->type.state);
         }
-        mit->current.ptr = ((void *)mit->page)+sizeof(MemPage)+((util)mit->page->remaining);
         mit->current.idx = 0;
         mit->end = ((void *)mit->page) + PAGE_SIZE-1;
         mit->type.state |= PROCESSING;
         setLastFlag(mit);
         setMemIdent(mit, &mit->current);
+        mit->current.ptr = ((void *)mit->page)+sizeof(MemPage)+((util)mit->page->remaining);
     }else if((mit->type.state & (MORE|PROCESSING)) == (MORE|PROCESSING)){
         mit->type.state &= ~MORE;
     }else{

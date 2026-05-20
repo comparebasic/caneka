@@ -20,10 +20,6 @@ struct lookup *BlankerLookup = NULL;
 struct lookup *RepointerLookup = NULL;
 
 cls Stash_UnpackAddr(MemCh *m, StashCoord *coord, void **arr){
-    Out("^c.Unpack Coord: ", NULL);
-    StashCoords_Print(OutStream, coord, MORE);
-    Out("^0.\n", NULL);
-
     cls typeOf = coord->typeOf;
     MemPage *pg = (MemPage *)arr[coord->idx];
     if(pg == NULL){
@@ -46,10 +42,6 @@ status Stash_PackAddr(cls typeOf, i32 slIdx, void **ptr){
        .idx = slIdx,
        .offset = (quad)u,
     };
-    
-    Out("^c.Packed Coord: ", NULL);
-    StashCoords_Print(OutStream, &coord, MORE);
-    Out("^0.\n", NULL);
 
     memcpy(ptr, &coord, sizeof(void *));
     return SUCCESS;
@@ -77,9 +69,6 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                         MemIdent *item = (MemIdent *)Table_Get(tbl, 
                             Util_Wrapped(m, (util)ptr));
 
-                        void *ar[] = {item, NULL};
-                        Out("^y.Item @^0\n", ar);
-
                         if(item != NULL && item->content != NULL){
                             Stash_PackAddr(item->rtype.of,
                                 item->slIdx, (void **)item->content);
@@ -87,23 +76,21 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                             StashCoord *coord = (StashCoord *)dptr;
                         }else{
                             args[0] = Util_Wrapped(m, (util)ptr);
-                            args[1] = NULL;
+                            args[1] = item;
+                            args[2] = NULL;
                             Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                                "PTR ARRAY Unable to find address @ in table,"
+                                "Packing PTR ARRAY Unable to find address @ or content in table, have @, "
                                 " may be external to this MemCh", args);
                         }
                     }else{
                         StashCoord *coord = (StashCoord *)dptr;
-
-                        void *ar[] = {coord, NULL};
-                        Out("^p.About to Unpack Coord @^0\n", ar);
-
                         Stash_UnpackAddr(m, coord, mit->input.arr);
                     }
                     checksum++;
                     dptr++;
                 }
-            }else if(mid->rtype.of > _TYPE_ABSTRACT_BEGIN){
+            }else if(mid->rtype.of != TYPE_MEMSLAB &&
+                    mid->rtype.of > _TYPE_ABSTRACT_BEGIN){
                 Map *map = (Map *)Lookup_Get(MapsLookup, mid->rtype.of);
                 if(map == NULL){
                     args[0] = Type_ToStr(m, mid->rtype.of);
@@ -111,10 +98,6 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                     Error(m, FUNCNAME, FILENAME, LINENUMBER,
                         "Map not found for type $, needed for mem persist", args);
                     Return(m, ERROR);
-                }
-                if(mid->rtype.of == TYPE_ITER){
-                    Iter *itp = (Iter *)mid->content;
-                    Iter_Init(itp, itp->p);
                 }
                 for(i16 i = 1; i <= map->type.range; i++){
                     RangeType *att = map->atts+i;
@@ -160,35 +143,42 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
     SourceFunc func = NULL;
     void *a = NULL;
     void *args[5];
-    Iter it;
 
     Table *tbl = MemIter_GetTable(m, persist);
 
+    Iter it;
+    Iter pagesIt;
+    Iter_Init(&pagesIt, Span_Make(m));
+    Iter_Init(&it, persist->it.p);
+    while((Iter_Next(&it) & END) == 0){
+        Iter_Add(&pagesIt, Iter_Get(&it));
+    }
+
     i32 count = 0;
-    Span *pages = Span_Make(m);
 
     MemIter mit;
     MemIter_Init(m, &mit, persist);
     i16 checksum = Stash_PackMemCh(m, &mit, tbl, NULL);
 
     StashHeader hdr = {
-        .pages = (i16)pages->nvalues,
+        .pages = (i16)pagesIt.p->nvalues,
         .checksum = checksum
     };
     Buff_AddBytes(bf, (byte *)&hdr, sizeof(StashHeader));
     Buff_Flush(bf);
 
-    Iter_Init(&it, pages);
-    while((Iter_Next(&it) & END) == 0){
-        MemPage *pg = (MemPage *)Iter_Get(&it);
+    Iter_Reset(&pagesIt);
+    while((Iter_Next(&pagesIt) & END) == 0){
+        MemPage *pg = (MemPage *)Iter_Get(&pagesIt);
         if((Buff_AddBytes(bf, (byte *)pg, PAGE_SIZE) & SUCCESS) == 0){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error writing page to stream for Stash", NULL);
             r |= ERROR;
             break;
         }
+
         Buff_Flush(bf);
-        r |= MemBook_FreePage(m, (MemPage *)Iter_Get(&it));
+        r |= MemBook_FreePage(persist, (MemPage *)Iter_Get(&pagesIt));
     }
 
     Return(m, r);
@@ -196,9 +186,6 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
 
 MemCh *Stash_FromStream(Buff *bf){
     Debug_Push(bf->m, bf);
-
-    printf("alo?\n");
-    fflush(stdout);
 
     status r = READY;
 
@@ -254,14 +241,8 @@ MemCh *Stash_FromStream(Buff *bf){
             r |= ERROR;
         }
 
-        printf("adding page idx:%d of total:%d\n", count, hdr.pages);
-        fflush(stdout);
-
         count++;
     }
-
-    printf("alo? II\n");
-    fflush(stdout);
 
     i16 checksum = 0;
 
@@ -271,9 +252,6 @@ MemCh *Stash_FromStream(Buff *bf){
         MemIter_InitArr(bf->m, &mit, pages, hdr.pages-1);
         checksum = Stash_PackMemCh(m, &mit, NULL, &persist);
     }
-
-    printf("checksum %d\n", checksum);
-    fflush(stdout);
 
     if(checksum != hdr.checksum){
         args[0] = I16_Wrapped(bf->m, hdr.checksum);
@@ -291,9 +269,6 @@ MemCh *Stash_FromStream(Buff *bf){
         Return(m, persist);
     }
 
-    void *ar[] = {persist, NULL};
-    Out("^p.Returning @^0\n", ar);
-    
     Return(m, persist);
 }
 
