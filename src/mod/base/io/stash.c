@@ -58,11 +58,11 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
 
         if((mit->type.state & MORE) == 0){
 
-            void *ar[] = {mid, NULL};
+            void *ar[] = {mid, Util_Wrapped(m, (util)(mit->current.ptr - (void *)mit->page)), NULL};
             if(pack){
-                Out("^c.Mid MORE to Pack @^0\n", ar);
+                Out("^c.Mid to Pack \\@$ @^0\n", ar);
             }else{
-                Out("^c.Mid MORE to Unpack @^0\n", ar);
+                Out("^c.Mid to Unpack \\@$ @^0\n", ar);
             }
 
             if(mid->rtype.of == TYPE_POINTER_ARRAY){
@@ -137,6 +137,10 @@ i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
                 if(!pack && mid->rtype.of == TYPE_MEMCTX){
                     *persist = (MemCh *)mid->content;
                 }
+            }else{
+                Str *s = Str_Ref(m, (byte *)mid->ptr, sizeof(Type), sizeof(Type), DEBUG);
+                void *ar[] = {mid, s, NULL};
+                Out("^c Not changing @/@^0\n", ar);
             }
         }
     }
@@ -160,7 +164,17 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
     Iter_Init(&pagesIt, Span_Make(m));
     Iter_Init(&it, persist->it.p);
     while((Iter_Next(&it) & END) == 0){
-        Iter_Add(&pagesIt, Iter_Get(&it));
+        MemPage *pg = (MemPage *)Iter_Get(&it);
+        Str *s = Str_Ref(m, (byte *)pg, MEM_SLAB_SIZE, MEM_SLAB_SIZE, DEBUG);
+        void *ar[] = {
+            pg,
+            s,
+            NULL
+        };
+        printf("%p", pg);
+        fflush(stdout);
+        Out("^p.Adding Page @ - @^0\n", ar);
+        Iter_Add(&pagesIt, pg);
     }
 
     i32 count = 0;
@@ -180,9 +194,12 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
     while((Iter_Next(&pagesIt) & END) == 0){
         MemPage *pg = (MemPage *)Iter_Get(&pagesIt);
 
+        printf("%p", pg);
+        fflush(stdout);
         Str *s = Str_Ref(m, (byte *)pg, PAGE_SIZE, PAGE_SIZE, DEBUG);
-        void *ar[] = {s, NULL};
-        Out("^c.Persisting Page @^0\n", ar);
+        void *ar[] = {I32_Wrapped(m, pagesIt.idx), s, NULL};
+        Out("^c.Persisting Page $ @^0\n", ar);
+
 
         if((Buff_AddBytes(bf, (byte *)pg, PAGE_SIZE) & SUCCESS) == 0){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
