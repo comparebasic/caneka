@@ -134,23 +134,13 @@ status MemIter_Next(MemIter *mit){
         setLastFlag(mit);
         setMemIdent(mit, &mit->current);
         mit->current.ptr = ((void *)mit->page)+sizeof(MemPage)+((util)mit->page->remaining);
-
-        void *ar[] = {I16_Wrapped(m, mit->page->remaining), NULL};
-        Out("^yStart Page: remaining$^0\n", ar);
-
     }else if((mit->type.state & (MORE|PROCESSING)) == (MORE|PROCESSING)){
         mit->type.state &= ~MORE;
-
-        printf("More\n");
-        fflush(stdout);
     }else{
 
         i64 sz = 0;
         Abstract *a = (Abstract *)mit->current.ptr;
         cls typeOf = a->type.of;
-
-        void *ar[] = {Type_ToStr(m, typeOf), NULL};
-        Out("^y.Item @^0\n", ar);
 
         if(typeOf > _TYPE_RANGE_TYPE_START && typeOf < _TYPE_RANGE_TYPE_END){
             sz = (i64)(((RangeType *)a)->range)+sizeof(RangeType);

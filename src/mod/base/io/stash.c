@@ -179,6 +179,11 @@ status Stash_FlushFree(Buff *bf, MemCh *persist){
     Iter_Reset(&pagesIt);
     while((Iter_Next(&pagesIt) & END) == 0){
         MemPage *pg = (MemPage *)Iter_Get(&pagesIt);
+
+        Str *s = Str_Ref(m, (byte *)pg, PAGE_SIZE, PAGE_SIZE, DEBUG);
+        void *ar[] = {s, NULL};
+        Out("^c.Persisting Page @^0\n", ar);
+
         if((Buff_AddBytes(bf, (byte *)pg, PAGE_SIZE) & SUCCESS) == 0){
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Error writing page to stream for Stash", NULL);

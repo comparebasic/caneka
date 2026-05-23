@@ -65,6 +65,12 @@ status MemCh_Print(Buff *bf, void *a, cls type, word flags){
         Iter_Init(&it, target->it.p);
         while((Iter_Next(&it) & END) == 0){
             MemPage *sl = (MemPage *)Iter_Get(&it);
+
+            Str *s = Str_Ref(bf->m,
+                (byte *)sl, sizeof(MemPage), sizeof(MemPage),DEBUG);
+            void *ar[] = {s, NULL};
+            Fmt(bf, "MemPage:Bytes(@)", ar);
+
             args[0] = I32_Wrapped(bf->m, it.idx);
             args[1] = sl;
             args[2] = NULL;

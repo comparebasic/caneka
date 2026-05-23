@@ -54,6 +54,9 @@ status Stash_Tests(MemCh *m){
     Buff *bf = Buff_Make(m, ZERO);
     File_Open(bf, path, O_WRONLY|O_CREAT|O_TRUNC);
 
+    void *ar[] = {pst, NULL};
+    Out("^p.Persisting &^0\n", ar);
+
     pst->type.state |= DEBUG;
     status re = Stash_FlushFree(bf, pst);
 
