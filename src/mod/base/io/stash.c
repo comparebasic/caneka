@@ -48,14 +48,23 @@ status Stash_PackAddr(cls typeOf, i32 slIdx, void **ptr){
 }
 
 i16 Stash_PackMemCh(MemCh *m, MemIter *mit, Table *tbl, MemCh **persist){
-    Debug_Push(m, persist);
+    Debug_Push(m, mit);
     boolean pack = (mit->type.state & MEM_ITER_STREAM) == 0;
     void *args[5];
     i16 checksum = 0;
     i32 count = 0;
     while((MemIter_Next(mit) & END) == 0){
         MemIdent *mid = (MemIdent *)MemIter_Get(mit);
+
         if((mit->type.state & MORE) == 0){
+
+            void *ar[] = {mid, NULL};
+            if(pack){
+                Out("^c.Mid MORE to Pack @^0\n", ar);
+            }else{
+                Out("^c.Mid MORE to Unpack @^0\n", ar);
+            }
+
             if(mid->rtype.of == TYPE_POINTER_ARRAY){
                 BytesLit *bt = (BytesLit*)mid->ptr;
                 i16 total = bt->type.range / sizeof(void *);
@@ -233,6 +242,11 @@ MemCh *Stash_FromStream(Buff *bf){
         s.length = 0;
         s.bytes = (byte *)pages[count];
         r |= (Buff_GetStr(bf, &s) & SUCCESS);
+
+        s.type.state |= DEBUG;
+        void *ar[] = {&s, NULL};
+        Out("^c.Page @^0\n", ar);
+
         if((r & SUCCESS) == 0){
             args[0] = I16_Wrapped(ErrStream->m, s.length);
             args[1] = NULL;
