@@ -54,9 +54,6 @@ status Stash_Tests(MemCh *m){
     Buff *bf = Buff_Make(m, ZERO);
     File_Open(bf, path, O_WRONLY|O_CREAT|O_TRUNC);
 
-    void *ar[] = {pst, NULL};
-    Out("^p.Persisting &^0\n", ar);
-
     pst->type.state |= DEBUG;
     status re = Stash_FlushFree(bf, pst);
 
@@ -88,12 +85,14 @@ status Stash_Tests(MemCh *m){
     s = Span_Get((Span *)loaded->owner, 0);
     Str *expected = Str_CstrRef(m, "One");
     r |= Test(pst != loaded, "loaded is not the original", NULL);
-    r |= Test(s != one, "Str is not the original", NULL);
+    args[0] = Util_Wrapped(m, (util)expected);
+    args[1] = Util_Wrapped(m, (util)s);
+    args[2] = NULL;
+    r |= Test(s != one, "Str is not the original @, have @", args);
 
     args[0] = expected;
     args[1] = s;
     r |= Test(Equals(s, expected), "Str has equivilent value, expected &, have &", args);
 
-    r |= ERROR;
     Return(m, r);
 }

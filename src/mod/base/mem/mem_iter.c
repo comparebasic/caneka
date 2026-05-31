@@ -14,6 +14,7 @@ static void setMemIdent(MemIter *mit, MemIdent *d){
         d->offset = 0;
     }else if(a != NULL){
         d->rtype.of = a->type.of;
+
         if(a->type.of > _TYPE_RANGE_TYPE_START && a->type.of < _TYPE_RANGE_TYPE_END){
             byte *b = (byte *)a;
             d->rtype.range = a->type.state;
@@ -133,9 +134,11 @@ status MemIter_Next(MemIter *mit){
         mit->type.state |= PROCESSING;
         setLastFlag(mit);
         setMemIdent(mit, &mit->current);
-        mit->current.ptr = ((void *)mit->page)+sizeof(MemPage)+((util)mit->page->remaining);
     }else if((mit->type.state & (MORE|PROCESSING)) == (MORE|PROCESSING)){
         mit->type.state &= ~MORE;
+        mit->current.ptr = ((void *)mit->page)+sizeof(MemPage)+((util)mit->page->remaining);
+        mit->current.idx = 1;
+        setMemIdent(mit, &mit->current);
     }else{
 
         i64 sz = 0;
