@@ -55,12 +55,13 @@ status HttpQuery_Tests(MemCh *m){
     IoCtx *ctx = IoCtx_Make(m);
     HttpReq *req = (HttpReq *)HttpReq_Mk(ctx);
 
-    Str *content = S(m, 
+    Buff_SetTemp(req->in);
+    Str *content = S(req->in->m, 
         "{\"email\": \"fancy.pantsy@example.com\", \"first-name\": \"Fantsy\"}");
-
-    args[0] = Str_FromI64(m, content->length);
+    args[0] = Str_FromI64(req->in->m, content->length);
     args[1] = content;
     args[2] = NULL;
+
     Fmt(req->in, 
         "POST /forms/signup?action=add HTTP/1.1\r\n"
         "User-Agent: Firefudge/Aluminum\r\n"
@@ -76,6 +77,10 @@ status HttpQuery_Tests(MemCh *m){
 
     Node *config = Inst_Make(m, TYPE_NODE);
     Buff *bf = Buff_Make(m, ZERO);
+
+    void *ar[] = {req->in, req->in->v, NULL};
+    Out("^p.In @ @^0\n", ar);
+
     HttpReq_ParseBody(req);
 
     args[0] = K(m, "POST");
