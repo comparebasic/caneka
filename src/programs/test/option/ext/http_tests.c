@@ -55,7 +55,6 @@ status HttpQuery_Tests(MemCh *m){
     IoCtx *ctx = IoCtx_Make(m);
     HttpReq *req = (HttpReq *)HttpReq_Mk(ctx);
 
-    Buff_SetTemp(req->in);
     Str *content = S(req->in->m, 
         "{\"email\": \"fancy.pantsy@example.com\", \"first-name\": \"Fantsy\"}");
     args[0] = Str_FromI64(req->in->m, content->length);
@@ -77,9 +76,6 @@ status HttpQuery_Tests(MemCh *m){
 
     Node *config = Inst_Make(m, TYPE_NODE);
     Buff *bf = Buff_Make(m, ZERO);
-
-    void *ar[] = {req->in, req->in->v, NULL};
-    Out("^p.In @ @^0\n", ar);
 
     HttpReq_ParseBody(req);
 
@@ -112,6 +108,8 @@ status HttpQuery_Tests(MemCh *m){
     args[2] = NULL;
     r |= Test(Equals(args[0],args[1]), 
         "HttpReq body is expected @, have &", args); 
+
+    MemCh_Free(req->m);
 
     Return(m, r);
 }

@@ -160,36 +160,6 @@ static TestSet ExtTests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Queue Tests",
-        Queue_Tests,
-        "Queue tests for file descriptors.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Queue Add Remove Tests",
-        QueueAddRemove_Tests,
-        "Queue tests for adding and removing items.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Queue Iter Tests",
-        QueueIter_Tests,
-        "Queue tests for iterating around a queue with additions and removals.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Queue Criteria Tests",
-        QueueCriteria_Tests,
-        "Queue tests for multi-critiria items (time/file descriptor).",
-        SKIP_TEST,
-    },
-    {
-        "Queue Scale Tests",
-        QueueScale_Tests,
-        "Queue testing adding and removing Queue items over time.",
-        SKIP_TEST,
-    },
-    {
         "Cash Tests",
         Cash_Tests,
         "Cash templater testing.",
@@ -221,8 +191,36 @@ static TestSet ExtTests[] = {
         FEATURE_COMPLETE,
     },
 #endif
-
-
+    {
+        "Queue Tests",
+        Queue_Tests,
+        "Queue tests for file descriptors.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Queue Add Remove Tests",
+        QueueAddRemove_Tests,
+        "Queue tests for adding and removing items.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Queue Iter Tests",
+        QueueIter_Tests,
+        "Queue tests for iterating around a queue with additions and removals.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Queue Criteria Tests",
+        QueueCriteria_Tests,
+        "Queue tests for multi-critiria items (time/file descriptor).",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Queue Scale Tests",
+        QueueScale_Tests,
+        "Queue testing adding and removing Queue items over time.",
+        FEATURE_COMPLETE,
+    },
     {
         NULL,
         NULL,

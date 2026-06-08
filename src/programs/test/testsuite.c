@@ -76,9 +76,6 @@ status Test_Runner(MemCh *m, TestSuite *suite){
     m->level++;
     TestSet *set = suite->set;
     char *name = NULL;
-    i32 pass = 0;
-    i32 fail = 0;
-
     void *args[8];
 
     word baseStackLevel = m->level;
@@ -112,6 +109,7 @@ status Test_Runner(MemCh *m, TestSuite *suite){
 
         if(set->status & SKIP_TEST){
             Out("^y.=== Skipping $  ^0.\n", args);
+            suite->skip++;
             set++;
             continue;
         }
@@ -177,13 +175,14 @@ status Test_Runner(MemCh *m, TestSuite *suite){
     args[0] = suite->name,
     args[1] = I32_Wrapped(m, suite->pass),
     args[2] = I32_Wrapped(m, suite->fail),
-    args[3] = NULL;
+    args[3] = I32_Wrapped(m, suite->skip),
+    args[4] = NULL;
     if(!suite->fail){
         Out("^g", NULL);
     }else{
         Out("^r", NULL);
     }
-    Out("Suite $ pass($) fail($)^0\n", args);
+    Out("Suite $ pass($) fail($) skip($)^0\n", args);
 
     m->level--;
     MemCh_FreeTemp(m);

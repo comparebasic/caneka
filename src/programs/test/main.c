@@ -86,6 +86,7 @@ i32 main(int argc, char **argv){
 
     i32 pass = 0;
     i32 fail = 0;
+    i32 skip = 0;
     TestSuite *suite = NULL;
 
 #ifdef CNKOPT_BASE
@@ -93,6 +94,7 @@ i32 main(int argc, char **argv){
     r |= Test_Runner(m, suite);
     pass += suite->pass;
     fail += suite->fail;
+    skip += suite->skip;
 #endif
 
 #ifdef CNKOPT_EXT
@@ -100,6 +102,7 @@ i32 main(int argc, char **argv){
     r |= Test_Runner(m, suite);
     pass += suite->pass;
     fail += suite->fail;
+    skip += suite->skip;
 #endif
 
 #ifdef CNKOPT_CRYPTO
@@ -107,6 +110,7 @@ i32 main(int argc, char **argv){
     r |= Test_Runner(m, suite);
     pass += suite->pass;
     fail += suite->fail;
+    skip += suite->skip;
 #endif
 
 #ifdef CNKOPT_INTER
@@ -114,17 +118,19 @@ i32 main(int argc, char **argv){
     r |= Test_Runner(m, suite);
     pass += suite->pass;
     fail += suite->fail;
+    skip += suite->skip;
 #endif
 
     args[0] = I32_Wrapped(m, pass),
     args[1] = I32_Wrapped(m, fail),
-    args[2] = NULL;
+    args[2] = I32_Wrapped(m, skip),
+    args[3] = NULL;
     if(!fail){
         Out("^g", NULL);
     }else{
         Out("^r", NULL);
     }
-    Out("\nAll Suites - pass($) fail($)^0\n", args);
+    Out("\nAll Suites - pass($) fail($) skip($)^0\n", args);
 
     if(CliArgs_Get(cli, dist) != NULL){
         File_Close(bf);

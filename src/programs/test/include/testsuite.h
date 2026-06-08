@@ -37,6 +37,7 @@ typedef struct test_suite {
     Str *name;
     i32 pass;
     i32 fail;
+    i32 skip;
     TestSet *set;
 } TestSuite;
 
