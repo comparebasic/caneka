@@ -69,6 +69,7 @@ status FmtMem_Tests(MemCh *m){
     Span *p = Span_Make(mm);
     Span_Add(p, S(mm, "Halo?"));
 
+    Dir_CheckCreate(m, K(m, "dist/test"));
     File_Open(bf, S(m, "dist/test/fmt-output.txt"), O_CREAT|O_TRUNC|O_WRONLY);  
     r |= Test((bf->type.state & ERROR) == 0, "Destination file opened", NULL);
 
