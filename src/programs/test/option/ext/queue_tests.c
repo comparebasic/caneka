@@ -299,18 +299,20 @@ status QueueCriteria_Tests(MemCh *m){
     i32 fdIdx = Queue_AddHandler(q, critFds);
 
     ApproxTime *current = (ApproxTime *)&crit->u;
+    current->type.of = TYPE_APPROXTIME;
     current->type.state = APPROXTIME_SEC;
     current->value = 0;
 
     Str *s = Str_FromCstr(m, "Two Days", ZERO);
     
-    ApproxTime compare = {.type = {TYPE_APPROXTIME, APPROXTIME_SEC}, .value =2};
+    ApproxTime compare = {.type = {TYPE_APPROXTIME, APPROXTIME_DAY}, .value =2};
     i32 idx = Queue_Add(q, s);
     Queue_SetCriteria(q, hIdx, idx, (util *)&compare);
 
     s = Str_FromCstr(m, "Three Seconds", ZERO);
-    compare.value = 3;
     idx = Queue_Add(q, s);
+    compare.type.state = APPROXTIME_SEC;
+    compare.value = 3;
     Queue_SetCriteria(q, hIdx, idx, (util *)&compare);
 
     s = Str_FromCstr(m, "Ten Minutes", ZERO);
@@ -322,7 +324,7 @@ status QueueCriteria_Tests(MemCh *m){
     status re = Queue_Next(q);
     args[0] = Type_StateVec(m, q->type.of, q->type.state);
     args[1] = NULL;
-    r |= Test(q->type.state & END, "No items will run at the presetn time, flags @ ", args);
+    r |= Test(q->type.state & END, "No items will run at the present time, flags @ ", args);
 
     current = (ApproxTime *)&crit->u;
     current->type.state = APPROXTIME_SEC;
@@ -343,10 +345,9 @@ status QueueCriteria_Tests(MemCh *m){
     };
 
     args[0] = I32_Wrapped(m, i);
-    args[1] = (ApproxTime *)crit->u;
+    args[1] = (ApproxTime *)&crit->u;
     args[2] = NULL;
-    r |= Test(i == 1, "Only one item was available to run, i is $, at $ seconds from start", args);
-
+    r |= Test(i == 1, "Only one item was available to run, i is $, at $ from start", args);
 
     current->type.state = APPROXTIME_MIN;
     current->value = 15;
@@ -366,9 +367,9 @@ status QueueCriteria_Tests(MemCh *m){
     };
 
     args[0] = I32_Wrapped(m, i);
-    args[1] = (ApproxTime *)crit->u;
+    args[1] = current;
     args[2] = NULL;
-    r |= Test(i == 2, "Only one item was available to run, i is $, at $ minutes from start", args);
+    r |= Test(i == 2, "Only one item was available to run, i is $, at @ from start", args);
 
 
     current->type.state = APPROXTIME_DAY;
@@ -390,9 +391,9 @@ status QueueCriteria_Tests(MemCh *m){
     };
 
     args[0] = I32_Wrapped(m, i);
-    args[1] = (ApproxTime *)crit->u;
+    args[1] = current;
     args[2] = NULL;
-    r |= Test(i == 3, "Only one item was available to run, i is $, at $ days from start", args);
+    r |= Test(i == 2, "Only one item was available to run, i is $, at $ days from start", args);
 
     Queue_Remove(q, 0);
 
@@ -426,7 +427,7 @@ status QueueCriteria_Tests(MemCh *m){
     };
 
     args[0] = I32_Wrapped(m, i);
-    args[1] = (ApproxTime *)crit->u;
+    args[1] = current;
     args[2] = NULL;
     r |= Test(i == 2, "PollFd set to Read: two item was available to run, i is $, at $ seconds from start", args);
 
@@ -447,7 +448,7 @@ status QueueCriteria_Tests(MemCh *m){
     };
 
     args[0] = I32_Wrapped(m, i);
-    args[1] = (ApproxTime *)crit->u;
+    args[1] = current;
     args[2] = NULL;
     r |= Test(i == 1, "No direction set on pollfd: Only one item was available to run, i is $, at $ seconds from start", args);
 
