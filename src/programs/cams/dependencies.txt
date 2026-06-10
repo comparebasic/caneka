@@ -1,0 +1,4 @@
+exec=main.c
+crypto@third/openssl
+ext
+base
