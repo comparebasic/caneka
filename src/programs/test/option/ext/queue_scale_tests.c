@@ -1,0 +1,233 @@
+#include <external.h>
+#include <caneka.h>
+#include <test_module.h>
+
+
+static status queueScaleTest(MemCh *m, i32 max){
+    status r = READY;
+    void *args[5];
+
+    Queue *q = Queue_Make(m);
+
+    QueueCrit *crit = QueueCrit_Make(m, QueueCrit_Time, ZERO);
+    crit->type.state |= QUEUE_CRIT_UTIL;
+    i32 hIdx = Queue_AddHandler(q, crit);
+
+    i32 patCount = 4;
+    i32 patIdx = 0;
+    util pattern[4] = { 3, 2, 1, 7};
+    util increase = 4;
+    i32 increaseCadance = max / 4;
+
+    ApproxTime now = {.type = {TYPE_APPROXTIME, APPROXTIME_MILLISEC}, 1};
+    i32 timeIncr = max /1;
+
+    for(i32 i = 0; i < max; i++){
+        ApproxTime at = {
+            .type = {TYPE_APPROXTIME, APPROXTIME_MILLISEC},
+            .value = pattern[patIdx] * increase
+        };
+        Queue_Add(q, I32_Wrapped(m, i)); 
+        Queue_SetCriteria(q, hIdx, i, (util *)&at);
+
+        if(++patIdx == patCount){
+            patIdx = 0;
+        }
+        if(i > 0 && i % increaseCadance == 0){
+            increase += increase;
+        }
+    }
+
+    i16 guard = 0;
+    while(q->it.p->nvalues > 0){
+        if(!Guard(&guard, 120, FUNCNAME, FILENAME, LINENUMBER)){
+            args[0] = I32_Wrapped(m, max);
+            args[1] = I16_Wrapped(m, guard);
+            args[2] = q;
+            args[3] = Util_Wrapped(m, crit->u);
+            args[4] = NULL;
+            r |= Test(FALSE, "All $ Queue items were handled, too many rounds,"
+                " round=$ q=@ \\@$", args);
+            return r;
+        }
+        ApproxTime *at = (ApproxTime *)&crit->u;
+        at->value += timeIncr;
+        while((Queue_Next(q) & END) == 0){
+            args[0] = Queue_Get(q);
+            args[1] = I32_Wrapped(m, q->it.idx);
+            args[2] = I32_Wrapped(m, crit->u);
+            args[3] = I16_Wrapped(m, guard);
+            args[4] = NULL;
+            if(args[0] == NULL){
+                r |= ERROR;
+                break;
+            }
+            Queue_Remove(q, q->it.idx);
+        }
+        struct timespec delay = {0,10};
+        struct timespec _remaining;
+        Time_Delay(&delay, &_remaining);
+    }
+
+    args[0] = I32_Wrapped(m, max);
+    args[1] = NULL;
+    r |= Test(q->it.p->nvalues == 0, "All $ Queue items were handled", args);
+    return r;
+}
+
+status QueueScale_Tests(MemCh *m){
+    Debug_Push(m, NULL);
+    status r = READY;
+    void *args[6];
+
+    Queue *q = Queue_Make(m);
+
+    QueueCrit *crit = QueueCrit_Make(m, QueueCrit_Time, ZERO);
+    crit->type.state |= QUEUE_CRIT_UTIL;
+    ApproxTime *current = (ApproxTime *)&crit->u;
+    i32 hIdx = Queue_AddHandler(q, crit);
+    crit->u = 10;
+    util time = 1;
+
+    ApproxTime oneSec = {.type = {TYPE_APPROXTIME, APPROXTIME_SEC}, .value=1};
+
+    Queue_Next(q);
+
+    i32 idx = 16;
+    Queue_Set(q, idx, S(m, "Not Cool..."));
+    Queue_SetCriteria(q, hIdx, idx, (util *)&oneSec);
+
+    idx = 24;
+    Queue_Set(q, idx, S(m, "Hidy Ho!"));
+    Queue_SetCriteria(q, hIdx, idx, (util *)&oneSec);
+
+    idx = 63;
+    Queue_Set(q, idx, S(m, "Livin on the Edge!"));
+    Queue_SetCriteria(q, hIdx, idx, (util *)&oneSec);
+
+    idx = 64;
+    Queue_Set(q, idx, S(m, "XjfoaiwuerZduio"));
+    Queue_SetCriteria(q, hIdx, idx, (util *)&oneSec);
+
+    idx = 65;
+    Queue_Set(q, idx, S(m, "SixyFivey"));
+    Queue_SetCriteria(q, hIdx, idx, (util *)&oneSec);
+
+    current->type.state = APPROXTIME_SEC;
+    current->value = 2;
+    Queue_Next(q);
+    idx = 16;
+
+    util u = 1;
+    util compare = ((u << 16) | (u << 24) | (u << 63));
+    args[0] = Str_Ref(m, (byte *)&compare, sizeof(util), sizeof(util), STRING_BINARY);
+    args[1] = I32_Wrapped(m, 16);
+    args[2] = I32_Wrapped(m, 24);
+    args[3] = I32_Wrapped(m, 63);
+    args[4] = Str_Ref(m, (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
+    args[5] = NULL;
+    r |= Test(q->go == compare,
+        "Expected q->go to be set to binary $ of @,@, and @, have $", args);
+
+    if(r & ERROR){
+        Return(m, r);
+    }
+
+    args[0] = Queue_Get(q);
+    args[1] = q;
+    args[2] = NULL;
+    r |= Test(Equals(args[0], S(m, "Not Cool...")),
+        "Expected value above first slab found, have @, in @", args);
+
+    compare = (u << idx);
+    args[0] = Str_Ref(m, (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
+    args[1] = I32_Wrapped(m, idx);
+    args[2] = NULL;
+    r |= Test((q->go & compare) != 0,
+        "Expected q->go to be set to binary $ of 1 << @", args);
+
+    Queue_Next(q);
+    idx = 24;
+    compare = (u << idx);
+
+    args[0] = Queue_Get(q);
+    args[1] = q;
+    args[2] = NULL;
+    r |= Test(Equals(args[0], S(m, "Hidy Ho!")),
+        "Expected value above first slab found, have @, in @", args);
+
+    args[0] = Str_Ref(m, (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
+    args[1] = I32_Wrapped(m, idx);
+    args[2] = NULL;
+    r |= Test((q->go & compare) != 0,
+        "Expected q->go to be set to binary $ of 1 << @", args);
+
+    Queue_Next(q);
+    idx = 63;
+    compare = (1 << idx);
+
+    args[0] = Queue_Get(q);
+    args[1] = q;
+    args[2] = NULL;
+    r |= Test(Equals(args[0], S(m, "Livin on the Edge!")),
+        "Expected value above first slab found, have @, in @", args);
+
+    args[0] = Str_Ref(m, (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
+    args[1] = I32_Wrapped(m, idx);
+    args[2] = NULL;
+    r |= Test((q->go & compare) != 0,
+        "Expected q->go to be set to binary $ of 1 << @", args);
+
+    Queue_Next(q);
+    idx = 64;
+    compare = (u << 0);
+
+    args[0] = Queue_Get(q);
+    args[1] = q;
+    args[2] = NULL;
+    r |= Test(Equals(args[0], S(m, "XjfoaiwuerZduio")),
+        "Expected value above first slab found, have @, in @", args);
+
+    args[0] = Str_Ref(m, (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
+    args[1] = I32_Wrapped(m, idx);
+    args[2] = NULL;
+    r |= Test((q->go & compare) != 0,
+        "Expected q->go to be set to binary $ of 1 << @", args);
+
+    Queue_Next(q);
+    idx = 65;
+    compare = (u << 1);
+
+    args[0] = Queue_Get(q);
+    args[1] = q;
+    args[2] = NULL;
+    r |= Test(Equals(args[0],  S(m, "SixyFivey")),
+        "Expected value above first slab found, have @, in @", args);
+
+    if(r & ERROR){
+        Return(m, r);
+    }
+
+    args[0] = Str_Ref(m, (byte *)&q->go, sizeof(util), sizeof(util), STRING_BINARY);
+    args[1] = I32_Wrapped(m, idx);
+    args[2] = NULL;
+    r |= Test((q->go & compare) != 0,
+        "Expected q->go to be set to binary $ of 1 << @", args);
+
+    r |= Test((queueScaleTest(m, 10) & (SUCCESS|ERROR)) == SUCCESS,
+        "Max 10 scale tests finish with SUCCESS", NULL);
+
+    r |= Test((queueScaleTest(m, 57) & (SUCCESS|ERROR)) == SUCCESS,
+        "Max 57 scale tests finish with SUCCESS", NULL);
+
+    r |= Test((queueScaleTest(m, 66) & (SUCCESS|ERROR)) == SUCCESS,
+        "Max 66 scale tests finish with SUCCESS", NULL);
+
+    r |= Test((queueScaleTest(m, 432) & (SUCCESS|ERROR)) == SUCCESS,
+        "Max 432 scale tests finish with SUCCESS", NULL);
+
+    r |= Test((queueScaleTest(m, 777) & (SUCCESS|ERROR)) == SUCCESS,
+        "Max 777 scale tests finish with SUCCESS", NULL);
+
+    Return(m, r);
+}
