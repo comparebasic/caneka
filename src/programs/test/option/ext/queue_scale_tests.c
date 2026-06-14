@@ -10,37 +10,36 @@ static status queueScaleTest(MemCh *m, i32 max){
     Queue *q = Queue_Make(m);
 
     QueueCrit *crit = QueueCrit_Make(m, QueueCrit_Time, ZERO);
-    crit->type.state |= QUEUE_CRIT_UTIL;
     i32 hIdx = Queue_AddHandler(q, crit);
 
     i32 patCount = 4;
     i32 patIdx = 0;
-    util pattern[4] = { 3, 2, 1, 7};
-    util increase = 4;
-    i32 increaseCadance = max / 4;
+    util pattern[4] = { 1, 0, 3, 2};
 
-    ApproxTime now = {.type = {TYPE_APPROXTIME, APPROXTIME_MILLISEC}, 1};
-    i32 timeIncr = max /1;
+    ApproxTime *current = (ApproxTime *)&crit->u;
+    current->type.of = TYPE_APPROXTIME;
+    current->type.state = APPROXTIME_MILLISEC;
+    current->value = 0;
 
     for(i32 i = 0; i < max; i++){
+        i16 time = pattern[i & 3];
+        if(i >= 4){
+            i32 base = i;
+            base &= ~3;
+            time += base;
+        }
         ApproxTime at = {
             .type = {TYPE_APPROXTIME, APPROXTIME_MILLISEC},
-            .value = pattern[patIdx] * increase
+            .value = time 
         };
         Queue_Add(q, I32_Wrapped(m, i)); 
         Queue_SetCriteria(q, hIdx, i, (util *)&at);
-
-        if(++patIdx == patCount){
-            patIdx = 0;
-        }
-        if(i > 0 && i % increaseCadance == 0){
-            increase += increase;
-        }
     }
 
+    Queue_Reset(q);
     i16 guard = 0;
     while(q->it.p->nvalues > 0){
-        if(!Guard(&guard, 120, FUNCNAME, FILENAME, LINENUMBER)){
+        if(!Guard(&guard, max * 16, FUNCNAME, FILENAME, LINENUMBER)){
             args[0] = I32_Wrapped(m, max);
             args[1] = I16_Wrapped(m, guard);
             args[2] = q;
@@ -51,7 +50,11 @@ static status queueScaleTest(MemCh *m, i32 max){
             return r;
         }
         ApproxTime *at = (ApproxTime *)&crit->u;
-        at->value += timeIncr;
+        at->value++;
+
+        if(q->type.state & END){
+            Queue_Reset(q);
+        }
         while((Queue_Next(q) & END) == 0){
             args[0] = Queue_Get(q);
             args[1] = I32_Wrapped(m, q->it.idx);
@@ -64,9 +67,6 @@ static status queueScaleTest(MemCh *m, i32 max){
             }
             Queue_Remove(q, q->it.idx);
         }
-        struct timespec delay = {0,10};
-        struct timespec _remaining;
-        Time_Delay(&delay, &_remaining);
     }
 
     args[0] = I32_Wrapped(m, max);
@@ -216,6 +216,10 @@ status QueueScale_Tests(MemCh *m){
 
     r |= Test((queueScaleTest(m, 10) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 10 scale tests finish with SUCCESS", NULL);
+
+    if(r & ERROR){
+        Return(m, r);
+    }
 
     r |= Test((queueScaleTest(m, 57) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 57 scale tests finish with SUCCESS", NULL);
