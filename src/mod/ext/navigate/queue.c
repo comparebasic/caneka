@@ -15,7 +15,7 @@ status Queue_Remove(Queue *q, i32 idx){
     q->type.state |= (it.type.state & (FLAG_ITER_REVERSE|END));
     MemCh *m = q->it.p->m;
 
-    i64 n = -1;
+    i64 n = 0;
     Iter_Init(&it, q->handlers);
     while((Iter_Next(&it) & END) == 0){
         r |= Queue_SetCriteria(q, it.idx, idx, (util *)&n);
@@ -124,7 +124,6 @@ status Queue_Next(Queue *q){
             util u = q->slabIdx+1;
             if(q->it.idx >= u*CRIT_SLAB_STRIDE){
                 q->slabIdx = q->it.idx / CRIT_SLAB_MASK;
-                util u = q->slabIdx;
 
                 q->go = 0;
                 Iter it;
@@ -132,11 +131,29 @@ status Queue_Next(Queue *q){
                 while((Iter_Next(&it) & END) == 0){
                     QueueCrit *crit = (QueueCrit *)Iter_Get(&it);
                     util *slab = (util *)Span_Get(crit->data, q->slabIdx);
+
+                    crit->type.state |= (q->type.state & DEBUG);
                     if(slab != NULL){
+                        if(q->type.state & DEBUG){
+                            printf("calling @%d\n", q->slabIdx*CRIT_SLAB_STRIDE);
+                            fflush(stdout);
+                        }
                         q->go |= crit->func(crit, slab);
                     }
                 }
+
+                if(q->type.state & DEBUG){
+                    void *ar[] = {
+                        I32_Wrapped(m, q->it.idx),
+                        NULL
+                    };
+                    Out("^c.ReVal GoBits \\@$ ", ar);
+                    Bits_Print(OutStream, (byte *)&q->go, sizeof(util), ZERO);
+                    Buff_AddBytes(OutStream, (byte *)"\n", 1);
+                }
+
             }
+
             util base = 1;
             i32 localIdx = (q->it.idx & CRIT_SLAB_MASK); 
             if((q->go & (base << localIdx)) != 0){

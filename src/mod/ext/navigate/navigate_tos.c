@@ -31,41 +31,53 @@ static status CompResult_Print(Buff *bf, void *a, cls type, word flags){
 
 static status QueueCrit_Print(Buff *bf, void *a, cls type, word flags){
     QueueCrit *crit = (QueueCrit *)Ifc(bf->m, a, TYPE_QUEUE_CRIT);
-    void *args[2];
+    void *args[3];
+    args[0] = Type_StateVec(bf->m, crit->type.of, crit->type.state); 
+    args[1] = &crit->u;
+    args[2] = NULL;
+    Fmt(bf, "QueueCrit<@ \\@^I.@^i. ", args);
+
+    boolean first = TRUE;
     if(flags & MORE){
-        Table *tbl = Table_Make(bf->m);
         Iter it;   
         Iter_Init(&it, crit->data);
         while((Iter_Next(&it) & END) == 0){
             util *slab = (util *)Iter_Get(&it);
             for(i32 i = 0; i < CRIT_SLAB_STRIDE; i++){
                if(slab[i] != -1 && slab[i] != 0){
-                   Single *key = I64_Wrapped(bf->m, it.idx *CRIT_SLAB_STRIDE + i);
-                   Single *value = NULL;
-                   if(crit->type.state & QUEUE_CRIT_PFD){
+                    Abstract *value = NULL;
+                    if(crit->type.state & QUEUE_CRIT_PFD){
                         struct pollfd *pfd = (struct pollfd *)slab+i;
-                        value = I64_Wrapped(bf->m, pfd->fd);
-                   }else{
-                        value = I64_Wrapped(bf->m, slab[i]);
-                   }
-                   Table_Set(tbl, key, value);
+                        value = (Abstract *)I64_Wrapped(bf->m, pfd->fd);
+                    }else{
+                        value = (Abstract *)&slab[i];
+                    }
+
+                    args[0] = I64_Wrapped(bf->m, (it.idx*CRIT_SLAB_STRIDE) + i);
+                    args[1] = value;
+                    args[2] = NULL;
+                    Fmt(bf, "$:@", args);
+
+                    if(first){
+                        first = FALSE;
+                    }else{
+                        Buff_AddBytes(bf, (byte *)", ", 2);
+                    }
                 }
             }
         }
         
-        args[0] = Table_Ordered(bf->m, tbl);
-        args[1] = NULL;
-        return Fmt(bf, "QueueCrit<@>", args);
+        Buff_AddBytes(bf, (byte *)">", 1);
     }else{
-        args[0] = NULL;
-        return Fmt(bf, "QueueCrit<>", args);
+        Buff_AddBytes(bf, (byte *)"QueueCrit<>", 11);
     }
+    return ZERO;
 }
 
 static status Queue_Print(Buff *bf, void *a, cls type, word flags){
     Queue *q = (Queue *)Ifc(bf->m, a, TYPE_QUEUE);
     status r = READY;
-    void *args[7];
+    void *args[6];
     args[0] = Type_StateVec(bf->m, q->type.of, q->type.state);
     args[1] = NULL;
     r |= Fmt(bf, "Queue<@ ", args);
@@ -75,10 +87,9 @@ static status Queue_Print(Buff *bf, void *a, cls type, word flags){
         args[1] = I32_Wrapped(bf->m, ((q->slabIdx+1)*CRIT_SLAB_STRIDE)-1);
         args[2] = &q->it;
         args[3] = q->handlers;
-        args[4] = q->it.p;
-        args[5] = &q->availableIt;
-        args[6] = NULL;
-        r |= Fmt(bf, " $to$ it:@ criteria:@ items:& available:@>", args);
+        args[4] = &q->availableIt;
+        args[5] = NULL;
+        r |= Fmt(bf, " $to$ it:@ criteria:@ available:@>", args);
     }else{
         args[0] = I32_Wrapped(bf->m, q->it.p->nvalues);
         args[1] = NULL;

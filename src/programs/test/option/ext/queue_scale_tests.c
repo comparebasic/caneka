@@ -38,8 +38,28 @@ static status queueScaleTest(MemCh *m, i32 max){
 
     Queue_Reset(q);
     i16 guard = 0;
+
+    i32 nvalues = 0;
+    i32 count = 0;
+
     while(q->it.p->nvalues > 0){
-        if(!Guard(&guard, max * 16, FUNCNAME, FILENAME, LINENUMBER)){
+
+        if(nvalues == q->it.p->nvalues){
+            count++;
+            if(count == 20){
+                q->type.state |= DEBUG;
+            }else if(count == 21){
+                args[0] = I32_Wrapped(m, q->it.p->nvalues);
+                args[1] = I32_Wrapped(m, q->it.idx);
+                args[2] = I32_Wrapped(m, max);
+                args[3] = q;
+                Out("^y.Count is $/\\@$ of $max &^0\n", args);
+                break;
+            }
+        }
+        nvalues = q->it.p->nvalues;
+
+        if(!Guard(&guard, max * 2, FUNCNAME, FILENAME, LINENUMBER)){
             args[0] = I32_Wrapped(m, max);
             args[1] = I16_Wrapped(m, guard);
             args[2] = q;
@@ -49,19 +69,21 @@ static status queueScaleTest(MemCh *m, i32 max){
                 " round=$ q=@ \\@$", args);
             return r;
         }
+
         ApproxTime *at = (ApproxTime *)&crit->u;
         at->value++;
 
         if(q->type.state & END){
+            args[0] = I32_Wrapped(m, q->it.p->nvalues);
+            args[1] = I32_Wrapped(m, q->it.idx);
+            args[2] = I32_Wrapped(m, max);
+            args[3] = q;
+            Out("^y.Reset at $/\\@$ of $max @^0\n", args);
             Queue_Reset(q);
         }
+
         while((Queue_Next(q) & END) == 0){
-            args[0] = Queue_Get(q);
-            args[1] = I32_Wrapped(m, q->it.idx);
-            args[2] = I32_Wrapped(m, crit->u);
-            args[3] = I16_Wrapped(m, guard);
-            args[4] = NULL;
-            if(args[0] == NULL){
+            if(Queue_Get(q) == NULL){
                 r |= ERROR;
                 break;
             }
@@ -229,6 +251,10 @@ status QueueScale_Tests(MemCh *m){
 
     r |= Test((queueScaleTest(m, 432) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 432 scale tests finish with SUCCESS", NULL);
+
+    if(r & ERROR){
+        Return(m, r);
+    }
 
     r |= Test((queueScaleTest(m, 777) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 777 scale tests finish with SUCCESS", NULL);
