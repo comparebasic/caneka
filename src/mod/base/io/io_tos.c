@@ -52,6 +52,32 @@ status DirSel_Print(Buff *bf, void *a, cls type, word flags){
     }
 }
 
+status HostEnt_Print(Buff *bf, void *a, cls type, word flags){
+    MemCh *m = bf->m;
+    HostEnt *h = (HostEnt *)a;
+    void *ar[] = {
+        Type_StateVec(m, h->type.of, h->type.state),
+        S(m, h->ent->h_name),
+        NULL,
+    };
+    Fmt(bf, "HostEnt<@ $ ", ar);
+
+    Iter it;
+    Iter_Init(&it, h->addrs);
+    while((Iter_Next(&it) & END) == 0){
+        Single *sg = Iter_Get(&it);
+        Str *s = Ip4_ToStr(m, sg->val.i);
+        if(it.idx > 0){
+            Buff_AddBytes(bf, (byte *)", ", 2);
+        }
+        Buff_AddBytes(bf, s->bytes, s->length);
+    }
+
+    Buff_AddBytes(bf, (byte *)">", 1);
+    
+    return ZERO;
+}
+
 status Buff_Print(Buff *bf, void *a, cls type, word flags){
     Buff *bfObj = (Buff *)Ifc(bf->m, a, TYPE_BUFF);
 
@@ -138,6 +164,7 @@ status IoTos_Init(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_STASH_ITEM, (void *)StashItem_Print);
     r |= Lookup_Add(m, lk, TYPE_BUFF, (void *)Buff_Print);
     r |= Lookup_Add(m, lk, TYPE_DIR_SELECTOR, (void *)DirSel_Print);
+    r |= Lookup_Add(m, lk, TYPE_HOST_ENT, (void *)HostEnt_Print);
     r |= Io_InitLabels(m, ToSFlagLookup);
     return r;
 }

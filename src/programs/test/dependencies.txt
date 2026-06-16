@@ -1,5 +1,6 @@
 exec=main.c
 exec=content-fetch.c
+exec=httpq_to_sha256.c
 option=crypto
 option=runtime
 option=inter

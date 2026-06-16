@@ -15,6 +15,7 @@
 #include "./io/stash_coord.c"
 #include "./io/stash_item.c"
 #include "./io/stash.c"
+#include "./io/host.c"
 #include "./mem/extfree.c"
 #include "./mem/span.c"
 #include "./mem/iter.c"

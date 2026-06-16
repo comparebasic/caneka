@@ -9,5 +9,6 @@
 #include "io/stash_item.h"
 #include "io/stash_header.h"
 #include "io/stash.h"
+#include "io/host.h"
 #include "io/io_tos.h"
 #include "io/io_maps.h"
