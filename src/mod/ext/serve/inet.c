@@ -1,11 +1,5 @@
-/* Base.io.sock
- *
- * Socket and Inet translation for ip and ipv6 addresses two and from readable strings 
- *
- * Also provides a socket connection function.
- */
 #include <external.h>
-#include "base_module.h"
+#include <caneka.h> 
 
 Str *Ip4_ToStr(MemCh *m, quad ip4){
     byte *ib = (byte *)&ip4;
@@ -55,31 +49,4 @@ quad Str_ToIp4(MemCh *m, Str *s){
         ptr++;
     }
     return ip4;
-}
-
-status Sock_InetConnect(Buff *bf, quad ip4, util *ip6, i32 port){
-    MemCh *m = bf->m;
-    struct sockaddr_in server;
-    i32 fd = socket(AF_INET, SOCK_STREAM, 0);
-    if(fd == -1){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Unable to make socket", NULL);
-        bf->type.state |= ERROR;
-        return bf->type.state;
-    }
-
-    Str *ip4s = Ip4_ToStr(m, ip4);
-
-    server.sin_addr.s_addr = inet_addr((char *)ip4s->bytes);
-    server.sin_family = AF_INET;
-    server.sin_port = htons(port);
-    if(connect(fd, (struct sockaddr *)&server, sizeof(server)) == -1){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Unable to connect", NULL);
-        bf->type.state |= ERROR;
-        return bf->type.state;
-    }
-
-    Buff_SetSocket(bf, fd);
-    return SUCCESS;
 }

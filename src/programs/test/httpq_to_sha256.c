@@ -1,6 +1,12 @@
 #include <external.h>
 #include <caneka.h>
 
+static char *getReq = ""
+    "GET / HTTP/1.1\r\n"
+    "Host: firecrow.com\r\n"
+    "User-Agent: CanekaCli\r\n"
+    "\r\n";
+
 i32 main(int argc, char **argv){
 
     status r = READY;
@@ -46,8 +52,28 @@ i32 main(int argc, char **argv){
         Ansi_SetColor(FALSE);
     }
 
-    void *ar[] = {cli, NULL};
-    Out("^p.$^0\n", ar);
+    args[0] = cli;
+    args[1] = NULL;
+    Out("^y.$^0\n", args);
+
+    Str *text = S(m, getReq);
+
+    Str *name = S(m, "firecrow.com");
+    HostEnt *h = HostEnt_FromName(m, name);
+
+    Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+    Conn_InetConnect(bf, h, 80);
+    Buff_Add(bf, text); 
+
+    HttpReq *req = (HttpReq *)HttpReq_MakeResp(m, bf->fd);
+    while((req->type.state & (SUCCESS|ERROR)) == 0){
+        HttpReq_ReadToRbl(req);
+    }
+    HttpReq_Close(req);
+
+    args[0] = req;
+    args[1] = NULL;
+    Out("^p.Req: &^0\n", args);
 
     return (r & ERROR) == 0 ? 0 : 1;
 }

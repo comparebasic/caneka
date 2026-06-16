@@ -28,6 +28,7 @@ status Cash_Tests(MemCh *m);
 status Http_Tests(MemCh *m);
 status HttpQuery_Tests(MemCh *m);
 status Inet_Tests(MemCh *gm);
+status Host_Tests(MemCh *m);
 #ifdef CNKOPT_FREEBSD
 status SysQuery_Tests(MemCh *m);
 #endif
@@ -169,6 +170,12 @@ static TestSet ExtTests[] = {
         "Inet Tests",
         Inet_Tests,
         "Inet address translation tests.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Host Tests",
+        Host_Tests,
+        "Basic DNS lookup test.",
         FEATURE_COMPLETE,
     },
     {

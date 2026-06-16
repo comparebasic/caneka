@@ -1,6 +1,16 @@
 #include <external.h>
 #include <caneka.h>
 
+void HttpReq_Close(HttpReq *req){
+    if(req->in != NULL){
+        close(req->in->fd);
+        Buff_UnsetFd(req->in);
+    }
+    if(req->out != NULL){
+        close(req->out->fd);
+        Buff_UnsetFd(req->out);
+    }
+}
 
 void HttpReq_ParseBody(HttpReq *req){
     MemCh *m = req->m;
@@ -29,6 +39,11 @@ void HttpReq_ParseBody(HttpReq *req){
     ReturnVoid(m);
 }
 
+void HttpReq_SetFd(HttpReq *req, i32 fd){
+    struct pollfd *pfd = (struct pollfd *)&req->u;
+    pfd->fd = fd;
+}
+
 void HttpReq_ReadToRbl(HttpReq *req){
     MemCh *m = req->m;
     Debug_Push(m, req);
@@ -41,6 +56,34 @@ void HttpReq_ReadToRbl(HttpReq *req){
     }
     
     req->type.state |= req->rbl->type.state & (SUCCESS|ERROR);
+
+    if(req->type.state & SUCCESS){
+        HttpReq_ParseBody(req);            
+        if(req->type.state & DEBUG){
+            void *args[] = {
+                req,
+                NULL,
+            };
+            Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
+        }
+    }
+
+    Debug_Pop(m);
+}
+
+void HttpReq_RespToRbl(HttpReq *req){
+    MemCh *m = req->m;
+    Debug_Push(m, req);
+
+    struct pollfd *pfd = (struct pollfd *)&req->u;
+    Buff_SetSocket(req->in, pfd->fd);
+    if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
+            (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
+        Roebling_Run(req->rbl);
+    }
+    
+    req->type.state |= req->rbl->type.state & (SUCCESS|ERROR);
+
     if(req->type.state & SUCCESS){
         HttpReq_ParseBody(req);            
         if(req->type.state & DEBUG){
@@ -108,5 +151,22 @@ Req *HttpReq_Mk(IoCtx *ctx){
     req->out = Buff_Make(m, BUFF_UNBUFFERED);
     req->sections = Span_Make(m);
     req->rbl = HttpRbl_Make(m, Cursor_Make(m, req->in->v), req);
+    return (Req *)req;
+}
+
+Req *HttpReq_MakeResp(MemCh *m, i32 fd){
+    HttpReq *req = MemCh_AllocOf(m, sizeof(HttpReq), TYPE_HTTP_REQ);
+    req->type.of = TYPE_HTTP_REQ;
+    req->m = m;
+    Iter_Init(&req->headersIt, Table_Make(m));
+    Iter_Init(&req->queryIt, Table_Make(m));
+    req->meta = Table_Make(m);
+    req->in = Buff_Make(m, ZERO);
+    req->out = Buff_Make(m, BUFF_UNBUFFERED);
+    if(fd >= 0){
+        Buff_SetSocket(req->out, fd);
+    }
+    req->sections = Span_Make(m);
+    req->rbl = HttpRespRbl_Make(m, Cursor_Make(m, req->out->v), req);
     return (Req *)req;
 }

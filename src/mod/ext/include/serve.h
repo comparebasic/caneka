@@ -9,7 +9,9 @@ enum serve_types {
 };
 
 #include "serve/req.h"
-#include "serve/ip_address.h"
+#include "serve/inet.h"
+#include "serve/hostent.h"
+#include "serve/conn.h"
 #include "serve/io_ctx.h"
 #include "serve/server.h"
 #include "serve/serve_tcp.h"

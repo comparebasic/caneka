@@ -32,7 +32,6 @@ status Clone_Tests(MemCh *gm);
 status DebugStack_Tests(MemCh *gm);
 status Histo_Tests(MemCh *m);
 status Parity_Tests(MemCh *m);
-status Host_Tests(MemCh *m);
 
 static TestSet BaseTests[] = {
     {
@@ -247,12 +246,6 @@ static TestSet BaseTests[] = {
         "Stash Tests",
         Stash_Tests,
         "Mem Stash testing.",
-        FEATURE_COMPLETE,
-    },
-    {
-        "Host Tests",
-        Host_Tests,
-        "Basic DNS lookup test.",
         FEATURE_COMPLETE,
     },
     {

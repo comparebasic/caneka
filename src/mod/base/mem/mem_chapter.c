@@ -87,8 +87,6 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
 
     if(sl->level != level){
         sl = MemCh_AddPage(m, level);
-        printf("Allocating level %d nvalue %d\n", (i32)level, m->it.p->nvalues);
-        fflush(stdout);
     }
 
     m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;

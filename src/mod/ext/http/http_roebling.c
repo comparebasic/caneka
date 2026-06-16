@@ -271,6 +271,31 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     return SUCCESS;
 }
 
+Roebling *HttpRespRbl_Make(MemCh *m, Cursor *curs, void *source){
+    Debug_Push(m, curs);
+
+    Roebling *rbl = Roebling_Make(m, curs, Capture, source); 
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_VERSION));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)version));
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_CODE));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)code));
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_EXPLAIN));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)explain));
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_PROTO_END));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)protoNl));
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_HEADER_NAME));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)headerName));
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_HEADER_VALUE));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)headerValue));
+    Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_END));
+    Roebling_Start(rbl);
+
+    rbl->capture = Capture;
+    rbl->source = source;
+
+    Return(m, rbl);
+}
+
 Roebling *HttpRbl_Make(MemCh *m, Cursor *curs, void *source){
     Debug_Push(m, curs);
 

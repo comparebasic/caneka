@@ -630,6 +630,7 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
             }
         }
     }
+
     if(amount == orig){
         bf->type.state |= NOOP;
     }
