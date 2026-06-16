@@ -123,7 +123,7 @@ status Queue_Next(Queue *q){
             /* if first in slab set the go values */
             util u = q->slabIdx+1;
             if(q->it.idx >= u*CRIT_SLAB_STRIDE){
-                q->slabIdx = q->it.idx / CRIT_SLAB_MASK;
+                q->slabIdx = q->it.idx / CRIT_SLAB_STRIDE;
 
                 q->go = 0;
                 Iter it;
@@ -134,24 +134,9 @@ status Queue_Next(Queue *q){
 
                     crit->type.state |= (q->type.state & DEBUG);
                     if(slab != NULL){
-                        if(q->type.state & DEBUG){
-                            printf("calling @%d\n", q->slabIdx*CRIT_SLAB_STRIDE);
-                            fflush(stdout);
-                        }
                         q->go |= crit->func(crit, slab);
                     }
                 }
-
-                if(q->type.state & DEBUG){
-                    void *ar[] = {
-                        I32_Wrapped(m, q->it.idx),
-                        NULL
-                    };
-                    Out("^c.ReVal GoBits \\@$ ", ar);
-                    Bits_Print(OutStream, (byte *)&q->go, sizeof(util), ZERO);
-                    Buff_AddBytes(OutStream, (byte *)"\n", 1);
-                }
-
             }
 
             util base = 1;

@@ -74,11 +74,6 @@ static status queueScaleTest(MemCh *m, i32 max){
         at->value++;
 
         if(q->type.state & END){
-            args[0] = I32_Wrapped(m, q->it.p->nvalues);
-            args[1] = I32_Wrapped(m, q->it.idx);
-            args[2] = I32_Wrapped(m, max);
-            args[3] = q;
-            Out("^y.Reset at $/\\@$ of $max @^0\n", args);
             Queue_Reset(q);
         }
 
@@ -239,10 +234,6 @@ status QueueScale_Tests(MemCh *m){
     r |= Test((queueScaleTest(m, 10) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 10 scale tests finish with SUCCESS", NULL);
 
-    if(r & ERROR){
-        Return(m, r);
-    }
-
     r |= Test((queueScaleTest(m, 57) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 57 scale tests finish with SUCCESS", NULL);
 
@@ -252,12 +243,11 @@ status QueueScale_Tests(MemCh *m){
     r |= Test((queueScaleTest(m, 432) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 432 scale tests finish with SUCCESS", NULL);
 
-    if(r & ERROR){
-        Return(m, r);
-    }
-
     r |= Test((queueScaleTest(m, 777) & (SUCCESS|ERROR)) == SUCCESS,
         "Max 777 scale tests finish with SUCCESS", NULL);
+
+    r |= Test((queueScaleTest(m, 4000) & (SUCCESS|ERROR)) == SUCCESS,
+        "Max 4k scale tests finish with SUCCESS", NULL);
 
     Return(m, r);
 }
