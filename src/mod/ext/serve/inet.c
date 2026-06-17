@@ -1,6 +1,7 @@
 #include <external.h>
 #include <caneka.h> 
 
+
 Str *Ip4_ToStr(MemCh *m, quad ip4){
     byte *ib = (byte *)&ip4;
     Str *s = Str_Make(m, IP4_STR_ALLOC);

@@ -1,3 +1,7 @@
+enum req_flags {
+    HTTP_REQ_RESPONSE = 1 << 8,
+};
+
 typedef struct http_req {
     Type type;
     MemCh *m;
@@ -23,5 +27,5 @@ void HttpReq_ExpectSend(HttpReq *req);
 void HttpReq_ParseBody(HttpReq *req);
 void HttpReq_SetFd(HttpReq *req, i32 fd);
 void HttpReq_Close(HttpReq *req);
+void HttpReq_SetToResponse(HttpReq *req, i32 fd);
 Req *HttpReq_Mk(IoCtx *ctx);
-Req *HttpReq_MakeResp(MemCh *m, i32 fd);

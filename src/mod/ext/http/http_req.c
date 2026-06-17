@@ -150,23 +150,17 @@ Req *HttpReq_Mk(IoCtx *ctx){
     req->in = Buff_Make(m, ZERO);
     req->out = Buff_Make(m, BUFF_UNBUFFERED);
     req->sections = Span_Make(m);
-    req->rbl = HttpRbl_Make(m, Cursor_Make(m, req->in->v), req);
+    if(ctx != NULL){
+        req->rbl = HttpRbl_Make(m, Cursor_Make(m, req->in->v), req);
+    }
     return (Req *)req;
 }
 
-Req *HttpReq_MakeResp(MemCh *m, i32 fd){
-    HttpReq *req = MemCh_AllocOf(m, sizeof(HttpReq), TYPE_HTTP_REQ);
-    req->type.of = TYPE_HTTP_REQ;
-    req->m = m;
-    Iter_Init(&req->headersIt, Table_Make(m));
-    Iter_Init(&req->queryIt, Table_Make(m));
-    req->meta = Table_Make(m);
-    req->in = Buff_Make(m, ZERO);
-    req->out = Buff_Make(m, BUFF_UNBUFFERED);
+void HttpReq_SetToResponse(HttpReq *req, i32 fd){
+    MemCh *m = req->m;
     if(fd >= 0){
-        Buff_SetSocket(req->out, fd);
+        HttpReq_SetFd(req, fd);
     }
-    req->sections = Span_Make(m);
-    req->rbl = HttpRespRbl_Make(m, Cursor_Make(m, req->out->v), req);
-    return (Req *)req;
+    req->rbl = HttpRespRbl_Make(m, Cursor_Make(m, req->in->v), req);
+    req->type.state |= HTTP_REQ_RESPONSE;
 }

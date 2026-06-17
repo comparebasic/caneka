@@ -1,2 +1,3 @@
-Roebling *UrlRoebling_Make(MemCh *m);
-Table *UrlToParts(MemCh *m, StrVec *url);
+#include "url/uri.h"
+#include "url/uri_tos.h"
+#include "url/url_roebling.h"

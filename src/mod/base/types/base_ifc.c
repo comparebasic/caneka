@@ -51,7 +51,7 @@ void Base_IfcInit(MemCh *m){
         IfcMap_Make(m,
             TYPE_STRVEC,
             ZERO,
-            TYPE_STR - TYPE_STRVEC,
+            TYPE_STRVEC -TYPE_STR,
             sizeof(StrVec),
             StrVec_Conv));
 

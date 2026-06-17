@@ -9,6 +9,25 @@ static PatCharDef getDef[] = {
     {PAT_END, 0, 0}
 };
 
+static PatCharDef codeDef[] = {
+    {PAT_TERM,'0' ,'9'},
+    {PAT_TERM,'0' ,'9'},
+    {PAT_TERM,'0' ,'9'},
+    {PAT_TERM|PAT_MANY|PAT_INVERT_CAPTURE|PAT_CONSUME,' ' ,' '},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef spaceDef[] = {
+    {PAT_TERM|PAT_MANY|PAT_INVERT_CAPTURE|PAT_CONSUME,' ' ,' '},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef explainDef[] = {
+    {PAT_KO|PAT_KO_TERM|PAT_INVERT_CAPTURE, '\r', '\r'},
+    patText,
+    {PAT_END, 0, 0}
+};
+
 static PatCharDef postDef[] = {
     {PAT_TERM,'P' ,'P'},
     {PAT_TERM,'O' ,'O'},
@@ -81,6 +100,19 @@ static PatCharDef versionDef[] = {
     {PAT_END, 0, 0}
 };
 
+static PatCharDef respVersionDef[] = {
+    {PAT_TERM,'H' ,'H'},
+    {PAT_TERM,'T' ,'T'},
+    {PAT_TERM,'T' ,'T'},
+    {PAT_TERM,'P' ,'P'},
+    {PAT_TERM,'/' ,'/'},
+    {PAT_TERM,'1' ,'1'},
+    {PAT_TERM,'.' ,'.'},
+    {PAT_TERM,'1' ,'2'},
+    {PAT_TERM|PAT_MANY|PAT_INVERT_CAPTURE|PAT_CONSUME,' ' ,' '},
+    {PAT_END, 0, 0}
+};
+
 static PatCharDef endlDef[] = {
     {PAT_TERM, '\r', '\r'},
     {PAT_TERM, '\n', '\n'},
@@ -149,6 +181,33 @@ static status version(MemCh *m, Roebling *rbl){
        queryStartDef, HTTP_QUERY_START, HTTP_QUERY);
     r |= Roebling_SetPattern(rbl,
         versionDef, HTTP_VERSION, HTTP_PROTO_END);
+    return r;
+}
+
+static status versionResp(MemCh *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        respVersionDef, HTTP_VERSION, HTTP_CODE);
+    return r;
+}
+
+static status code(MemCh *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        codeDef, HTTP_CODE, HTTP_EXPLAIN);
+    return r;
+}
+
+static status explain(MemCh *m, Roebling *rbl){
+    status r = READY;
+    Roebling_ResetPatterns(rbl);
+
+    r |= Roebling_SetPattern(rbl,
+        explainDef, HTTP_EXPLAIN, HTTP_PROTO_END);
     return r;
 }
 
@@ -276,7 +335,7 @@ Roebling *HttpRespRbl_Make(MemCh *m, Cursor *curs, void *source){
 
     Roebling *rbl = Roebling_Make(m, curs, Capture, source); 
     Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_VERSION));
-    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)version));
+    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)versionResp));
     Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_CODE));
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)code));
     Roebling_AddStep(rbl, I16_Wrapped(m, HTTP_EXPLAIN));

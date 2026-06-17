@@ -20,7 +20,9 @@ status Caneka_Init(MemCh *m){
     BinSeg_Init(m);
     Navigate_ToSInit(m, ToStreamLookup);
     Serve_TosInit(m);
+    Serve_Init(m);
     Http_TosInit(m);
+    Uri_ToSInit(m, ToStreamLookup);
     Node_ClsInit(m);
     IterApi_Init(m);
     Cash_ToSInit(m, ToStreamLookup);
