@@ -15,4 +15,5 @@ enum serve_types {
 #include "serve/io_ctx.h"
 #include "serve/server.h"
 #include "serve/serve_tcp.h"
+#include "serve/serve_init.h"
 #include "serve/serve_tos.h"

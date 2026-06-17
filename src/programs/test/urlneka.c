@@ -54,35 +54,47 @@ i32 main(int argc, char **argv){
 
     StrVec *uriText = Ifc(m, CliArgs_Get(cli, uriKey), TYPE_STRVEC);
     Uri *uri = Uri_Make(m, uriText);
+    i32 port = Serve_PortByService(uri->proto);
+    Str *name = Ifc(m, uri->host, TYPE_STR);
 
-    args[0] = cli;
-    args[1] = uriText;
-    args[2] = uri;
+    args[0] = uri->v;
+    args[1] = name;
+    args[2] = I32_Wrapped(m, port);
     args[3] = NULL;
-    Out("^y.$ -> @ -> ^c.@^0\n", args);
+    Out("^y.Requesting -> @ from $:$^0\n", args);
 
-    Str *text = S(m, getReq);
-
-    Str *name = S(m, "firecrow.com");
     HostEnt *h = HostEnt_FromName(m, name);
 
+    Str *text = S(m, getReq);
     Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
-    Conn_InetConnect(bf, h, 80);
+    Conn_InetConnect(bf, h, port);
     Buff_Add(bf, text); 
 
     HttpReq *req = (HttpReq *)HttpReq_Mk(NULL);
     HttpReq_SetToResponse(req, bf->fd);
-    args[0] = req;
-    args[1] = NULL;
-    Out("^p.Req: &^0\n", args);
     while((req->type.state & (SUCCESS|ERROR)) == 0){
         HttpReq_ReadToRbl(req);
     }
     HttpReq_Close(req);
 
-    args[0] = req;
+#ifdef CNKOPT_CRYPTO
+    Str *sha = Str_DigestAlloc(m);
+    Buff *body = Ifc(m, req->body, TYPE_BUFF);
+    StrVec_ToSha256(m, body->v, (digest*)sha->bytes);
+    sha->length = DIGEST_SIZE;
+    Str *hex = Str_ToHex(m, sha);
+
+    args[0] = hex;
     args[1] = NULL;
-    Out("^p.Req: &^0\n", args);
+    Out("^p.ShaHex: @^0\n", args);
+#endif
+    
+    /*
+    Str *dest = CliArgs_Get(cli, destKey); 
+    if(dest != NULL){
+        ;
+    }
+    */
 
     MemCh_Free(req->m);
 

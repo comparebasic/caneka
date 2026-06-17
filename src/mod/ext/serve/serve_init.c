@@ -3,6 +3,15 @@
 
 static Table *services = NULL;
 
+i32 Serve_PortByService(Str *s){
+    Single *sg = Table_Get(services, s);
+    if(s == NULL){
+        return -1;
+    }else{
+        return sg->val.i;
+    }
+}
+
 void Serve_Init(MemCh *m){
     if(services == NULL){
         services = Table_Make(m);
