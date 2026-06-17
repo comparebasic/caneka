@@ -152,8 +152,8 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                     }
 
                     match_EndOfKoTerm(mt);
-                    PatCharDef *nextDef = mt->pat.curDef+1;
 
+                    PatCharDef *nextDef = mt->pat.curDef+1;
                     if((nextDef->flags & PAT_KO) == 0){
                         if(mt->type.state & MATCH_LEAVE){
                             goto miss;
@@ -162,6 +162,9 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                         match_NextTerm(mt);
                         break;
                     }else{
+                        if((def->flags & (PAT_KO|PAT_KO_TERM)) == (PAT_KO|PAT_KO_TERM)){
+                            mt->pat.curDef++;
+                        }
                         break;
                     }
                 }
