@@ -46,7 +46,7 @@ static i32 openPortToFd(i32 port){
     return fd;
 }
 
-static void ServeTcp_OpenTcp(Server *srv){
+static void ServeTcp_OpenTcp(Serve *srv){
     i32 fd = openPortToFd(srv->ctx->address.ip.port);
     void *args[4];
 
@@ -65,7 +65,7 @@ static void ServeTcp_OpenTcp(Server *srv){
     Out("^c.Opened Socket ^D.$^d.fd for @. Ready to Serve^0\n", args);
 }
 
-static void ServeTcp_AcceptPoll(Server *srv){
+static void ServeTcp_AcceptPoll(Serve *srv){
     MemCh *m = srv->m;
     Debug_Push(m, srv);
 
@@ -94,15 +94,15 @@ static void ServeTcp_AcceptPoll(Server *srv){
     while(available-- > 0){
         i32 new_fd = accept(pfd->fd, (struct sockaddr*)NULL, NULL);
         if(new_fd > 0){
-            srv->metrics.open++;
-
             fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
-            Req *req = srv->ctx->mk(srv->ctx);
-            req->idx = Queue_Add(srv->q, req);
+            TcpSource *ts = (TcpSource *)srv->source;
+            ts->new_fd = new_fd;
+            ts->clientEnt = NULL;
 
-            struct pollfd *pfd = (struct pollfd *)&req->u;
-            Queue_SetCriteria(srv->q, 0, req->idx, &req->u);
+            Req *req = srv->def.mk(MemCh_Make());
+            srv->def.setup(srv, req);
+            req->idx = Queue_Add(srv->q, req);
         }else{
             break;
         }
@@ -113,33 +113,22 @@ static void ServeTcp_AcceptPoll(Server *srv){
         srv->type.state &= ~(NOOP|PROCESSING);
         Req *req = (Req *)Queue_Get(srv->q);
 
-        srv->ctx->handle(m, req);
+        srv->def.handle(m, req);
         if(req->type.state & (SUCCESS|ERROR)){
             Queue_Remove(srv->q, req->idx);
-            srv->ctx->finalize(m, req);    
+            srv->def.finalize(m, req);    
             MemCh_Free(req->m);
-            if(req->type.state & ERROR){
-                srv->metrics.error++;
-            }
-            srv->metrics.served++;
-            srv->metrics.open--;
         }
-    }
-
-    if((srv->type.state & DEBUG) && srv->q->type.state & END){
-        args[0] = srv;
-        args[1] = NULL;
-        Out("^c.    No more Reqs @^0\n", args);
     }
 
     ReturnVoid(m);
 }
 
-struct pollfd *Server_TcpGetPollFd(Req *req){
+struct pollfd *Serve_TcpGetPollFd(Req *req){
      return (struct pollfd *)&req->u;
 }
 
-void Server_ServeTcp(Server *srv){
+void Serve_ServeTcp(Serve *srv){
     QueueCrit *crit = QueueCrit_Make(srv->m, QueueCrit_Fds, ZERO);
     Queue_AddHandler(srv->q, crit);
 

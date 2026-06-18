@@ -24,20 +24,20 @@ static status IoCtx_Print(Buff *bf, void *a, cls type, word flags){
     return Fmt(bf, "IoCtx<>", args);
 }
 
-static status Server_Print(Buff *bf, void *a, cls type, word flags){
-    Server *ctx = (Server*)a;
+static status Serve_Print(Buff *bf, void *a, cls type, word flags){
+    Serve *ctx = (Serve*)a;
     void *args[] = {
         NULL,
     };
-    return Fmt(bf, "Server<>", args);
+    return Fmt(bf, "Serve<>", args);
 }
 
 static status Req_Print(Buff *bf, void *a, cls type, word flags){
-    Server *ctx = (Server*)a;
+    Serve *ctx = (Serve*)a;
     void *args[] = {
         NULL,
     };
-    return Fmt(bf, "Server<>", args);
+    return Fmt(bf, "Serve<>", args);
 }
 
 static status HostEnt_Print(Buff *bf, void *a, cls type, word flags){
@@ -66,13 +66,11 @@ static status HostEnt_Print(Buff *bf, void *a, cls type, word flags){
     return ZERO;
 }
 
-
-
 status Serve_TosInit(MemCh *m){
     status r = READY;
     Lookup *lk = ToStreamLookup;
     r |= Lookup_Add(m, lk, TYPE_IO_CTX, (void *)IoCtx_Print);
-    r |= Lookup_Add(m, lk, TYPE_SERVER, (void *)Server_Print);
+    r |= Lookup_Add(m, lk, TYPE_SERVE, (void *)Serve_Print);
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
     r |= Lookup_Add(m, lk, TYPE_HOST_ENT, (void *)HostEnt_Print);
     return r;

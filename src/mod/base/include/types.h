@@ -3,7 +3,7 @@
 #include "types/error_msg.h"
 #include "types/guard.h"
 #include "types/range.h"
-#include "types/typedefs.h"
+#include "types/funcdefs.h"
 #include "types/strings.h"
 #include "types/map.h"
 #include "types/clone.h"

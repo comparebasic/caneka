@@ -139,8 +139,7 @@ void HttpReq_ExpectSend(HttpReq *req){
     pfd->events = POLLOUT|POLLNVAL|POLLHUP|POLLERR;
 }
 
-Req *HttpReq_Mk(IoCtx *ctx){
-    MemCh *m = MemCh_Make();
+Req *HttpReq_Mk(MemCh *m){
     HttpReq *req = MemCh_AllocOf(m, sizeof(HttpReq), TYPE_HTTP_REQ);
     req->type.of = TYPE_HTTP_REQ;
     req->m = m;
@@ -150,10 +149,24 @@ Req *HttpReq_Mk(IoCtx *ctx){
     req->in = Buff_Make(m, ZERO);
     req->out = Buff_Make(m, BUFF_UNBUFFERED);
     req->sections = Span_Make(m);
-    if(ctx != NULL){
-        req->rbl = HttpRbl_Make(m, Cursor_Make(m, req->in->v), req);
-    }
     return (Req *)req;
+}
+
+void HttpReq_Setup(Serve *srv, Req *_req){
+    HttpReq *req = (HttpReq *)_req;
+    srv->metrics.open++;
+
+    TcpSource *ts = (TcpSource *)srv->source;
+    req->clientEnt = ts->clientEnt;
+    HttpReq_SetFd(req, ts->new_fd);
+    HttpReq_ExpectRecv(req);
+
+    Queue_SetCriteria(srv->q, 0, req->idx, &req->u);
+}
+
+void HttpReq_SetToRecv(HttpReq *req){
+    MemCh *m = req->m;
+    req->rbl = HttpRbl_Make(m, Cursor_Make(m, req->in->v), req);
 }
 
 void HttpReq_SetToResponse(HttpReq *req, i32 fd){

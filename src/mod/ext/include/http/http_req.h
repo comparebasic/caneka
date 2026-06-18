@@ -7,8 +7,9 @@ typedef struct http_req {
     MemCh *m;
     i32 idx;
     util u;
+    Iter routeIt;
     /* req end */
-    IpAddress address;
+    HostEnt *clientEnt;
     StrVec *path;
     Buff *in;
     Buff *out;
@@ -27,5 +28,7 @@ void HttpReq_ExpectSend(HttpReq *req);
 void HttpReq_ParseBody(HttpReq *req);
 void HttpReq_SetFd(HttpReq *req, i32 fd);
 void HttpReq_Close(HttpReq *req);
+Req *HttpReq_Mk(Serve *srv);
+void HttpReq_Setup(Serve *srv, Req *_req){
+void HttpReq_SetToRecv(HttpReq *req);
 void HttpReq_SetToResponse(HttpReq *req, i32 fd);
-Req *HttpReq_Mk(IoCtx *ctx);
