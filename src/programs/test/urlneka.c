@@ -89,12 +89,30 @@ i32 main(int argc, char **argv){
     Out("^p.ShaHex: @^0\n", args);
 #endif
     
-    /*
     Str *dest = CliArgs_Get(cli, destKey); 
     if(dest != NULL){
-        ;
+        StrVec *path = IoUtil_AbsVec(m, StrVec_From(m, dest));
+        StrVec *dir = IoUtil_BasePath(m, path);
+
+        void *ar[] = {
+            path,
+            dir,
+            NULL
+        };
+        Out("^p.Path:@ dir:@ ^0\n", ar);
+
+        Dir_CheckCreate(m, Ifc(m, dir, TYPE_STR));
+        Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+        File_Open(bf, path, O_WRONLY|O_CREAT);
+#ifdef CNKOPT_CRYPTO
+        Buff_Add(bf, hex);
+#else
+        struct timespec now;
+        Time_Now(&now);
+        Buff_Add(bf, Time_ToStr(m, &now));
+#endif
+        File_Close(bf);
     }
-    */
 
     MemCh_Free(req->m);
 
