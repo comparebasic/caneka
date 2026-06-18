@@ -8,6 +8,7 @@ enum serve_types {
     _SERVE_PROTO_END,
 };
 
+#include "serve/handlerdef.h"
 #include "serve/req.h"
 #include "serve/inet.h"
 #include "serve/hostent.h"

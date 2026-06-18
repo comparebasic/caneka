@@ -113,10 +113,10 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         srv->type.state &= ~(NOOP|PROCESSING);
         Req *req = (Req *)Queue_Get(srv->q);
 
-        srv->def.handle(m, req);
+        srv->def.handle(m, req, srv);
         if(req->type.state & (SUCCESS|ERROR)){
             Queue_Remove(srv->q, req->idx);
-            srv->def.finalize(m, req);    
+            srv->def.finalize(m, req, srv);
             MemCh_Free(req->m);
         }
     }
@@ -136,4 +136,10 @@ void Serve_ServeTcp(Serve *srv){
     ServeTcp_AcceptPoll(srv);
 
     return;
+}
+
+Serve *Serve_MakeTcp(MemCh *m, HandlerDef *def, HostEnt *ent){
+    Serve *srv = Serve_Make(m);
+    srv->def = def;
+    srv->address.ent = ent;
 }

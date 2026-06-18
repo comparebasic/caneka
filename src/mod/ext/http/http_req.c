@@ -1,15 +1,89 @@
 #include <external.h>
 #include <caneka.h>
 
-void HttpReq_Close(HttpReq *req){
-    if(req->in != NULL){
-        close(req->in->fd);
-        Buff_UnsetFd(req->in);
+status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Srv *srv){
+    MemCh *m = req->m;
+    Debug_Push(m, req);
+
+    struct pollfd *pfd = (struct pollfd *)&req->u;
+    Buff_SetSocket(req->in, pfd->fd);
+    if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
+            (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
+        Roebling_Run(req->rbl);
     }
-    if(req->out != NULL){
-        close(req->out->fd);
-        Buff_UnsetFd(req->out);
+    
+    req->type.state |= req->rbl->type.state & (SUCCESS|ERROR);
+
+    if(req->type.state & SUCCESS){
+        HttpReq_ParseBody(req);            
+        if(req->type.state & DEBUG){
+            void *args[] = {
+                req,
+                NULL,
+            };
+            Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
+        }
     }
+
+    Return(m, req->type.state);
+}
+
+status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Srv *srv){
+    MemCh *m = req->m;
+    Debug_Push(m, req);
+
+    struct pollfd *pfd = (struct pollfd *)&req->u;
+    Buff_SetSocket(req->in, pfd->fd);
+    if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
+            (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
+        Roebling_Run(req->rbl);
+    }
+    
+    req->type.state |= req->rbl->type.state & (SUCCESS|ERROR);
+
+    if(req->type.state & SUCCESS){
+        HttpReq_ParseBody(req);            
+        if(req->type.state & DEBUG){
+            void *args[] = {
+                req,
+                NULL,
+            };
+            Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
+        }
+    }
+
+    Return(m, req->type.state);
+}
+
+status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
+    MemCh *m = req->m;
+    Debug_Push(m, req);
+
+    struct pollfd *pfd = (struct pollfd *)&req->u;
+    Buff_SetSocket(req->out, pfd->fd);
+
+    Iter it;
+    Iter_Init(&it, req->sections);
+    while((Iter_Next(&it) & END) == 0){
+        Buff *bf = Iter_Get(&it);
+
+        Buff_Pipe(req->out, bf);
+        if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
+            close(bf->fd);
+            Buff_UnsetFd(bf);
+        }
+
+        if((bf->type.state & ERROR) || (bf->type.state & (SUCCESS|END)) == 0){
+            req->type.state |= ERROR;
+            break;
+        }
+    }
+
+    if((req->type.state & ERROR) == 0){
+        req->type.state |= SUCCESS;
+    }
+    
+    Return(m, req->type.state);
 }
 
 void HttpReq_ParseBody(HttpReq *req){
@@ -39,102 +113,28 @@ void HttpReq_ParseBody(HttpReq *req){
     ReturnVoid(m);
 }
 
+void HttpReq_Close(HttpReq *req){
+    if(req->in != NULL){
+        close(req->in->fd);
+        Buff_UnsetFd(req->in);
+    }
+    if(req->out != NULL){
+        close(req->out->fd);
+        Buff_UnsetFd(req->out);
+    }
+}
+
 void HttpReq_SetFd(HttpReq *req, i32 fd){
     struct pollfd *pfd = (struct pollfd *)&req->u;
     pfd->fd = fd;
 }
 
-void HttpReq_ReadToRbl(HttpReq *req){
-    MemCh *m = req->m;
-    Debug_Push(m, req);
-
-    struct pollfd *pfd = (struct pollfd *)&req->u;
-    Buff_SetSocket(req->in, pfd->fd);
-    if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
-            (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
-        Roebling_Run(req->rbl);
-    }
-    
-    req->type.state |= req->rbl->type.state & (SUCCESS|ERROR);
-
-    if(req->type.state & SUCCESS){
-        HttpReq_ParseBody(req);            
-        if(req->type.state & DEBUG){
-            void *args[] = {
-                req,
-                NULL,
-            };
-            Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
-        }
-    }
-
-    Debug_Pop(m);
-}
-
-void HttpReq_RespToRbl(HttpReq *req){
-    MemCh *m = req->m;
-    Debug_Push(m, req);
-
-    struct pollfd *pfd = (struct pollfd *)&req->u;
-    Buff_SetSocket(req->in, pfd->fd);
-    if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
-            (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
-        Roebling_Run(req->rbl);
-    }
-    
-    req->type.state |= req->rbl->type.state & (SUCCESS|ERROR);
-
-    if(req->type.state & SUCCESS){
-        HttpReq_ParseBody(req);            
-        if(req->type.state & DEBUG){
-            void *args[] = {
-                req,
-                NULL,
-            };
-            Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
-        }
-    }
-
-    Debug_Pop(m);
-}
-
-void HttpReq_Write(HttpReq *req){
-    MemCh *m = req->m;
-    Debug_Push(m, req);
-
-    struct pollfd *pfd = (struct pollfd *)&req->u;
-    Buff_SetSocket(req->out, pfd->fd);
-
-    Iter it;
-    Iter_Init(&it, req->sections);
-    while((Iter_Next(&it) & END) == 0){
-        Buff *bf = Iter_Get(&it);
-
-        Buff_Pipe(req->out, bf);
-        if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
-            close(bf->fd);
-            Buff_UnsetFd(bf);
-        }
-
-        if((bf->type.state & ERROR) || (bf->type.state & (SUCCESS|END)) == 0){
-            req->type.state |= ERROR;
-            break;
-        }
-    }
-
-    if((req->type.state & ERROR) == 0){
-        req->type.state |= SUCCESS;
-    }
-    
-    Debug_Pop(m);
-}
-
-void HttpReq_ExpectRecv(HttpReq *req){
+void HttpReq_ExpectRecv(MemCh *m, HttpReq *req, Serve *srv){
     struct pollfd *pfd = (struct pollfd *)&req->u;
     pfd->events = POLLIN|POLLNVAL|POLLHUP|POLLERR;
 }
 
-void HttpReq_ExpectSend(HttpReq *req){
+void HttpReq_ExpectSend(MemCh *m, HttpReq *req, Serve *srv){
     struct pollfd *pfd = (struct pollfd *)&req->u;
     pfd->events = POLLOUT|POLLNVAL|POLLHUP|POLLERR;
 }

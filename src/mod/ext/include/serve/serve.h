@@ -11,7 +11,7 @@ typedef struct serve {
     } log;
     HandlerDef def;
     union {
-        HostEnt *hostent;
+        HostEnt *ent;
         StrVec *path;
     } address;
     struct {
@@ -24,8 +24,7 @@ typedef struct serve {
     void *source;
 } Serve;
 
-void Serve_LogOpen(Server *srv, Req *req);
-void Serve_LogFinalized(Server *srv, Req *req);
+void Serve_LogOpen(Serve *srv, Req *req);
+void Serve_LogFinalized(Serve *srv, Req *req);
 
-Serve *Serve_MakeTcp(MemCh *m, Req_Mk mk, DoFunc handle, DoFunc finalize, Table *chain);
-Serve *Serve_MakeFileSystem(MemCh *m, Req_Mk mk, DoFunc handle, DoFunc finalize, Table *chain);
+Serve *Serve_Make(MemCh *m);

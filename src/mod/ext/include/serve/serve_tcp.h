@@ -9,3 +9,5 @@ typedef struct tcp_source {
 struct pollfd *Serve_TcpGetPollFd(Req *req);
 void Serve_ServeTcp(Serve *srv);
 TcpSource *TcpSource_Make(MemCh *m);
+
+Serve *Serve_MakeTcp(MemCh *m, HandlerDef *def, HostEnt *ent);

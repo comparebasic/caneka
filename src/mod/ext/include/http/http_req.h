@@ -22,7 +22,9 @@ typedef struct http_req {
 } HttpReq;
 
 void HttpReq_ReadToRbl(HttpReq *req);
+void HttpReq_RespToRbl(MemCh *m, HttpReq *req, Srv *srv);
 void HttpReq_Write(HttpReq *req);
+
 void HttpReq_ExpectRecv(HttpReq *req);
 void HttpReq_ExpectSend(HttpReq *req);
 void HttpReq_ParseBody(HttpReq *req);
@@ -32,3 +34,4 @@ Req *HttpReq_Mk(Serve *srv);
 void HttpReq_Setup(Serve *srv, Req *_req){
 void HttpReq_SetToRecv(HttpReq *req);
 void HttpReq_SetToResponse(HttpReq *req, i32 fd);
+
