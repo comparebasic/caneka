@@ -1,13 +1,15 @@
+typedef void (*ReqFunc)(MemCh *m, struct req *req, struct serve *srv);
+
 typedef struct req_handler_def {
     Type type;
-    Req_Mk mk;
-    Req_Setup setup;
-    SourceFunc handle;
-    SourceFunc finalize;
+    Maker mk;
+    ReqFunc setup;
+    ReqFunc handle;
+    ReqFunc finalize;
     Iter routesIt; /*<Table>*/
     struct {
-        SourceFunc open;
-        SourceFunc final;
+        ReqFunc open;
+        ReqFunc final;
     } log;
 } HandlerDef;
 

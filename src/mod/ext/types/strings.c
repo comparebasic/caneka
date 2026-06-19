@@ -40,7 +40,7 @@ static char *extTypeStrings[] = {
     "TYPE_QUEUE",
     "TYPE_QUEUE_CRIT",
     "TYPE_SERVE",
-    "TYPE_TCP_SOURCE";
+    "TYPE_TCP_SOURCE",
     "TYPE_URI",
     "TYPE_PROC_IO_SET",
     "TYPE_SSID_CTX",

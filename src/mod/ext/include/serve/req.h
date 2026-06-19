@@ -7,5 +7,5 @@ typedef struct req {
 } Req;
 
 typedef Req *(*Req_Mk)(MemCh *m);
-typedef void (*Req_Setup)(struct serve *srv, Req *req);
+typedef void (*Req_Setup)(MemCh *m, Req *req, struct serve *srv);
 Req *Make_Req(MemCh *m);

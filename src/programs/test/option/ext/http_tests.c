@@ -8,8 +8,7 @@ status Http_Tests(MemCh *m){
     void *args[5];
     status r = READY;
 
-    IoCtx *ctx = IoCtx_Make(m);
-    HttpReq *req = (HttpReq *)HttpReq_Mk(ctx);
+    HttpReq *req = (HttpReq *)HttpReq_Mk(MemCh_Make(), NULL);
 
     StrVec *v = Sv(m, 
         "GET /fancy.html HTTP/1.1\r\n"
@@ -52,8 +51,8 @@ status HttpQuery_Tests(MemCh *m){
     void *args[5];
     status r = READY;
 
-    IoCtx *ctx = IoCtx_Make(m);
-    HttpReq *req = (HttpReq *)HttpReq_Mk(ctx);
+    HttpReq *req = (HttpReq *)HttpReq_Mk(MemCh_Make(), NULL);
+    HttpReq_SetToRecv(req);
 
     Str *content = S(req->in->m, 
         "{\"email\": \"fancy.pantsy@example.com\", \"first-name\": \"Fantsy\"}");

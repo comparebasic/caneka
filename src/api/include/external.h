@@ -23,7 +23,6 @@
 #include <fcntl.h>
 #include <time.h>
 #include <dirent.h>
-#include <netinet/in.h>
 #include <netdb.h>
 #include <sys/random.h>
 

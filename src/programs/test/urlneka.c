@@ -54,26 +54,27 @@ i32 main(int argc, char **argv){
 
     StrVec *uriText = Ifc(m, CliArgs_Get(cli, uriKey), TYPE_STRVEC);
     Uri *uri = Uri_Make(m, uriText);
-    i32 port = Serve_PortByService(uri->proto);
     Str *name = Ifc(m, uri->host, TYPE_STR);
+    Str *service = Ifc(m, uri->proto, TYPE_STR);
 
     args[0] = uri->v;
     args[1] = name;
-    args[2] = I32_Wrapped(m, port);
+    args[2] = service;
     args[3] = NULL;
     Out("^y.Requesting -> @ from $:$^0\n", args);
 
-    HostEnt *h = HostEnt_FromName(m, name);
+    HostEnt *h = HostEnt_FromName(m, name, service);
 
     Str *text = S(m, getReq);
     Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+    i32 port = Serve_PortByService(uri->proto);
     Conn_InetConnect(bf, h, port);
     Buff_Add(bf, text); 
 
-    HttpReq *req = (HttpReq *)HttpReq_Mk(NULL);
+    HttpReq *req = (HttpReq *)HttpReq_Mk(MemCh_Make(), NULL);
     HttpReq_SetToResponse(req, bf->fd);
     while((req->type.state & (SUCCESS|ERROR)) == 0){
-        HttpReq_ReadToRbl(req);
+        HttpReq_ReadToRbl(req->m, req, NULL);
     }
     HttpReq_Close(req);
 

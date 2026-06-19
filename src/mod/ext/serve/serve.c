@@ -2,11 +2,11 @@
 #include <caneka.h>
 
 void Serve_LogOpen(Serve *srv, Req *req){
-    srv->log.open(srv->m, req, srv);
+    srv->def.log.open(srv->m, req, srv);
 }
 
 void Serve_LogFinalized(Serve *srv, Req *req){
-    srv->log.final(srv->m, req, srv);
+    srv->def.log.final(srv->m, req, srv);
 }
 
 Serve *Serve_Make(MemCh *m){

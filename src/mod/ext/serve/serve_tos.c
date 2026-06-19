@@ -16,14 +16,6 @@ StrVec *Serve_PollFlagVec(MemCh *m, struct pollfd *pfd){
     return v;
 }
 
-static status IoCtx_Print(Buff *bf, void *a, cls type, word flags){
-    IoCtx *ctx = (IoCtx*)a;
-    void *args[] = {
-        NULL,
-    };
-    return Fmt(bf, "IoCtx<>", args);
-}
-
 static status Serve_Print(Buff *bf, void *a, cls type, word flags){
     Serve *ctx = (Serve*)a;
     void *args[] = {
@@ -45,7 +37,7 @@ static status HostEnt_Print(Buff *bf, void *a, cls type, word flags){
     HostEnt *h = (HostEnt *)a;
     void *ar[] = {
         Type_StateVec(m, h->type.of, h->type.state),
-        S(m, h->ent->h_name),
+        h->name,
         NULL,
     };
     Fmt(bf, "HostEnt<@ $ ", ar);
@@ -69,7 +61,6 @@ static status HostEnt_Print(Buff *bf, void *a, cls type, word flags){
 status Serve_TosInit(MemCh *m){
     status r = READY;
     Lookup *lk = ToStreamLookup;
-    r |= Lookup_Add(m, lk, TYPE_IO_CTX, (void *)IoCtx_Print);
     r |= Lookup_Add(m, lk, TYPE_SERVE, (void *)Serve_Print);
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
     r |= Lookup_Add(m, lk, TYPE_HOST_ENT, (void *)HostEnt_Print);

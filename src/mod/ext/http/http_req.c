@@ -1,8 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Srv *srv){
-    MemCh *m = req->m;
+status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
     struct pollfd *pfd = (struct pollfd *)&req->u;
@@ -28,8 +27,7 @@ status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Srv *srv){
     Return(m, req->type.state);
 }
 
-status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Srv *srv){
-    MemCh *m = req->m;
+status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
     struct pollfd *pfd = (struct pollfd *)&req->u;
@@ -56,7 +54,6 @@ status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Srv *srv){
 }
 
 status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
-    MemCh *m = req->m;
     Debug_Push(m, req);
 
     struct pollfd *pfd = (struct pollfd *)&req->u;
@@ -129,17 +126,17 @@ void HttpReq_SetFd(HttpReq *req, i32 fd){
     pfd->fd = fd;
 }
 
-void HttpReq_ExpectRecv(MemCh *m, HttpReq *req, Serve *srv){
+void HttpReq_ExpectRecv(HttpReq *req){
     struct pollfd *pfd = (struct pollfd *)&req->u;
     pfd->events = POLLIN|POLLNVAL|POLLHUP|POLLERR;
 }
 
-void HttpReq_ExpectSend(MemCh *m, HttpReq *req, Serve *srv){
+void HttpReq_ExpectSend(HttpReq *req){
     struct pollfd *pfd = (struct pollfd *)&req->u;
     pfd->events = POLLOUT|POLLNVAL|POLLHUP|POLLERR;
 }
 
-Req *HttpReq_Mk(MemCh *m){
+Req *HttpReq_Mk(MemCh *m, void *source){
     HttpReq *req = MemCh_AllocOf(m, sizeof(HttpReq), TYPE_HTTP_REQ);
     req->type.of = TYPE_HTTP_REQ;
     req->m = m;
@@ -152,7 +149,7 @@ Req *HttpReq_Mk(MemCh *m){
     return (Req *)req;
 }
 
-void HttpReq_Setup(Serve *srv, Req *_req){
+void HttpReq_Setup(MemCh *m, Req *_req, Serve *srv){
     HttpReq *req = (HttpReq *)_req;
     srv->metrics.open++;
 

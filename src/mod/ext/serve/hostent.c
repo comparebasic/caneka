@@ -7,19 +7,26 @@ HostEnt *HostEnt_Make(MemCh *m){
     return h;
 }
 
-HostEnt *HostEnt_FromName(MemCh *m, Str *s){
+HostEnt *HostEnt_FromName(MemCh *m, Str *name, Str *service){
     HostEnt *h = HostEnt_Make(m);
-    h->name = s;
-    h->ent = gethostbyname(Str_Cstr(m, s));
+    h->name = name;
     h->addrs = Span_Make(m);
-    if(h->ent == NULL){
+    if(getaddrinfo(Str_Cstr(m, name), Str_Cstr(m, service), NULL, &h->info) != 0){
+        void *ar[] = {
+            name, service, NULL
+        };
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, 
+            "Error getting network address info for $/$", ar);
         h->type.state |= ERROR;
-    }else if(h->ent->h_length > 0){
-        i32 **list = (i32 **)h->ent->h_addr_list;
-        while(*list != NULL){
-            i32 *ptr = *list;
-            Span_Add(h->addrs, I32_Wrapped(m, *ptr));
-            list++;
+    }else{
+        struct addrinfo *info = h->info;
+        while(info != NULL){
+            if(info->ai_family == AF_INET){
+                struct sockaddr_in *addr = (struct sockaddr_in *)info->ai_addr;
+                quad ip4 = addr->sin_addr.s_addr;
+                Span_Add(h->addrs, U32_Wrapped(m, ip4));
+            }
+            info = info->ai_next;
         }
     }
     return h;

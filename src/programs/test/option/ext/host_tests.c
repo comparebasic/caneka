@@ -8,7 +8,7 @@ status Host_Tests(MemCh *m){
     void *args[5];
 
     Str *name = S(m, "firecrow.com");
-    HostEnt *h = HostEnt_FromName(m, name);
+    HostEnt *h = HostEnt_FromName(m, name, S(m, "http"));
     r |= Test((h->type.state & ERROR) == 0, 
         "Hostname lookup succeeded with out an error flag", args);
 
@@ -19,8 +19,7 @@ status Host_Tests(MemCh *m){
     Str *expected = S(m, "71.19.150.127"); 
     Single *addr = Span_Get(h->addrs, 0);
 
-
-    args[0] = S(m, h->ent->h_name);
+    args[0] = h->name;
     args[1] = expected;
     args[2] = Ip4_ToStr(m, addr->val.i);
     args[3] = NULL;

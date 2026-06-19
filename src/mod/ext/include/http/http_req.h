@@ -10,6 +10,10 @@ typedef struct http_req {
     Iter routeIt;
     /* req end */
     HostEnt *clientEnt;
+    struct {
+        i16 method;
+        i16 proto;
+    } address;
     StrVec *path;
     Buff *in;
     Buff *out;
@@ -21,17 +25,16 @@ typedef struct http_req {
     Span *sections;
 } HttpReq;
 
-void HttpReq_ReadToRbl(HttpReq *req);
-void HttpReq_RespToRbl(MemCh *m, HttpReq *req, Srv *srv);
-void HttpReq_Write(HttpReq *req);
+status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv);
+status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv);
+status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv);
 
 void HttpReq_ExpectRecv(HttpReq *req);
 void HttpReq_ExpectSend(HttpReq *req);
 void HttpReq_ParseBody(HttpReq *req);
 void HttpReq_SetFd(HttpReq *req, i32 fd);
 void HttpReq_Close(HttpReq *req);
-Req *HttpReq_Mk(Serve *srv);
-void HttpReq_Setup(Serve *srv, Req *_req){
+Req *HttpReq_Mk(MemCh *m, void *source);
+void HttpReq_Setup(MemCh *m, Req *req, Serve *srv);
 void HttpReq_SetToRecv(HttpReq *req);
 void HttpReq_SetToResponse(HttpReq *req, i32 fd);
-

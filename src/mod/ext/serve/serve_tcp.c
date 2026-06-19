@@ -47,7 +47,7 @@ static i32 openPortToFd(i32 port){
 }
 
 static void ServeTcp_OpenTcp(Serve *srv){
-    i32 fd = openPortToFd(srv->ctx->address.ip.port);
+    i32 fd = openPortToFd(srv->address.ent->port);
     void *args[4];
 
     struct pollfd *pfd = (struct pollfd *)&srv->u;
@@ -100,8 +100,8 @@ static void ServeTcp_AcceptPoll(Serve *srv){
             ts->new_fd = new_fd;
             ts->clientEnt = NULL;
 
-            Req *req = srv->def.mk(MemCh_Make());
-            srv->def.setup(srv, req);
+            Req *req = srv->def.mk(MemCh_Make(), NULL);
+            srv->def.setup(req->m, req, srv);
             req->idx = Queue_Add(srv->q, req);
         }else{
             break;
@@ -113,10 +113,10 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         srv->type.state &= ~(NOOP|PROCESSING);
         Req *req = (Req *)Queue_Get(srv->q);
 
-        srv->def.handle(m, req, srv);
+        srv->def.handle(req->m, req, srv);
         if(req->type.state & (SUCCESS|ERROR)){
             Queue_Remove(srv->q, req->idx);
-            srv->def.finalize(m, req, srv);
+            srv->def.finalize(req->m, req, srv);
             MemCh_Free(req->m);
         }
     }
@@ -140,6 +140,7 @@ void Serve_ServeTcp(Serve *srv){
 
 Serve *Serve_MakeTcp(MemCh *m, HandlerDef *def, HostEnt *ent){
     Serve *srv = Serve_Make(m);
-    srv->def = def;
+    memcpy(&srv->def, def, sizeof(HandlerDef));
     srv->address.ent = ent;
+    return srv;
 }
