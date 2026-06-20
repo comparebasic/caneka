@@ -34,7 +34,7 @@ void HttpReq_ExpectSend(HttpReq *req);
 void HttpReq_ParseBody(HttpReq *req);
 void HttpReq_SetFd(HttpReq *req, i32 fd);
 void HttpReq_Close(HttpReq *req);
-Req *HttpReq_Mk(MemCh *m, void *source);
+Req *HttpReq_Mk(MemCh *m, Serve *srv);
 void HttpReq_Setup(MemCh *m, Req *req, Serve *srv);
 void HttpReq_SetToRecv(HttpReq *req);
 void HttpReq_SetToResponse(HttpReq *req, i32 fd);

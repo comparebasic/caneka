@@ -5,11 +5,11 @@ typedef struct serve {
     MemCh *m;
     util u;
     Queue *q;
+    HandlerDef *def;
     struct {
         Buff *out;
         Buff *err;
     } log;
-    HandlerDef def;
     union {
         HostEnt *ent;
         StrVec *path;

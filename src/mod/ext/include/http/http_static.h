@@ -1,1 +1,1 @@
-void HttpStatic_DefMake(MemCh *m);
+HandlerDef *HttpStatic_DefMake(MemCh *m);

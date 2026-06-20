@@ -21,12 +21,14 @@ status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
     return SUCCESS;
 }
 
-void HttpStatic_DefMake(MemCh *m){
+HandlerDef *HttpStatic_DefMake(MemCh *m){
     HandlerDef *def = HandlerDef_Make(m);
+    def->mk = HttpReq_Mk;
+    def->setup = HttpReq_Setup;
     def->handle = (ReqFunc) HttpStatic_Handle;
-    def->handle = (ReqFunc) HttpStatic_Finalize;
+    def->finalize = (ReqFunc) HttpStatic_Finalize;
     def->log.open = (ReqFunc) HttpStatic_logOpen;
-    def->log.open = (ReqFunc) HttpStatic_logFinalized;
+    def->log.final = (ReqFunc) HttpStatic_logFinalized;
 
     Table *tbl = Table_Make(m);
 
@@ -39,5 +41,5 @@ void HttpStatic_DefMake(MemCh *m){
     Iter_Init(&def->routesIt, tbl);
     def->routesIt.metrics.selected = h->idx;
 
-    return;
+    return def;
 }

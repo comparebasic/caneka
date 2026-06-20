@@ -12,6 +12,8 @@ gobits QueueCrit_Fds(QueueCrit *crit, util *values){
     }
     struct pollfd *pfds = (struct pollfd *)values;
     i32 ready = poll(pfds, CRIT_SLAB_STRIDE, 0);
+    printf("QueueCrit ready %d\n", ready);
+    fflush(stdout);
 
     util base = 1;
     for(i32 i = 0; i < CRIT_SLAB_STRIDE && ready > 0; i++){

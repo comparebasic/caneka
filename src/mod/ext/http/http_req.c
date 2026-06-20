@@ -136,7 +136,7 @@ void HttpReq_ExpectSend(HttpReq *req){
     pfd->events = POLLOUT|POLLNVAL|POLLHUP|POLLERR;
 }
 
-Req *HttpReq_Mk(MemCh *m, void *source){
+Req *HttpReq_Mk(MemCh *m, Serve *srv){
     HttpReq *req = MemCh_AllocOf(m, sizeof(HttpReq), TYPE_HTTP_REQ);
     req->type.of = TYPE_HTTP_REQ;
     req->m = m;

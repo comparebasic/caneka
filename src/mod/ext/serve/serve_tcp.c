@@ -72,6 +72,13 @@ static void ServeTcp_AcceptPoll(Serve *srv){
     srv->type.state &= ~SUCCESS;
     void *args[5];
 
+    Buff_SetTemp(OutStream); 
+    if(srv->type.state & DEBUG){
+        args[0] = srv;
+        args[1] = NULL;
+        Out("^c.Serve.AcceptPoll @^0\n", args);
+    }
+
     struct pollfd *pfd = (struct pollfd *)&srv->u;
 
     i64 timeout = 0;
@@ -100,9 +107,19 @@ static void ServeTcp_AcceptPoll(Serve *srv){
             ts->new_fd = new_fd;
             ts->clientEnt = NULL;
 
-            Req *req = srv->def.mk(MemCh_Make(), NULL);
-            srv->def.setup(req->m, req, srv);
+            Req *req = srv->def->mk(MemCh_Make(), srv);
+            srv->def->setup(req->m, req, srv);
             req->idx = Queue_Add(srv->q, req);
+
+            if(srv->type.state & DEBUG){
+                Buff_SetTemp(OutStream); 
+                void *ar[] = {
+                   I32_Wrapped(OutStream->m, new_fd), 
+                   I32_Wrapped(OutStream->m, req->idx), 
+                   NULL
+                };
+                Out("^c.NewConnection fd:$ qIdx:$^0\n", ar);
+            }
         }else{
             break;
         }
@@ -110,15 +127,33 @@ static void ServeTcp_AcceptPoll(Serve *srv){
 
     srv->type.state |= (NOOP|PROCESSING);
     while((Queue_Next(srv->q) & END) == 0){
+        if(srv->type.state & DEBUG){
+            Buff_SetTemp(OutStream); 
+            void *ar[] = {
+               I32_Wrapped(OutStream->m, srv->q->it.idx), 
+               NULL
+            };
+            Out("^c.Handling qIdx:$^0\n", ar);
+            exit(1);
+        }
         srv->type.state &= ~(NOOP|PROCESSING);
         Req *req = (Req *)Queue_Get(srv->q);
 
-        srv->def.handle(req->m, req, srv);
+        srv->def->handle(req->m, req, srv);
         if(req->type.state & (SUCCESS|ERROR)){
             Queue_Remove(srv->q, req->idx);
-            srv->def.finalize(req->m, req, srv);
+            srv->def->finalize(req->m, req, srv);
             MemCh_Free(req->m);
         }
+    }
+
+    if(srv->type.state & DEBUG){
+        Buff_SetTemp(OutStream); 
+        void *ar[] = {
+           I32_Wrapped(OutStream->m, srv->q->it.p->nvalues), 
+           NULL
+        };
+        Out("^c.End AcceptPoll open:$^0\n", ar);
     }
 
     ReturnVoid(m);
@@ -133,14 +168,20 @@ void Serve_ServeTcp(Serve *srv){
     Queue_AddHandler(srv->q, crit);
 
     ServeTcp_OpenTcp(srv);
-    ServeTcp_AcceptPoll(srv);
+
+    while((srv->type.state & ERROR) == 0){
+        ServeTcp_AcceptPoll(srv);
+    }
 
     return;
 }
 
 Serve *Serve_MakeTcp(MemCh *m, HandlerDef *def, HostEnt *ent){
     Serve *srv = Serve_Make(m);
-    memcpy(&srv->def, def, sizeof(HandlerDef));
+    srv->source = TcpSource_Make(m);
+    srv->def = def;
     srv->address.ent = ent;
+
+    srv->type.state |= DEBUG;
     return srv;
 }

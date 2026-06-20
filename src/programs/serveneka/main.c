@@ -31,9 +31,9 @@ i32 main(int argc, char **argv){
         Sv(m, "Show this help message."));
     Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL,
         Sv(m, "Skip ansi color sequences in output."));
-    Args_Add(cli, portKey, NULL, ARG_OPTIONAL,
+    Args_Add(cli, portKey, S(m, "8000"), ARG_DEFAULT,
         Sv(m, "Port to use."));
-    Args_Add(cli, dirKey, NULL, ARG_OPTIONAL,
+    Args_Add(cli, dirKey, NULL, ZERO,
         Sv(m, "Directory to serve files from."));
 
     CliArgs_Parse(cli);
@@ -41,6 +41,18 @@ i32 main(int argc, char **argv){
     if(CliArgs_Get(cli, noColorKey)){
         Ansi_SetColor(FALSE);
     }
+
+    Str *portStr = CliArgs_Get(cli, portKey);
+    i32 port = Int_FromStr(portStr); 
+
+    HandlerDef *def = HttpStatic_DefMake(m);
+    StrVec *dir = Ifc(m, CliArgs_Get(cli, dirKey), TYPE_STRVEC);
+    def->source = dir;
+
+    HostEnt *ent = HostEnt_Make(m);
+    ent->port = port;
+    Serve *srv = Serve_MakeTcp(m, def, ent);
+    Serve_ServeTcp(srv);
 
     return (r & ERROR) == 0 ? 0 : 1;
 }
