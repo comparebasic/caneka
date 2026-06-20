@@ -7,7 +7,7 @@ typedef struct req_handler_def {
     ReqFunc setup;
     ReqFunc handle;
     ReqFunc finalize;
-    Iter routesIt; /*<Table>*/
+    Iter routeIt; /*<Table>*/
     struct {
         ReqFunc open;
         ReqFunc final;

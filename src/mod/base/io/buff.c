@@ -252,8 +252,10 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
 }
 
 void Buff_SetTemp(Buff *bf){
-    bf->type.state |= BUFF_TEMP_MEM;
-    bf->m->level++;
+    if((bf->type.state & BUFF_TEMP_MEM) == 0){
+        bf->type.state |= BUFF_TEMP_MEM;
+        bf->m->level++;
+    }
 }
 
 status Buff_Rinse(Buff *bf){

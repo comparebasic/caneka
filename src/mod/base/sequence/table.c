@@ -270,6 +270,11 @@ i32 Table_SetByIter(Iter *it, void *_a, void *_value){
     return h->idx;
 }
 
+Hashed *Table_GetHashedByIter(Iter *it, void *_a){
+    Abstract *a = (Abstract *)_a;
+    return Table_GetSetHashed(it, SPAN_OP_GET, a, NULL);
+}
+
 void *Table_FromIdx(Table *tbl, i32 idx){
     Hashed *h = (Hashed *)Span_Get(tbl, idx);
     if(h != NULL){

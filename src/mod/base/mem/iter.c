@@ -164,9 +164,9 @@ static status Iter_Query(Iter *it){
     i8 dimsNeeded = 0;
     while(_increments[dimsNeeded+1] <= it->idx){
         if(++dimsNeeded > SPAN_MAX_DIMS){
-            void *args[] = {I32_Wrapped(m, it->idx), NULL};
+            void *args[] = {I32_Wrapped(m, it->idx), I32_Wrapped(m, it->p->nvalues), NULL};
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                "idx too large $", args);
+                "idx too large $ for nvalues $", args);
             it->type.state |= ERROR;
             return it->type.state;
         }

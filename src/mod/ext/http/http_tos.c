@@ -10,9 +10,9 @@ static status HttpReq_Print(Buff *bf, void *a, cls type, word flags){
             Type_StateVec(m, req->type.of, req->type.state),
             HttpMethodStr(m, req->address.method),
             req->path,
-
             Serve_PollFlagVec(m, pfd),
             I32_Wrapped(m, pfd->fd),
+            &req->routeIt,
             req->headersIt.p,
             req->queryIt.p,
             req->body,
@@ -22,8 +22,8 @@ static status HttpReq_Print(Buff *bf, void *a, cls type, word flags){
             req->out,
             NULL
         };
-        return Fmt(bf, "HttpReq<@ $"
-            " @ @/@ headers:@ query:@ body:@ meta:@"
+        return Fmt(bf, "HttpReq<@ method:$ path:@"
+            " @/@ route:@ headers:@ query:@ body:@ meta:@"
             " sections:@ in:& out:&>", args);
     }else if(flags & MORE){
         void *args[] = {

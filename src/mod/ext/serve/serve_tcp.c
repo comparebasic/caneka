@@ -59,10 +59,12 @@ static void ServeTcp_OpenTcp(Serve *srv){
         srv->type.state |= ERROR;
     }
 
+    Buff_SetTemp(OutStream);
     args[0] = I32_Wrapped(OutStream->m, fd);
     args[1] = srv;
-    args[0] = NULL;
-    Out("^c.Opened Socket ^D.$^d.fd for @. Ready to Serve^0\n", args);
+    args[2] = I32_Wrapped(OutStream->m, srv->address.ent->port);
+    args[3] = NULL;
+    Out("^c.Opened Socket ^D.$^d.fd for @. Ready to Serve on port $^0\n", args);
 }
 
 static void ServeTcp_AcceptPoll(Serve *srv){
@@ -70,13 +72,17 @@ static void ServeTcp_AcceptPoll(Serve *srv){
     Debug_Push(m, srv);
 
     srv->type.state &= ~SUCCESS;
-    void *args[5];
+    void *args[8];
 
     Buff_SetTemp(OutStream); 
-    if(srv->type.state & DEBUG){
+    MemBookStats st;
+    MemBook_GetStats(OutStream->m, &st);
+    if(0 && srv->type.state & DEBUG){
         args[0] = srv;
-        args[1] = NULL;
-        Out("^c.Serve.AcceptPoll @^0\n", args);
+        args[1] = Str_MemCount(OutStream->m, st.total * PAGE_SIZE);
+        args[2] = I16_Wrapped(OutStream->m, m->level);
+        args[3] = NULL;
+        Out("^c.Serve.AcceptPoll @ Mem Used @ level$^0\n", args);
     }
 
     struct pollfd *pfd = (struct pollfd *)&srv->u;
@@ -134,7 +140,6 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                NULL
             };
             Out("^c.Handling qIdx:$^0\n", ar);
-            exit(1);
         }
         srv->type.state &= ~(NOOP|PROCESSING);
         Req *req = (Req *)Queue_Get(srv->q);
@@ -147,7 +152,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         }
     }
 
-    if(srv->type.state & DEBUG){
+    if(0 && srv->type.state & DEBUG){
         Buff_SetTemp(OutStream); 
         void *ar[] = {
            I32_Wrapped(OutStream->m, srv->q->it.p->nvalues), 
@@ -171,6 +176,11 @@ void Serve_ServeTcp(Serve *srv){
 
     while((srv->type.state & ERROR) == 0){
         ServeTcp_AcceptPoll(srv);
+        struct timespec ts;
+        struct timespec remaining;
+        ts.tv_sec = 0;
+        ts.tv_nsec = 200000000;
+        Time_Delay(&ts, &remaining);
     }
 
     return;

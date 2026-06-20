@@ -22,6 +22,7 @@ void *Table_Get(Span *tbl, void *a);
 i32 Table_UnSet(Table *tbl, void *a);
 i32 Table_Set(Span *tbl, void *a, void *value);
 i32 Table_SetByIter(Iter *it, void *a, void *value);
+Hashed *Table_GetHashedByIter(Iter *it, void *_a);
 void *Table_FromIdx(Span *tbl, i32 idx);
 i32 Table_GetIdx(Span *tbl, void *a);
 Table *Table_Make(MemCh *m);
