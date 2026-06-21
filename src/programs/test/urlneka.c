@@ -52,6 +52,7 @@ i32 main(int argc, char **argv){
         Ansi_SetColor(FALSE);
     }
 
+#ifdef CNKOPT_EXT
     StrVec *uriText = Ifc(m, CliArgs_Get(cli, uriKey), TYPE_STRVEC);
     Uri *uri = Uri_Make(m, uriText);
     Str *name = Ifc(m, uri->host, TYPE_STR);
@@ -116,6 +117,7 @@ i32 main(int argc, char **argv){
     }
 
     MemCh_Free(req->m);
+#endif
 
     return (r & ERROR) == 0 ? 0 : 1;
 }

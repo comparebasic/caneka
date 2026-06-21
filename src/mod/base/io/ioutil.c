@@ -3,6 +3,43 @@
 
 static Span *pathSeps = NULL;
 
+status IoUtil_Relativise(MemCh *m, StrVec *path){
+    void *ar[] = {
+        path,
+        NULL
+    };
+    Out("^y.Relativise @^0\n", ar);
+
+    status r = READY;
+    Iter it;
+    Iter_Init(&it, path->p);
+    i32 count = 0;
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        if((s->type.state & LAST) && s->length == 1 && s->bytes[0] == '.'){
+            count++;
+        }else if(count){
+            if(count == 1){
+                void *ar[] = {
+                    I32_Wrapped(m, it.idx),
+                    NULL
+                };
+                Out("^p.Single Noop \\@$^0\n", ar);
+            }else if(count > 1){
+                void *ar[] = {
+                    I32_Wrapped(m, count),
+                    I32_Wrapped(m, it.idx),
+                    NULL
+                };
+                Out("^p.More than one $ \\@$^0\n", ar);
+            }
+            count = 0;
+        }
+    }
+
+    return r;
+}
+
 Str *IoUtil_PathSep(MemCh *m){
     return Str_Ref(m, (byte *)"/", 1, 1, STRING_COPY|MORE);
 }

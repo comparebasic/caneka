@@ -1,3 +1,4 @@
+status IoUtil_Relativise(MemCh *m, StrVec *path);
 status IoUtils_Init(MemCh *m);
 status IoUtil_Exists(Str *path);
 status IoUtil_Unlink(Str *path);

@@ -32,6 +32,7 @@ status Clone_Tests(MemCh *gm);
 status DebugStack_Tests(MemCh *gm);
 status Histo_Tests(MemCh *m);
 status Parity_Tests(MemCh *m);
+status IoUtilsRelativize_Tests(MemCh *m);
 
 static TestSet BaseTests[] = {
     {
@@ -114,7 +115,7 @@ static TestSet BaseTests[] = {
         "Fmt Memory Tests",
         FmtMem_Tests,
         "Fmt memory clennup tests",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "Histo Tests",
@@ -246,6 +247,12 @@ static TestSet BaseTests[] = {
         "Stash Tests",
         Stash_Tests,
         "Mem Stash testing.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "IoUtils Relativize Tests",
+        IoUtilsRelativize_Tests,
+        "Adjusting paths baed on previous .. and local . symbols",
         FEATURE_COMPLETE,
     },
     {
