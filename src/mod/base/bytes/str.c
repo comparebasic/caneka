@@ -10,6 +10,9 @@
 #include "base_module.h"
 
 boolean TextCharFilter(byte *b, i64 length){
+    if(length == 0){
+        return TRUE;
+    }
     /* Ensure text is within safe characters */
     byte *end = b+(length-1);
     while(TRUE){

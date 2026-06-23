@@ -252,7 +252,7 @@ static TestSet BaseTests[] = {
     {
         "IoUtils Relativize Tests",
         IoUtilsRelativize_Tests,
-        "Adjusting paths baed on previous .. and local . symbols",
+        "Adjusting paths based on previous .. and local . symbols",
         FEATURE_COMPLETE,
     },
     {

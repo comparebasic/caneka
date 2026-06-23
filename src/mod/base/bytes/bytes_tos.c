@@ -8,6 +8,7 @@
 static Str **streamLabels = NULL;
 static Str **strLabels = NULL;
 static Str **histoLabels = NULL;
+static Str **strvecLabels = NULL;
 
 status Bytes_Debug(Buff *bf, byte *start, byte *end){
     byte *b = start;
@@ -244,6 +245,13 @@ status Str_InitLabels(MemCh *m, Lookup *lk){
         strLabels[15] = Str_CstrRef(m, "UTF8");
         strLabels[16] = Str_CstrRef(m, "SEP");
         Lookup_Add(m, lk, TYPE_STR, (void *)strLabels);
+        r |= SUCCESS;
+    }
+
+    if(strvecLabels == NULL){
+        strLabels = (Str **)Arr_Make(m, 17);
+        strLabels[9] = Str_CstrRef(m, "PATH");
+        Lookup_Add(m, lk, TYPE_STRVEC, (void *)strLabels);
         r |= SUCCESS;
     }
 

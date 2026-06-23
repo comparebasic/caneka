@@ -4,12 +4,6 @@
 static Span *pathSeps = NULL;
 
 status IoUtil_Relativise(MemCh *m, StrVec *path){
-    void *ar[] = {
-        path,
-        NULL
-    };
-    Out("^y.Relativise @^0\n", ar);
-
     status r = READY;
     Iter it;
     Iter_Init(&it, path->p);
@@ -18,20 +12,52 @@ status IoUtil_Relativise(MemCh *m, StrVec *path){
         Str *s = Iter_Get(&it);
         if((s->type.state & LAST) && s->length == 1 && s->bytes[0] == '.'){
             count++;
-        }else if(count){
+        }else if(count && (s->type.state & MORE)){
             if(count == 1){
-                void *ar[] = {
-                    I32_Wrapped(m, it.idx),
-                    NULL
-                };
-                Out("^p.Single Noop \\@$^0\n", ar);
+                if(it.idx == 1){
+                    path->type.state |= NOOP;
+                }
+                s->length = 0;
+                s->type.state |= NOOP;
+                Iter_Prev(&it);
+                s = Iter_Get(&it);
+                s->length = 0;
+                s->type.state |= NOOP;
+                Iter_Next(&it);
+                r |= PROCESSING;
             }else if(count > 1){
-                void *ar[] = {
-                    I32_Wrapped(m, count),
-                    I32_Wrapped(m, it.idx),
-                    NULL
-                };
-                Out("^p.More than one $ \\@$^0\n", ar);
+                s->length = 0;
+                s->type.state |= NOOP;
+                i32 take = count;
+                while(take--){
+                    Iter_Prev(&it);
+                    s = Iter_Get(&it);
+                    s->length = 0;
+                    s->type.state |= NOOP;
+                }
+
+                while(Iter_Prev(&it) & END){
+                   path->type.state |= ERROR; 
+                   break;
+                }
+
+                while((s->type.state & MORE) == 0){
+                    if(Iter_Prev(&it) & END){
+                        path->type.state |= ERROR; 
+                        break;
+                    }
+                    s = Iter_Get(&it);
+                    if(s->length == 0 && (s->type.state & NOOP)){
+                       path->type.state |= ERROR; 
+                       break;
+                    }
+                    s->length = 0;
+                    s->type.state |= NOOP;
+                }
+
+                while(count--){
+                    Iter_Next(&it);
+                }
             }
             count = 0;
         }
