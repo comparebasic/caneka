@@ -22,12 +22,29 @@ i32 Seel_TypeByName(void *name){
     return ZERO;
 }
 
-status Seel_SetKv(Span *inst, Str *prop, void *key, void *value){
-    Table *tbl = Seel_Get(inst, prop);
-    if(tbl != NULL && tbl->type.of == TYPE_TABLE){
-        return Table_Set(tbl, key, value);
+status Seel_AddTo(Span *inst, void *attKey, void *_key, void *value){
+    MemCh *m = inst->m;
+    Abstract *a = Seel_Get(inst, attKey);
+    Abstract *key = (Abstract *)_key;
+    if(a->type.of == TYPE_TABLE){
+        Table *tbl = (Table *)a;
+        return Table_Set(tbl, key, value) >= 0 ? SUCCESS : ERROR;
+    }else if(a->type.of == TYPE_SPAN){
+        Span *p = (Span *)a;
+        if(key != NULL){
+            Single *sg = (Single *)Ifc(m, key, TYPE_WRAPPED_U32);
+            return Span_Set(p, sg->val.i, value);
+        }else{
+            return Span_Add(p, value);
+        }
+    }else if(a->type.of & TYPE_INSTANCE){
+        Inst *subInst = (Inst *)a;
+        return Seel_Set(subInst, key, value);
+    }else{
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Not a container type cannot add a nested property to the value found", NULL);
+        return ERROR;
     }
-    return NOOP;
 }
 
 status Seel_Set(Span *inst, void *key, void *value){

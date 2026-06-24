@@ -26,6 +26,7 @@ status Caneka_Init(MemCh *m){
     Node_ClsInit(m);
     IterApi_Init(m);
     Cash_ToSInit(m, ToStreamLookup);
+    HttpConfig_ClsInit(m);
 
     return m->type.state;
 }

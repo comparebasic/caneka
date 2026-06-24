@@ -26,6 +26,7 @@ i32 main(int argc, char **argv){
     Str *noColorKey = K(m, "no-color");
     Str *portKey = K(m, "port");
     Str *dirKey = K(m, "dir");
+    Str *etagKey = K(m, "etag");
 
     Args_Add(cli, helpKey, NULL, ARG_OPTIONAL,
         Sv(m, "Show this help message."));
@@ -35,6 +36,8 @@ i32 main(int argc, char **argv){
         Sv(m, "Port to use."));
     Args_Add(cli, dirKey, NULL, ZERO,
         Sv(m, "Directory to serve files from."));
+    Args_Add(cli, etagKey, NULL, ZERO,
+        Sv(m, "Directory to store etags."));
 
     CliArgs_Parse(cli);
 
@@ -47,10 +50,20 @@ i32 main(int argc, char **argv){
 
     HandlerDef *def = HttpStatic_DefMake(m);
     StrVec *dir = Ifc(m, CliArgs_Get(cli, dirKey), TYPE_STRVEC);
-    def->source = dir;
+    Node *config = Inst_Make(m, TYPE_HTTP_CONFIG);
 
     HostEnt *ent = HostEnt_Make(m);
     ent->port = port;
+    Seel_AddTo(config, K(m, "addrs"), NULL, ent);
+    Seel_Set(config, K(m, "dir"), CliArgs_Get(cli, dirKey));
+    Seel_Set(config, K(m, "etag"), CliArgs_Get(cli, etagKey));
+
+    args[0] = config;
+    args[1] = NULL;
+    Out("^c.Config @^0\n", args);
+
+    def->source = config;
+
     Serve *srv = Serve_MakeTcp(m, def, ent);
     Serve_ServeTcp(srv);
 

@@ -229,6 +229,7 @@ static char *extTypeStrings[] = {
 static char *extTypeInstectStrings[] = {
     "TYPE_INSTANCE",
     "TYPE_NODE",
+    "TYPE_HTTP_CONFIG",
     "_EXT_OBJECT_END",
     NULL
 };

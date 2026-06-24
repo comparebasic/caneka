@@ -17,11 +17,15 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
     ReqFunc func = (ReqFunc)sg->val.ptr;
     func(m, (Req *)req, srv);
 
+    StrVec *path = IoPath_FromVec(m, req->path);
+    IoUtil_Relativise(m, path);
+
     void *ar[] = {
+        path, 
         req,
         NULL
     };
-    Out("^p.Handle &^0\n", ar);
+    Out("^p.Handle $ &^0\n", ar);
 
     return;
 }

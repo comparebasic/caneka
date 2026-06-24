@@ -12,5 +12,5 @@ Table *Seel_GetSeel(MemCh *m, cls instType);
 status Seel_Init(MemCh *m);
 void *Seel_Get(Span *inst, void *key);
 status Seel_Set(Span *inst, void *key, void *value);
-status Seel_SetKv(Span *inst, Str *prop, void *key, void *value);
+status Seel_AddTo(Span *inst, void *attKey, void *key, void *value);
 i32 Seel_TypeByName(void *name);

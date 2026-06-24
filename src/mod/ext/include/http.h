@@ -10,4 +10,5 @@ enum http_types {
 #include "http/http_roebling.h"
 #include "http/http_req.h"
 #include "http/http_static.h"
+#include "http/http_config.h"
 #include "http/http_tos.h"
