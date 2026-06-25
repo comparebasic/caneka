@@ -37,7 +37,8 @@ status IoUtil_Relativise(MemCh *m, StrVec *path){
                 }
 
                 while(Iter_Prev(&it) & END){
-                   path->type.state |= ERROR; 
+                   Error(m, FUNCNAME, FILENAME, LINENUMBER, 
+                       "Invalid path tries to jump up beyound root", NULL);
                    break;
                 }
 

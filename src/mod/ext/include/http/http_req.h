@@ -18,6 +18,7 @@ typedef struct http_req {
     Buff *in;
     Buff *out;
     Iter headersIt;
+    Table *headersOut;
     Iter queryIt;
     Table *meta;
     Roebling *rbl;
@@ -36,5 +37,7 @@ void HttpReq_SetFd(HttpReq *req, i32 fd);
 void HttpReq_Close(HttpReq *req);
 Req *HttpReq_Mk(MemCh *m, Serve *srv);
 void HttpReq_Setup(MemCh *m, Req *req, Serve *srv);
+void HttpReq_Serve(MemCh *m, HttpReq *req, Serve *srv);
 void HttpReq_SetToRecv(HttpReq *req);
 void HttpReq_SetToResponse(HttpReq *req, i32 fd);
+void HttpReq_SetHeader(HttpReq *req, Str *key, void *value);

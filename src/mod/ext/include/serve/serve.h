@@ -21,6 +21,7 @@ typedef struct serve {
         util error;
         util total;
     } metrics;
+    Inst *config;
     void *source;
 } Serve;
 

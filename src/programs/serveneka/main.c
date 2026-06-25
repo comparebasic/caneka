@@ -49,22 +49,24 @@ i32 main(int argc, char **argv){
     i32 port = Int_FromStr(portStr); 
 
     HandlerDef *def = HttpStatic_DefMake(m);
-    StrVec *dir = Ifc(m, CliArgs_Get(cli, dirKey), TYPE_STRVEC);
+
+    StrVec *dir = IoUtil_GetAbsVec(m, CliArgs_Get(cli, dirKey));
+    IoUtil_TrimDir(m, dir);
     Node *config = Inst_Make(m, TYPE_HTTP_CONFIG);
 
     HostEnt *ent = HostEnt_Make(m);
     ent->port = port;
     Seel_AddTo(config, K(m, "addrs"), NULL, ent);
-    Seel_Set(config, K(m, "dir"), CliArgs_Get(cli, dirKey));
+    Seel_Set(config, K(m, "dir"), dir);
     Seel_Set(config, K(m, "etag"), CliArgs_Get(cli, etagKey));
 
-    args[0] = config;
+    Serve *srv = Serve_MakeTcp(m, def, ent);
+    srv->config = config;
+
+    args[0] = config->m;
     args[1] = NULL;
     Out("^c.Config @^0\n", args);
 
-    def->source = config;
-
-    Serve *srv = Serve_MakeTcp(m, def, ent);
     Serve_ServeTcp(srv);
 
     return (r & ERROR) == 0 ? 0 : 1;

@@ -74,6 +74,7 @@ void *Seel_Get(Span *inst, void *key){
     if(inst == NULL){
         return NULL;
     }
+
     Table *seel = Lookup_Get(SeelLookup, inst->type.of);
     void *args[2];
     if(seel == NULL){
@@ -91,6 +92,7 @@ void *Seel_Get(Span *inst, void *key){
             "Seel prop not found key: @", args);
         return NULL;
     }
+
     Single *sg = (Single *)h->value;
     if(sg->val.w == TYPE_ABSTRACT){
         return Span_Get(inst, h->orderIdx);

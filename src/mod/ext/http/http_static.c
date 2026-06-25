@@ -10,27 +10,23 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
     Str *key = K(m, "static");
     Hashed *h = Table_GetHashedByIter(&srv->def->routeIt, key);
     Span *chain = Ifc(m, h->value, TYPE_SPAN);
-    Iter_Init(&req->routeIt, chain);
-    Iter_Next(&req->routeIt);
+    if((req->routeIt.type.state & PROCESSING) == 0){
+        Iter_Init(&req->routeIt, chain);
+        Iter_Next(&req->routeIt);
+    }else if(req->type.state & SUCCESS){
+        Iter_Next(&req->routeIt);
+    }
 
     Single *sg = Iter_Get(&req->routeIt);
     ReqFunc func = (ReqFunc)sg->val.ptr;
     func(m, (Req *)req, srv);
 
-    StrVec *path = IoPath_FromVec(m, req->path);
-    IoUtil_Relativise(m, path);
-
-    void *ar[] = {
-        path, 
-        req,
-        NULL
-    };
-    Out("^p.Handle $ &^0\n", ar);
-
     return;
 }
 
 static void HttpStatic_Finalize(MemCh *m, HttpReq *req, Serve *srv){
+    void *ar[] = {req, NULL};
+    Out("^y.Finalize @^0\n", ar);
     return;
 }
 
@@ -43,7 +39,27 @@ static void HttpStatic_logFinalized(MemCh *m, HttpReq *req, Serve *srv){
 }
 
 status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
-    return SUCCESS;
+    Debug_Push(m, req);
+    StrVec *local = IoPath_FromVec(m, req->path);
+    IoUtil_Relativise(m, local);
+
+    Str *dir = Seel_Get(srv->config, K(m, "dir"));
+    StrVec *path = Clone(m, dir);
+    StrVec_AddVec(path, local);
+
+    Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+    File_Open(bf, path, O_RDONLY);
+    Span_Add(req->sections, bf);
+
+    void *ar[] = {
+        path, 
+        bf,
+        NULL
+    };
+    Out("^y.File Retrieved $ @^0\n", ar);
+    req->type.state |= SUCCESS;
+
+    Return(m, req->type.state);
 }
 
 HandlerDef *HttpStatic_DefMake(MemCh *m){

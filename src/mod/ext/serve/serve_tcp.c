@@ -145,7 +145,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         Req *req = (Req *)Queue_Get(srv->q);
 
         srv->def->handle(req->m, req, srv);
-        if(req->type.state & (SUCCESS|ERROR)){
+        if(req->type.state & (END|ERROR)){
             Queue_Remove(srv->q, req->idx);
             srv->def->finalize(req->m, req, srv);
             MemCh_Free(req->m);
@@ -179,7 +179,7 @@ void Serve_ServeTcp(Serve *srv){
         struct timespec ts;
         struct timespec remaining;
         ts.tv_sec = 0;
-        ts.tv_nsec = 200000000;
+        ts.tv_nsec = 2000;
         Time_Delay(&ts, &remaining);
     }
 

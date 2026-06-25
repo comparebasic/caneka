@@ -27,6 +27,16 @@ status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Return(m, req->type.state);
 }
 
+void HttpReq_SetHeader(HttpReq *req, Str *key, void *value){
+    if(req->headersOut == NULL){
+        req->headersOut = Table_Make(req->m);
+    }
+    Table_Set(req->headersOut, key, value);
+}
+
+void HttpReq_Serve(MemCh *m, HttpReq *req, Serve *srv){
+}
+
 status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
@@ -55,31 +65,49 @@ status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv){
 
 status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
+    Iter it;
 
+    HttpReq_SetHeader(req, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
     struct pollfd *pfd = (struct pollfd *)&req->u;
     Buff_SetSocket(req->out, pfd->fd);
 
-    Iter it;
-    Iter_Init(&it, req->sections);
+    i32 length = 0;
+    if(req->sections->nvalues == 0){
+        Buff_Add(req->out, K(m, "HTTP/1.1 404 Not Found\r\n"));
+    }else{
+        Buff_Add(req->out, K(m, "HTTP/1.1 200 Ok\r\n"));
+        Iter_Init(&it, req->sections);
+        while((Iter_Next(&it) & END) == 0){
+            Buff *bf = Iter_Get(&it);
+            Buff_Stat(bf);
+            length += bf->st.st_size;
+        }
+        HttpReq_SetHeader(req,
+            S(m, "Content-Length"), I32_Wrapped(m, length));
+    }
+
+    Iter_Init(&it, Table_Ordered(m, req->headersOut));
     while((Iter_Next(&it) & END) == 0){
-        Buff *bf = Iter_Get(&it);
+        Hashed *h = Iter_Get(&it);
+        void *ar[] = {h->key, h->value, NULL};
+        Fmt(req->out, "$: $\r\n", ar);
+    }
+        
+    Buff_Add(req->out, K(m, "\r\n"));
 
-        Buff_Pipe(req->out, bf);
-        if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
-            close(bf->fd);
-            Buff_UnsetFd(bf);
-        }
-
-        if((bf->type.state & ERROR) || (bf->type.state & (SUCCESS|END)) == 0){
-            req->type.state |= ERROR;
-            break;
+    if(length){
+        Iter_Init(&it, req->sections);
+        while((Iter_Next(&it) & END) == 0){
+            Buff *bf = Iter_Get(&it);
+            Buff_Pipe(req->out, bf);
+            if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
+                close(bf->fd);
+                Buff_UnsetFd(bf);
+            }
         }
     }
+    req->type.state |= (SUCCESS|END);
 
-    if((req->type.state & ERROR) == 0){
-        req->type.state |= SUCCESS;
-    }
-    
     Return(m, req->type.state);
 }
 
