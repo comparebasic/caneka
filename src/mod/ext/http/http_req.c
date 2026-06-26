@@ -3,26 +3,41 @@
 
 status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
+    Out("^p.  HttpReq_RespToRbl\n^0", NULL);
 
-    struct pollfd *pfd = (struct pollfd *)&req->u;
+    struct pollfd *pfd = (struct pollfd *)req->slot;
     Buff_SetSocket(req->in, pfd->fd);
     if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
             (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
         Roebling_Run(req->rbl);
+        void *ar[] = {
+            req->in->v,
+            req->headersIt.p,
+            NULL
+        };
+        Out("^p.  Read So Far: ^c.@ -> @^0\n", ar);
     }
     
     req->type.state |= req->rbl->type.state & (SUCCESS|ERROR);
 
     if(req->type.state & SUCCESS){
         HttpReq_ParseBody(req);            
-        if(req->type.state & DEBUG){
+        if(1 || req->type.state & DEBUG){
             void *args[] = {
                 req,
                 NULL,
             };
-            Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
+            Out("^p.  Parsed Tcp Initial Request -> ^c.@^0\n", args);
         }
+    }else{
+        void *args[] = {
+            req,
+            NULL,
+        };
+        Out("^r.  Error Parsing Tcp Initial Request -> ^c.@^0\n", args);
     }
+
+    HttpReq_ExpectSend(req);
 
     Return(m, req->type.state);
 }
@@ -40,7 +55,7 @@ void HttpReq_Serve(MemCh *m, HttpReq *req, Serve *srv){
 status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
-    struct pollfd *pfd = (struct pollfd *)&req->u;
+    struct pollfd *pfd = (struct pollfd *)req->slot;
     Buff_SetSocket(req->in, pfd->fd);
     if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
             (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
@@ -68,7 +83,7 @@ status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
     Iter it;
 
     HttpReq_SetHeader(req, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
-    struct pollfd *pfd = (struct pollfd *)&req->u;
+    struct pollfd *pfd = (struct pollfd *)req->slot;
     Buff_SetSocket(req->out, pfd->fd);
 
     i32 length = 0;
@@ -150,17 +165,17 @@ void HttpReq_Close(HttpReq *req){
 }
 
 void HttpReq_SetFd(HttpReq *req, i32 fd){
-    struct pollfd *pfd = (struct pollfd *)&req->u;
+    struct pollfd *pfd = (struct pollfd *)req->slot;
     pfd->fd = fd;
 }
 
 void HttpReq_ExpectRecv(HttpReq *req){
-    struct pollfd *pfd = (struct pollfd *)&req->u;
+    struct pollfd *pfd = (struct pollfd *)req->slot;
     pfd->events = POLLIN|POLLNVAL|POLLHUP|POLLERR;
 }
 
 void HttpReq_ExpectSend(HttpReq *req){
-    struct pollfd *pfd = (struct pollfd *)&req->u;
+    struct pollfd *pfd = (struct pollfd *)req->slot;
     pfd->events = POLLOUT|POLLNVAL|POLLHUP|POLLERR;
 }
 
@@ -183,10 +198,10 @@ void HttpReq_Setup(MemCh *m, Req *_req, Serve *srv){
 
     TcpSource *ts = (TcpSource *)srv->source;
     req->clientEnt = ts->clientEnt;
+
+    Queue_SetCriteria(srv->q, 0, req->idx, &req->slot);
     HttpReq_SetFd(req, ts->new_fd);
     HttpReq_ExpectRecv(req);
-
-    Queue_SetCriteria(srv->q, 0, req->idx, &req->u);
 }
 
 void HttpReq_SetToRecv(HttpReq *req){

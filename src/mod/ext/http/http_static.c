@@ -7,6 +7,8 @@ static void HttpStatic_Setup(MemCh *m, Req *req, Serve *srv){
 }
 
 static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
+    Out("^p.HttpStatic_Handle\n^0", NULL);
+
     Str *key = K(m, "static");
     Hashed *h = Table_GetHashedByIter(&srv->def->routeIt, key);
     Span *chain = Ifc(m, h->value, TYPE_SPAN);
@@ -40,6 +42,8 @@ static void HttpStatic_logFinalized(MemCh *m, HttpReq *req, Serve *srv){
 
 status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
+    Out("^p.  HttpStatic_RetrieveFile^0\n", NULL);
+
     StrVec *local = IoPath_FromVec(m, req->path);
     IoUtil_Relativise(m, local);
 

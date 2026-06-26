@@ -6,7 +6,7 @@ typedef struct http_req {
     Type type;
     MemCh *m;
     i32 idx;
-    util u;
+    util *slot;
     Iter routeIt;
     /* req end */
     HostEnt *clientEnt;

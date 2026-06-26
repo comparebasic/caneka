@@ -4,7 +4,7 @@
 static status HttpReq_Print(Buff *bf, void *a, cls type, word flags){
     HttpReq *req = (HttpReq *)a;
     MemCh *m = bf->m;
-    struct pollfd *pfd = (struct pollfd *)&req->u;
+    struct pollfd *pfd = (struct pollfd *)req->slot;
     if(flags & DEBUG){
         void *args[] = {
             Type_StateVec(m, req->type.of, req->type.state),

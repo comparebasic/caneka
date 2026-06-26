@@ -2,7 +2,7 @@ typedef struct req {
     Type type;
     MemCh *m;
     i32 idx;
-    util u;
+    util *slot;
     Iter routeIt;
 } Req;
 

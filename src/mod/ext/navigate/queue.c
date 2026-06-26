@@ -15,10 +15,10 @@ status Queue_Remove(Queue *q, i32 idx){
     q->type.state |= (it.type.state & (FLAG_ITER_REVERSE|END));
     MemCh *m = q->it.p->m;
 
-    i64 n = 0;
     Iter_Init(&it, q->handlers);
     while((Iter_Next(&it) & END) == 0){
-        r |= Queue_SetCriteria(q, it.idx, idx, (util *)&n);
+        util *uptr = Queue_GetCriteria(q, it.idx, idx);
+        *uptr = 0;
     }
 
     Single *sg = NULL;
@@ -58,17 +58,17 @@ status Queue_Set(Queue *q, i32 idx, void *a){
     return r;
 }
 
-util Queue_GetCriteria(Queue *q, i32 critIdx, i32 idx){
+util *Queue_GetCriteria(Queue *q, i32 critIdx, i32 idx){
     Iter it;
     Iter_Init(&it, q->handlers);
     i32 slabIdx = idx / CRIT_SLAB_STRIDE;
     QueueCrit *crit = (QueueCrit *)Span_Get(q->handlers, critIdx);
     util *slab = (util *)Span_Get(crit->data, slabIdx);
     i32 localIdx = idx & CRIT_SLAB_MASK;
-    return slab[localIdx];
+    return &slab[localIdx];
 }
 
-status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
+status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util **value){
     status r = READY;
     void *args[2];
     MemCh *m = q->it.p->m;
@@ -88,7 +88,7 @@ status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util *value){
         r |= Span_Set(crit->data, slabIdx, slab);
     } 
     i32 localIdx = idx & CRIT_SLAB_MASK;
-    slab[localIdx] = *((util *)value);
+    *value = &(slab[localIdx]);
     r |= SUCCESS;
     return r;
 }

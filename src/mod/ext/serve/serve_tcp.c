@@ -74,17 +74,6 @@ static void ServeTcp_AcceptPoll(Serve *srv){
     srv->type.state &= ~SUCCESS;
     void *args[8];
 
-    Buff_SetTemp(OutStream); 
-    MemBookStats st;
-    MemBook_GetStats(OutStream->m, &st);
-    if(0 && srv->type.state & DEBUG){
-        args[0] = srv;
-        args[1] = Str_MemCount(OutStream->m, st.total * PAGE_SIZE);
-        args[2] = I16_Wrapped(OutStream->m, m->level);
-        args[3] = NULL;
-        Out("^c.Serve.AcceptPoll @ Mem Used @ level$^0\n", args);
-    }
-
     struct pollfd *pfd = (struct pollfd *)&srv->u;
 
     i64 timeout = 0;
@@ -103,7 +92,18 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         ReturnVoid(m);
     }
 
-    i32 accepted = 0;
+    if(1 && srv->type.state & DEBUG){
+        Buff_SetTemp(OutStream); 
+        MemBookStats st;
+        MemBook_GetStats(OutStream->m, &st);
+        args[0] = srv;
+        args[1] = Str_MemCount(OutStream->m, st.total * PAGE_SIZE);
+        args[2] = I32_Wrapped(OutStream->m, srv->q->it.p->nvalues);
+        args[3] = I32_Wrapped(OutStream->m, available);
+        args[4] = NULL;
+        Out("^c.Serve.AcceptPoll @ Mem Used @ $requests $available^0\n", args);
+    }
+
     while(available-- > 0){
         i32 new_fd = accept(pfd->fd, (struct sockaddr*)NULL, NULL);
         if(new_fd > 0){
@@ -146,6 +146,8 @@ static void ServeTcp_AcceptPoll(Serve *srv){
 
         srv->def->handle(req->m, req, srv);
         if(req->type.state & (END|ERROR)){
+            printf("Error|End?\n");
+            fflush(stdout);
             Queue_Remove(srv->q, req->idx);
             srv->def->finalize(req->m, req, srv);
             MemCh_Free(req->m);
@@ -165,7 +167,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
 }
 
 struct pollfd *Serve_TcpGetPollFd(Req *req){
-     return (struct pollfd *)&req->u;
+     return (struct pollfd *)req->slot;
 }
 
 void Serve_ServeTcp(Serve *srv){
@@ -176,11 +178,13 @@ void Serve_ServeTcp(Serve *srv){
 
     while((srv->type.state & ERROR) == 0){
         ServeTcp_AcceptPoll(srv);
+        /*
         struct timespec ts;
         struct timespec remaining;
         ts.tv_sec = 0;
-        ts.tv_nsec = 2000;
+        ts.tv_nsec = 500000000;
         Time_Delay(&ts, &remaining);
+        */
     }
 
     return;

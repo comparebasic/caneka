@@ -32,8 +32,9 @@ static status queueScaleTest(MemCh *m, i32 max){
             .type = {TYPE_APPROXTIME, APPROXTIME_MILLISEC},
             .value = time 
         };
+        util *ptr = (util *)at;
         Queue_Add(q, I32_Wrapped(m, i)); 
-        Queue_SetCriteria(q, hIdx, i, (util *)&at);
+        Queue_SetCriteria(q, hIdx, i, (util **)&ptr);
     }
 
     Queue_Reset(q);
@@ -110,25 +111,27 @@ status QueueScale_Tests(MemCh *m){
 
     Queue_Next(q);
 
+    util *ptr = (util *)&oneSec;
+
     i32 idx = 16;
     Queue_Set(q, idx, S(m, "Not Cool..."));
-    Queue_SetCriteria(q, hIdx, idx, (util *)&oneSec);
+    Queue_SetCriteria(q, hIdx, idx, (util **)&ptr);
 
     idx = 24;
     Queue_Set(q, idx, S(m, "Hidy Ho!"));
-    Queue_SetCriteria(q, hIdx, idx, (util *)&oneSec);
+    Queue_SetCriteria(q, hIdx, idx, (util **)&ptr);
 
     idx = 63;
     Queue_Set(q, idx, S(m, "Livin on the Edge!"));
-    Queue_SetCriteria(q, hIdx, idx, (util *)&oneSec);
+    Queue_SetCriteria(q, hIdx, idx, (util **)&ptr);
 
     idx = 64;
     Queue_Set(q, idx, S(m, "XjfoaiwuerZduio"));
-    Queue_SetCriteria(q, hIdx, idx, (util *)&oneSec);
+    Queue_SetCriteria(q, hIdx, idx, (util **)&ptr);
 
     idx = 65;
     Queue_Set(q, idx, S(m, "SixyFivey"));
-    Queue_SetCriteria(q, hIdx, idx, (util *)&oneSec);
+    Queue_SetCriteria(q, hIdx, idx, (util **)&ptr);
 
     current->type.state = APPROXTIME_SEC;
     current->value = 2;
