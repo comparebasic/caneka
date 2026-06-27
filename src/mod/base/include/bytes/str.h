@@ -22,6 +22,7 @@ typedef status (*StrRslvFunc)(MemCh *m, i32 idx, Str *arg, void *source);
 #define K(m, x) Str_FromCstr((m), (x), ZERO)
 
 boolean TextCharFilter(byte *b, i64 length);
+i16 Str_Remaining(Str *s, byte *ptr);
 status Str_Reset(Str *s);
 status Str_Wipe(Str *s);
 status Str_Incr(Str *s, word length);

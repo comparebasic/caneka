@@ -7,8 +7,6 @@ static void HttpStatic_Setup(MemCh *m, Req *req, Serve *srv){
 }
 
 static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
-    Out("^p.HttpStatic_Handle\n^0", NULL);
-
     Str *key = K(m, "static");
     Hashed *h = Table_GetHashedByIter(&srv->def->routeIt, key);
     Span *chain = Ifc(m, h->value, TYPE_SPAN);
@@ -28,7 +26,6 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
 
 static void HttpStatic_Finalize(MemCh *m, HttpReq *req, Serve *srv){
     void *ar[] = {req, NULL};
-    Out("^y.Finalize @^0\n", ar);
     return;
 }
 
@@ -42,7 +39,6 @@ static void HttpStatic_logFinalized(MemCh *m, HttpReq *req, Serve *srv){
 
 status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
-    Out("^p.  HttpStatic_RetrieveFile^0\n", NULL);
 
     StrVec *local = IoPath_FromVec(m, req->path);
     IoUtil_Relativise(m, local);
@@ -53,14 +49,20 @@ status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
 
     Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
     File_Open(bf, path, O_RDONLY);
+    Buff_Stat(bf);
     Span_Add(req->sections, bf);
 
-    void *ar[] = {
-        path, 
-        bf,
-        NULL
-    };
-    Out("^y.File Retrieved $ @^0\n", ar);
+    StrVec *ext = IoUtil_GetExt(m, local); 
+
+    Str *mime = Table_Get(MimeByExt, ext);
+    if(mime){
+        HttpReq_SetHeader(req, S(m, "Content-Type"), mime);
+    }
+    HttpReq_SetHeader(req, S(m, "Date"), Time_ToRStr(m, &bf->st.st_mtim));
+
+    Str *etag = Etag(m, 1, Ifc(m, local, TYPE_STR), Parity_FromBuff(bf)); 
+    HttpReq_SetHeader(req, S(m, "Etag"), etag);
+
     req->type.state |= SUCCESS;
 
     Return(m, req->type.state);

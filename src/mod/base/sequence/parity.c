@@ -102,12 +102,54 @@ quad HalfParity_FromVec(StrVec *v){
     return parity;
 }
 
-boolean Parity_Compare(util par, StrVec *v){
-    if((v->total & 7) != (par & 7)){
-        return FALSE;
+boolean Parity_Compare(util par, void *sv){
+    Abstract *a = (Abstract *)sv;
+    if(a->type.of == TYPE_STRVEC){
+        StrVec *v = (StrVec *)a;
+        if((v->total & 7) != (par & 7)){
+            return FALSE;
+        }else{
+            return Parity_FromVec(v) == par;
+        }
+    }else if(a->type.of == TYPE_STR){
+        Str *s = (Str *)a;
+        if((s->length & 7) != (par & 7)){
+            return FALSE;
+        }else{
+            return Parity_From(s) == par;
+        }
     }else{
-        return Parity_FromVec(v) == par;
+        return FALSE;
     }
+}
+
+util Parity_FromBuff(Buff *bf){
+    if(bf->st.st_size <= 0){
+        Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Cannot create parity from Buff without a stat size", NULL);
+        return 0;
+    }
+    util parity = 0;
+    util slot = 0;
+    util size = sizeof(util);
+
+    Str *s = Str_Make(bf->m, STR_DEFAULT);
+    while((bf->type.state & END) == 0){
+        Buff_GetStr(bf, s);
+        i64 remaining = STR_DEFAULT;
+        byte *ptr = s->bytes;
+        while(remaining >= size){
+            memcpy(((byte *)&slot), ptr, size);
+            parity += slot;
+            remaining -= size;
+            ptr += size;
+        }
+    }
+
+    parity &= ~7;
+    parity |= (bf->st.st_size & 7);
+
+    return parity;
 }
 
 util Parity_From(Str *s){

@@ -27,6 +27,15 @@ boolean TextCharFilter(byte *b, i64 length){
     return TRUE;
 }
 
+i16 Str_Remaining(Str *s, byte *ptr){
+    i64 pos = ptr - s->bytes;
+    if(pos < 0 || pos > s->alloc){
+        return -1;
+    }else{
+        return (i16)pos;
+    }
+}
+
 status Str_Reset(Str *s){
     s->length = 0;
     return SUCCESS;

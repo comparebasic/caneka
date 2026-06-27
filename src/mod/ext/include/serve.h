@@ -11,6 +11,8 @@ enum serve_types {
 #include "serve/handlerdef.h"
 #include "serve/req.h"
 #include "serve/inet.h"
+#include "serve/mime.h"
+#include "serve/etag.h"
 #include "serve/hostent.h"
 #include "serve/conn.h"
 #include "serve/serve.h"

@@ -1,17 +1,14 @@
 #include <external.h>
 #include "base_module.h"
 
-Str *Bytes_ToHexStr(MemCh *m, byte *b, i16 length){
-    if(length > STR_MAX*2){
+void Bytes_ToHexOntoStr(MemCh *m, byte *b, byte *ptr, Str *s, i16 length){
+    if(Str_Remaining(s, ptr) < length *2){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error str length doubled would be beyond a single str and no "
-            "length provided to indicate truncation", NULL);
-        return NULL;
+            "Not enough room left on string", NULL);
     }
 
-    Str *s = Str_Make(m, length*2);
     s->type.state |= STRING_ENCODED;
-    byte *nb = s->bytes;
+    byte *nb = ptr;
     for(i32 i = 0; i < length; i++){
         byte c;
         c = b[i] >> 4;
@@ -24,7 +21,20 @@ Str *Bytes_ToHexStr(MemCh *m, byte *b, i16 length){
             (c - 10) + 'a';
     }
 
-    s->length = length*2;
+    s->length += length*2;
+}
+
+Str *Bytes_ToHexStr(MemCh *m, byte *b, i16 length){
+    if(length > STR_MAX*2){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error str length doubled would be beyond a single str and no "
+            "length provided to indicate truncation", NULL);
+        return NULL;
+    }
+
+    Str *s = Str_Make(m, length*2);
+    s->type.state |= STRING_ENCODED;
+    Bytes_ToHexOntoStr(m, b, s->bytes, s, length);
 
     return s;
 }
