@@ -2,9 +2,15 @@
 #include "base_module.h"
 
 void Bytes_ToHexOntoStr(MemCh *m, byte *b, byte *ptr, Str *s, i16 length){
-    if(Str_Remaining(s, ptr) < length *2){
+    if(Str_Remaining(s, ptr) < length*2){
+        void *ar[] = {
+            I16_Wrapped(m, length*2),
+            I16_Wrapped(m, Str_Remaining(s, ptr)),
+            s,
+            NULL
+        };
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Not enough room left on string", NULL);
+            "Not enough room left on string needed $, have $, on &", ar);
     }
 
     s->type.state |= STRING_ENCODED;
@@ -61,6 +67,18 @@ StrVec *StrVec_ToHex(MemCh *m, StrVec *v){
     }
 
     return n;
+}
+
+util Util_FromHex(MemCh *m, Str *s){
+    if(s->length != sizeof(util)*2){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Wrong size str of bytes to decode into a util", NULL);
+        return 0;
+    }
+    util u = 0;
+    Str *ref = Str_Ref(m, (byte *)&u, sizeof(util), sizeof(util), ZERO);
+    Bytes_FromHex(m, ref, s->bytes);
+    return u;
 }
 
 status Bytes_FromHex(MemCh *m, Str *s, byte *nb){

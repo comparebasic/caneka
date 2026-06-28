@@ -12,3 +12,4 @@ Str *Str_ToTitle(MemCh *m, Str *s);
 Str *Str_ToUpper(MemCh *m, Str *s);
 Str *Str_ToLower(MemCh *m, Str *s);
 Str *Str_ToLowerFiltered(MemCh *m, Str *s, Str *filter, byte replace);
+Str *Str_Take(MemCh *m, Str *from, word amount);

@@ -60,8 +60,23 @@ status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
     }
     HttpReq_SetHeader(req, S(m, "Date"), Time_ToRStr(m, &bf->st.st_mtim));
 
-    Str *etag = Etag(m, 1, Ifc(m, local, TYPE_STR), Parity_FromBuff(bf)); 
-    HttpReq_SetHeader(req, S(m, "Etag"), etag);
+    Table *etags = Seel_Get(srv->config, K(m, "etags"));
+    Inst *etag = (Inst *)Table_Get(etags, local);
+    Str *etagStr = NULL;
+    if(etag == NULL){
+        util parity = Parity_FromBuff(bf);
+        Buff_PosAbs(bf, 0);
+        StrVec *name = Clone(srv->m, local);
+        etag = Etag(srv->m, etags->nvalues, name, parity); 
+        Table_Set(etags, name, etag);
+        etagStr = Seel_Get(etag, K(m, "tag"));
+    }else{
+        etagStr = Seel_Get(etag, K(m, "tag"));
+    }
+
+    if(etagStr != NULL){
+        HttpReq_SetHeader(req, S(m, "Etag"), etagStr);
+    }
 
     req->type.state |= SUCCESS;
 

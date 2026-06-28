@@ -41,3 +41,4 @@ Str *Str_Make(MemCh *m, word alloc);
 Str *Str_MakeBlank(MemCh *m);
 status Str_Decr(Str *s, word length);
 Str *Str_Rec(MemCh *m, Str *s);
+i64 Str_AddStr(Str *s, Str *add);

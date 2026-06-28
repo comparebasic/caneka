@@ -26,7 +26,6 @@ i32 main(int argc, char **argv){
     Str *noColorKey = K(m, "no-color");
     Str *portKey = K(m, "port");
     Str *dirKey = K(m, "dir");
-    Str *etagKey = K(m, "etag");
 
     Args_Add(cli, helpKey, NULL, ARG_OPTIONAL,
         Sv(m, "Show this help message."));
@@ -36,8 +35,6 @@ i32 main(int argc, char **argv){
         Sv(m, "Port to use."));
     Args_Add(cli, dirKey, NULL, ZERO,
         Sv(m, "Directory to serve files from."));
-    Args_Add(cli, etagKey, NULL, ZERO,
-        Sv(m, "Directory to store etags."));
 
     CliArgs_Parse(cli);
 
@@ -58,7 +55,6 @@ i32 main(int argc, char **argv){
     ent->port = port;
     Seel_AddTo(config, K(m, "addrs"), NULL, ent);
     Seel_Set(config, K(m, "dir"), dir);
-    Seel_Set(config, K(m, "etag"), CliArgs_Get(cli, etagKey));
 
     Serve *srv = Serve_MakeTcp(m, def, ent);
     srv->config = config;

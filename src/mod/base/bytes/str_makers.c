@@ -115,6 +115,21 @@ Str *Str_MemCount(MemCh *m, i64 mem) {
     return s;
 }
 
+Str *Str_Take(MemCh *m, Str *from, word amount){
+    if(from->length < amount){
+        void *ar[] = {
+            I16_Wrapped(m, amount),
+            NULL
+        };
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error str too short to consume requested amount", ar);
+        return NULL;
+    }
+    Str *s = Str_Ref(m, from->bytes, amount, amount, s->type.state);
+    Str_Incr(from, amount);
+    return s;
+}
+
 i64 Str_Trunc(Str *s, i64 amount){
     if(s->type.state & STRING_CONST){
         void *args[] = {s ,NULL};

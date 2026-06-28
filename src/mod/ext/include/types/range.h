@@ -223,5 +223,6 @@ enum ext_types {
     TYPE_INSTANCE = 1 << 14,
     TYPE_NODE,
     TYPE_HTTP_CONFIG,
+    TYPE_ETAG,
     _EXT_OBJECT_END,
 };

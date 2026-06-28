@@ -133,8 +133,13 @@ util Parity_FromBuff(Buff *bf){
     util slot = 0;
     util size = sizeof(util);
 
+    i64 total = bf->st.st_size;
+
     Str *s = Str_Make(bf->m, STR_DEFAULT);
-    while((bf->type.state & END) == 0){
+    while(total > 0 && (bf->type.state & END) == 0){
+        if(total < (i64)s->length){
+            s->length = (i16)total;
+        }
         Buff_GetStr(bf, s);
         i64 remaining = STR_DEFAULT;
         byte *ptr = s->bytes;
@@ -144,6 +149,7 @@ util Parity_FromBuff(Buff *bf){
             remaining -= size;
             ptr += size;
         }
+        total -= s->length;
     }
 
     parity &= ~7;

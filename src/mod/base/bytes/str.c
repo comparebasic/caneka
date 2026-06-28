@@ -28,11 +28,11 @@ boolean TextCharFilter(byte *b, i64 length){
 }
 
 i16 Str_Remaining(Str *s, byte *ptr){
-    i64 pos = ptr - s->bytes;
-    if(pos < 0 || pos > s->alloc){
+    byte *end = s->bytes+s->alloc-1;
+    if(ptr > end || ptr < s->bytes){
         return -1;
     }else{
-        return (i16)pos;
+        return (i16)((end - ptr)+1);
     }
 }
 
@@ -49,6 +49,10 @@ status Str_Wipe(Str *s){
 
 i64 Str_ToFd(Str *s, int fd){
     return write(fd, s->bytes, s->length);
+}
+
+i64 Str_AddStr(Str *s, Str *add){
+    return Str_Add(s, add->bytes, add->length);
 }
 
 i64 Str_Add(Str *s, byte *b, i64 length){
