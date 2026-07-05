@@ -43,12 +43,9 @@ or by building and running the [Test](./src/programs/test) program.
 ### Components
 
 - Core: Done ([Base](./src/mod/base)/[Ext](./src/mod/ext/))
-- Utilities: Experimental ([Inter](./src/mod/inter/))
-- Passport: Initial Development ([Passport](./src/mod/passport/))
-- WebServer: Initial Development ([Serveneka](./src/mod/serveneka/))
-- Syntax: Not Started
+- WebServer: Development ([Serveneka](./src/programs/serveneka/))
 - Python Module: Build Only ([Pyneka](./src/lib/pyneka))
-- OpenSsl Bindings: Experimental ([third/OpenSsl](./src/mod/third/openssl))
+- OpenSsl Bindings: Development ([third/OpenSsl](./src/mod/third/openssl))
 
 #### Core Components
 
