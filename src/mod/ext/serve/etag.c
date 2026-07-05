@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-Inst *Etag(MemCh *m, i32 idx, StrVec *name, util parity){
+Inst *Etag(MemCh *m, i32 idx, StrVec *name, util parity, struct timespec *ts){
     quad nameParity = HalfParity_FromVec(name);
 
     Str *nameParityHex = Bytes_ToHexStr(m, (byte *)&nameParity, sizeof(quad));
@@ -14,6 +14,7 @@ Inst *Etag(MemCh *m, i32 idx, StrVec *name, util parity){
     Seel_Set(etag, K(m, "parity"), parityHex);
     Seel_Set(etag, K(m, "path-parity"), nameParityHex);
     Seel_Set(etag, K(m, "tag"), Etag_ToStr(etag));
+    Seel_Set(etag, K(m, "last-modified"), Time_ToRStr(m, ts));
 
     return etag;
 }
@@ -76,6 +77,7 @@ status Etag_ClsInit(MemCh *m){
     Table_Set(tbl, S(m, "parity"), I16_Wrapped(m, TYPE_STR));
     Table_Set(tbl, S(m, "path-parity"), I16_Wrapped(m, TYPE_STR));
     Table_Set(tbl, S(m, "tag"), I16_Wrapped(m, TYPE_STR));
+    Table_Set(tbl, S(m, "last-modified"), I16_Wrapped(m, TYPE_STR));
     r |= Seel_Seel(m, tbl, S(m, "Etag"), TYPE_ETAG);
     return r;
 }

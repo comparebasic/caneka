@@ -146,8 +146,6 @@ static void ServeTcp_AcceptPoll(Serve *srv){
 
         srv->def->handle(req->m, req, srv);
         if(req->type.state & (END|ERROR)){
-            printf("Error|End?\n");
-            fflush(stdout);
             Queue_Remove(srv->q, req->idx);
             srv->def->finalize(req->m, req, srv);
             MemCh_Free(req->m);

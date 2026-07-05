@@ -49,9 +49,9 @@ char *buildekaExamples = ""
     "\n"
     "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/clineka --option crypto@third/openssl\x1b[0m\n"
     "\n"
-    "    Build the \x1b[1mWebServer\x1b[22m\n"
+    "    Build the \x1b[1mWebServer\x1b[22m (Serveneka)\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/webserver\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/serveneka\x1b[0m\n"
     "\n"
     "    Build the \x1b[1mPyneka\x1b[22m Python module\n"
     "\n"
@@ -89,11 +89,7 @@ char *buildTests[] = {
 char *buildWebServer[] = {
     "./dist/bin/buildeka",
     "--src",
-    "src/programs/webserver",
-    "--option",
-    "base",
-    "ext",
-    "inter",
+    "src/programs/serveneka",
     NULL
 };
 
@@ -127,9 +123,9 @@ char *runTests[] = {
 };
 
 char *runWebServer[] = {
-    "./build/bin/webserver",
-    "--config",
-    "fixtures/web-server/default.config",
+    "./build/bin/serveneka",
+    "--dir",
+    "fixtures/serveneka",
     NULL
 };
 

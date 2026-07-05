@@ -275,6 +275,15 @@ Hashed *Table_GetHashedByIter(Iter *it, void *_a){
     return Table_GetSetHashed(it, SPAN_OP_GET, a, NULL);
 }
 
+void *Table_GetByIter(Iter *it, void *_a){
+    Abstract *a = (Abstract *)_a;
+    Hashed *h = Table_GetSetHashed(it, SPAN_OP_GET, a, NULL);
+    if(h != NULL){
+        return h->value;
+    }
+    return NULL;
+}
+
 void *Table_FromIdx(Table *tbl, i32 idx){
     Hashed *h = (Hashed *)Span_Get(tbl, idx);
     if(h != NULL){

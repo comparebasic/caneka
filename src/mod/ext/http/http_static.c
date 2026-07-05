@@ -47,39 +47,61 @@ status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
     StrVec *path = Clone(m, dir);
     StrVec_AddVec(path, local);
 
-    Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
-    File_Open(bf, path, O_RDONLY);
-    Buff_Stat(bf);
-    Span_Add(req->sections, bf);
-
     StrVec *ext = IoUtil_GetExt(m, local); 
-
     Str *mime = Table_Get(MimeByExt, ext);
     if(mime){
         HttpReq_SetHeader(req, S(m, "Content-Type"), mime);
     }
-    HttpReq_SetHeader(req, S(m, "Date"), Time_ToRStr(m, &bf->st.st_mtim));
 
-    Table *etags = Seel_Get(srv->config, K(m, "etags"));
-    Inst *etag = (Inst *)Table_Get(etags, local);
+    Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+    File_Open(bf, path, O_RDONLY);
+    Buff_Stat(bf);
+
+    Str *timeStr = Time_ToRStr(m, &bf->st.st_mtim);
+
+    StrVec *lastEtag = Table_GetByIter(&req->headersIt, K(m, "If-None-Match"));
+    StrVec *since = Table_GetByIter(&req->headersIt, K(m, "If-Modified-Since"));
+
+    Table *tags = Seel_Get(srv->config, K(m, "etags"));
+    Inst *etag = (Inst *)Table_Get(tags, local);
     Str *etagStr = NULL;
-    if(etag == NULL){
+    Str *etagLatest = NULL;
+    Str *tag = NULL;
+
+    if(etag != NULL){
+        etagLatest =  Seel_Get(etag, K(m, "last-modified"));
+    }
+
+    if(etag == NULL || !Equals(timeStr, etagLatest)){
         util parity = Parity_FromBuff(bf);
         Buff_PosAbs(bf, 0);
         StrVec *name = Clone(srv->m, local);
-        etag = Etag(srv->m, etags->nvalues, name, parity); 
-        Table_Set(etags, name, etag);
+        etag = Etag(srv->m, tags->nvalues, name, parity, &bf->st.st_mtim); 
+        Table_Set(tags, name, etag);
         etagStr = Seel_Get(etag, K(m, "tag"));
+        etagLatest = Seel_Get(etag, K(m, "last-modified"));
     }else{
         etagStr = Seel_Get(etag, K(m, "tag"));
     }
 
+    HttpReq_SetHeader(req, S(m, "Date"), timeStr);
+
+    if(etagStr != NULL && lastEtag != NULL && since != NULL &&
+            Equals(since, etagLatest) && Equals(lastEtag, etagStr)){
+        req->type.state |= NOOP;
+        File_Close(bf);
+        printf("Etag set\n");
+        fflush(stdout);
+    }else{
+        Span_Add(req->sections, bf);
+    }
+
     if(etagStr != NULL){
         HttpReq_SetHeader(req, S(m, "Etag"), etagStr);
+        HttpReq_SetHeader(req, S(m, "Last-Modified"), timeStr);
     }
 
     req->type.state |= SUCCESS;
-
     Return(m, req->type.state);
 }
 

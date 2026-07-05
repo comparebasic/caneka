@@ -98,8 +98,6 @@ StrVec *IoUtil_GetExt(MemCh *m, StrVec *path){
     while((Iter_Prev(&it) & END) == 0){
         Str *s = Iter_Get(&it);
         if(s->type.state & MORE){
-            Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                "Error found path sep before exte sep", NULL);
             return NULL;
         }else if (s->type.state & LAST){
             break;

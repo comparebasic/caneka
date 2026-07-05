@@ -130,7 +130,9 @@ static PatCharDef headerNameDef[] = {
 static PatCharDef headerValueDef[] = {
     {PAT_KO|PAT_KO_TERM, '\r', '\r'},
     {PAT_KO|PAT_KO_TERM, '\n', '\n'},
-    {PAT_MANY|PAT_INVERT_CAPTURE, ' ', ' '},
+    {PAT_MANY|PAT_INVERT_CAPTURE|PAT_TERM, ' ', ' '},
+    {PAT_KO|PAT_KO_TERM, '\r', '\r'},
+    {PAT_KO|PAT_KO_TERM, '\n', '\n'},
     patText,
     {PAT_END, 0, 0}
 };

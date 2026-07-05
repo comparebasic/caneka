@@ -49,9 +49,6 @@ void HttpReq_SetHeader(HttpReq *req, Str *key, void *value){
     Table_Set(req->headersOut, key, value);
 }
 
-void HttpReq_Serve(MemCh *m, HttpReq *req, Serve *srv){
-}
-
 status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
@@ -87,7 +84,9 @@ status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
     Buff_SetSocket(req->out, pfd->fd);
 
     i32 length = 0;
-    if(req->sections->nvalues == 0){
+    if(req->type.state & NOOP){
+        Buff_Add(req->out, K(m, "HTTP/1.1 304 Not Modified\r\n"));
+    }else if(req->sections->nvalues == 0){
         Buff_Add(req->out, K(m, "HTTP/1.1 404 Not Found\r\n"));
     }else{
         Buff_Add(req->out, K(m, "HTTP/1.1 200 Ok\r\n"));
