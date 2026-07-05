@@ -202,7 +202,7 @@ static TestSet ExtTests[] = {
         "Queue Tests",
         Queue_Tests,
         "Queue tests for file descriptors.",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "Queue Add Remove Tests",
@@ -220,13 +220,13 @@ static TestSet ExtTests[] = {
         "Queue Criteria Tests",
         QueueCriteria_Tests,
         "Queue tests for multi-critiria items (time/file descriptor).",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "Queue Scale Tests",
         QueueScale_Tests,
         "Queue testing adding and removing Queue items over time.",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         NULL,

@@ -45,6 +45,7 @@ or by building and running the [Test](./src/programs/test) program.
 - Core: Done ([Base](./src/mod/base)/[Ext](./src/mod/ext/))
 - Utilities: Experimental ([Inter](./src/mod/inter/))
 - Passport: Initial Development ([Passport](./src/mod/passport/))
+- WebServer: Initial Development ([Serveneka](./src/mod/serveneka/))
 - Syntax: Not Started
 - Python Module: Build Only ([Pyneka](./src/lib/pyneka))
 - OpenSsl Bindings: Experimental ([third/OpenSsl](./src/mod/third/openssl))
@@ -108,6 +109,11 @@ there is a bug when compling with gcc related to the order of static libs.
 
 This will compile and run the bootstrap program which will present a menu
 to guide you through the rest of the build process.
+
+note: while the build program is working, it may need to be cleaned on
+each build for stability reasons (at present).
+
+    ./dist/bin/bootstrap --clean
 
 
 ### CnkBuild - source builder

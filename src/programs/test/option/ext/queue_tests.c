@@ -22,7 +22,7 @@ status Queue_Tests(MemCh *m){
     Str *one = Str_CstrRef(m, "ItemOne");
     Queue_Set(q, 3, one);
 
-    util *ptr = &pfd;
+    util *ptr = (util *)&pfd;
     Queue_SetCriteria(q, 0, 3, (util **)&ptr);
 
     status re = Queue_Next(q);
@@ -336,7 +336,7 @@ status QueueCriteria_Tests(MemCh *m){
 
     idx = Queue_Add(q, s);
     struct pollfd pfd = { bf->fd, POLLOUT, 0};
-    util *ptr = (util *)&pfd;
+    ptr = (util *)&pfd;
     Queue_SetCriteria(q, fdIdx, idx, (util **)&ptr);
 
     Queue_Reset(q);
@@ -364,7 +364,7 @@ status QueueCriteria_Tests(MemCh *m){
     r |= Test(i == 2, "PollFd set to Read: two item was available to run, i is $, at $ seconds from start", args);
 
     struct pollfd pfd2 = { bf->fd, ZERO, 0};
-    util *ptr2 = &pfd2;
+    util *ptr2 = (util *)&pfd2;
     Queue_SetCriteria(q, fdIdx, 0, (util **)&ptr2);
 
     expected[0] = Str_FromCstr(m, "Three Seconds", ZERO);

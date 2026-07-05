@@ -32,7 +32,7 @@ static status queueScaleTest(MemCh *m, i32 max){
             .type = {TYPE_APPROXTIME, APPROXTIME_MILLISEC},
             .value = time 
         };
-        util *ptr = (util *)at;
+        util *ptr = (util *)&at;
         Queue_Add(q, I32_Wrapped(m, i)); 
         Queue_SetCriteria(q, hIdx, i, (util **)&ptr);
     }
