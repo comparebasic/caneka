@@ -7,9 +7,9 @@ extern Str *ansi_blue;
 extern Str *ansi_cyan;
 extern Str *ansi_dark;
 
-Str *Str_FromAnsi(MemCh *m, char **_ptr, char *end);
-Str *Str_AnsiCstr(MemCh *m, char *cstr);
-Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume);
+Str *Str_FromAnsi(Buff *bf, char **_ptr, char *end);
+Str *Str_AnsiCstr(Buff *bf, char *cstr);
+Str *Str_ConsumeAnsi(Buff *bf, char **_ptr, char *end, boolean consume);
 status AnsiStr_Init(MemCh *m);
-status Ansi_SetColor(boolean yesno);
-boolean Ansi_HasColor();
+boolean Ansi_HasColor(Buff *bf);
+void Ansi_SetColor(Buff *bf, boolean yn);

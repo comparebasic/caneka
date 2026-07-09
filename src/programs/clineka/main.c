@@ -54,7 +54,7 @@ i32 main(int argc, char **argv){
     CliArgs_Parse(cli);
 
     if(CliArgs_Get(cli, noColorKey) != NULL){
-        Ansi_SetColor(FALSE);
+        Ansi_SetColor(OutStream, FALSE);
     }
 
     if(CliArgs_Get(cli, helpKey) != NULL){

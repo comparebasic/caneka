@@ -100,6 +100,19 @@ static PatCharDef versionDef[] = {
     {PAT_END, 0, 0}
 };
 
+static PatCharDef versionUndefinedDef[] = {
+    {PAT_TERM,'u' ,'u'},
+    {PAT_TERM,'n' ,'n'},
+    {PAT_TERM,'d' ,'d'},
+    {PAT_TERM,'e' ,'e'},
+    {PAT_TERM,'f' ,'f'},
+    {PAT_TERM,'i' ,'i'},
+    {PAT_TERM,'n' ,'n'},
+    {PAT_TERM,'e' ,'e'},
+    {PAT_TERM,'d' ,'d'},
+    {PAT_END, 0, 0}
+};
+
 static PatCharDef respVersionDef[] = {
     {PAT_TERM,'H' ,'H'},
     {PAT_TERM,'T' ,'T'},
@@ -183,6 +196,8 @@ static status version(MemCh *m, Roebling *rbl){
        queryStartDef, HTTP_QUERY_START, HTTP_QUERY);
     r |= Roebling_SetPattern(rbl,
         versionDef, HTTP_VERSION, HTTP_PROTO_END);
+    r |= Roebling_SetPattern(rbl,
+        versionUndefinedDef, HTTP_VERSION, HTTP_PROTO_END);
     return r;
 }
 

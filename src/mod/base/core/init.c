@@ -24,7 +24,7 @@ status Core_Direct(MemCh *m, i32 out, i32 err){
 status Core_Init(MemCh *m){
     status r = READY;
     if(OutStream == NULL){
-        Buff *bf = Buff_Make(m, ZERO);
+        Buff *bf = Buff_Make(m, BUFF_COLOR);
         r |= SUCCESS;
         OutStream = bf;
     }

@@ -24,6 +24,7 @@
 #include <time.h>
 #include <dirent.h>
 #include <netdb.h>
+#include <limits.h>
 #include <sys/random.h>
 
 #endif

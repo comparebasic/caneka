@@ -6,6 +6,8 @@ enum microtime_units {
     APPROXTIME_DAY = 1 << 12,
 };
 
+typedef util duration;
+
 typedef struct approx_time {
     Type type;
     quad value;
@@ -28,3 +30,7 @@ Single *Time_Wrapped(MemCh *m, struct timespec *ts);
 
 status ApproxTime_Beyond(struct timespec *delta, ApproxTime *mt);
 status ApproxTime_Set(struct timespec *present, struct timespec *start, ApproxTime *at);
+
+duration Time_Duration(MemCh *m, struct timespec *ts, struct timespec *sub);
+void From_Duration(duration d, struct timespec *ts);
+Str *Duration_Str(MemCh *m, duration d);

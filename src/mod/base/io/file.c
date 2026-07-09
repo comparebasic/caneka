@@ -29,8 +29,6 @@ status File_Open(Buff *bf, void *_fpath, word ioFlags){
     char *cstr = Str_Cstr(bf->m, fpath);
     if((ioFlags & (O_TRUNC)) || ioFlags == O_RDONLY || (ioFlags & O_CREAT) == 0){
         i32 ri = stat(cstr, &bf->st); 
-        printf("%d %d %d\n", ri, ioFlags, O_RDONLY);
-        fflush(stdout);
         args[0] = bf;
         args[1] = fpath;
         args[2] = NULL;
@@ -40,8 +38,6 @@ status File_Open(Buff *bf, void *_fpath, word ioFlags){
             bf->type.state |= ERROR;
             return bf->type.state;
         }else if(ri == -1 && (ioFlags == O_RDONLY)){
-            printf("um... error?\n");
-            fflush(stdout);
             if((bf->type.state & NOOP) == 0){
                 Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
                     "File not found for @ @", args);
@@ -118,7 +114,7 @@ status File_Stat(MemCh *m, Str *path, struct stat *st){
 }
 
 StrVec *File_ToVec(MemCh *m, Str *path){
-    Buff *bf = Buff_Make(m, BUFF_SLURP);
+    Buff *bf = Buff_Make(m, ZERO);
     if(!File_Exists(bf, path)){
         return NULL;
     }

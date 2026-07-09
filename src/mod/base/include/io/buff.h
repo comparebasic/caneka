@@ -7,7 +7,7 @@ enum send_recv_flags {
     BUFF_DATASYNC = 1 << 11,
     BUFF_TEMP_MEM = 1 << 12,
     BUFF_UNBUFFERED = 1 << 13,
-    BUFF_SLURP = 1 << 14,
+    BUFF_COLOR = 1 << 14,
     BUFF_CLOBBER = 1 << 15,
 };
 

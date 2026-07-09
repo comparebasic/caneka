@@ -1,28 +1,86 @@
 #include <external.h>
 #include <caneka.h>
 
+static void HttpReq_setLength(MemCh *m, HttpReq *req){
+    i64 length = 0;
+    Iter it;
+    if(req->sections->nvalues > 0){
+        Iter_Init(&it, req->sections);
+        while((Iter_Next(&it) & END) == 0){
+            Buff *bf = Iter_Get(&it);
+            Buff_Stat(bf);
+            length += bf->st.st_size;
+        }
+    }
+    if(length > 0){
+        HttpReq_SetHeader(req,
+            S(m, "Content-Length"), I32_Wrapped(m, length));
+    }
+}
+
+static void HttpReq_writeStatus(MemCh *m, HttpReq *req){
+    if(req->type.state & NOOP){
+        if(req->type.state & ERROR){
+            Buff_Add(req->out, K(m, "HTTP/1.1 404 Not Found\r\n"));
+        }else{
+            Buff_Add(req->out, K(m, "HTTP/1.1 304 Not Modified\r\n"));
+        }
+    }else if(req->type.state & ERROR){
+        Buff_Add(req->out, K(m, "HTTP/1.1 500 Server Error\r\n"));
+    }else{
+        Buff_Add(req->out, K(m, "HTTP/1.1 200 Ok\r\n"));
+    }
+}
+
+static void HttpReq_writeHeaders(MemCh *m, HttpReq *req){
+    Iter it;
+    Iter_Init(&it, Table_Ordered(m, req->headersOut));
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        void *ar[] = {h->key, h->value, NULL};
+        Fmt(req->out, "$: $\r\n", ar);
+    }
+    Buff_Add(req->out, K(m, "\r\n"));
+}
+
+static void HttpReq_writeBody(MemCh *m, HttpReq *req){
+    Iter it;
+    if(req->sections->nvalues > 0){
+        Iter_Init(&it, req->sections);
+        while((Iter_Next(&it) & END) == 0){
+            Buff *bf = Iter_Get(&it);
+            Buff_Pipe(req->out, bf);
+            if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
+                close(bf->fd);
+                Buff_UnsetFd(bf);
+            }
+        }
+    }
+}
+
 status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
-    Out("^p.  HttpReq_RespToRbl\n^0", NULL);
 
     struct pollfd *pfd = (struct pollfd *)req->slot;
     Buff_SetSocket(req->in, pfd->fd);
     if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
             (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
         Roebling_Run(req->rbl);
-        void *ar[] = {
-            req->in->v,
-            req->headersIt.p,
-            NULL
-        };
-        Out("^p.  Read So Far: ^c.@ -> @^0\n", ar);
+        if(req->type.state & DEBUG){
+            void *ar[] = {
+                req->in->v,
+                req->headersIt.p,
+                NULL
+            };
+            Out("^p.  Read So Far: ^c.@ -> @^0\n", ar);
+        }
     }
     
     req->type.state |= req->rbl->type.state & (SUCCESS|ERROR);
 
     if(req->type.state & SUCCESS){
         HttpReq_ParseBody(req);            
-        if(1 || req->type.state & DEBUG){
+        if(req->type.state & DEBUG){
             void *args[] = {
                 req,
                 NULL,
@@ -30,14 +88,16 @@ status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
             Out("^p.  Parsed Tcp Initial Request -> ^c.@^0\n", args);
         }
     }else{
-        void *args[] = {
-            req,
-            NULL,
-        };
-        Out("^r.  Error Parsing Tcp Initial Request -> ^c.@^0\n", args);
+        if(req->type.state & DEBUG){
+            void *args[] = {
+                req,
+                NULL,
+            };
+            Out("^r.  Error Parsing Tcp Initial Request -> ^c.@^0\n", args);
+        }
     }
 
-    HttpReq_ExpectSend(req);
+    HttpReq_ExpectInternal(req);
 
     Return(m, req->type.state);
 }
@@ -84,55 +144,22 @@ status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv){
 
 status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
-    Iter it;
 
     HttpReq_SetHeader(req, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
     struct pollfd *pfd = (struct pollfd *)req->slot;
     Buff_SetSocket(req->out, pfd->fd);
 
-    i32 length = 0;
-    if(req->type.state & NOOP){
-        Buff_Add(req->out, K(m, "HTTP/1.1 304 Not Modified\r\n"));
-    }else if(req->sections->nvalues == 0){
-        Buff_Add(req->out, K(m, "HTTP/1.1 404 Not Found\r\n"));
-    }else{
-        if(req->type.state & ERROR){
-            Buff_Add(req->out, K(m, "HTTP/1.1 500 Error\r\n"));
-        }else{
-            Buff_Add(req->out, K(m, "HTTP/1.1 200 Ok\r\n"));
-        }
-        Iter_Init(&it, req->sections);
-        while((Iter_Next(&it) & END) == 0){
-            Buff *bf = Iter_Get(&it);
-            Buff_Stat(bf);
-            length += bf->st.st_size;
-        }
-        HttpReq_SetHeader(req,
-            S(m, "Content-Length"), I32_Wrapped(m, length));
-    }
+    printf("Write\n");
+    fflush(stdout);
 
-    Iter_Init(&it, Table_Ordered(m, req->headersOut));
-    while((Iter_Next(&it) & END) == 0){
-        Hashed *h = Iter_Get(&it);
-        void *ar[] = {h->key, h->value, NULL};
-        Fmt(req->out, "$: $\r\n", ar);
-    }
-        
-    Buff_Add(req->out, K(m, "\r\n"));
+    HttpReq_writeStatus(m, req);
+    HttpReq_setLength(m, req);
+    HttpReq_writeHeaders(m, req);
+    HttpReq_writeBody(m, req);
 
-    if(length){
-        Iter_Init(&it, req->sections);
-        while((Iter_Next(&it) & END) == 0){
-            Buff *bf = Iter_Get(&it);
-            Buff_Pipe(req->out, bf);
-            if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
-                close(bf->fd);
-                Buff_UnsetFd(bf);
-            }
-        }
-    }
+    printf("Written\n");
+    fflush(stdout);
     req->type.state |= (SUCCESS|END);
-
     Return(m, req->type.state);
 }
 
@@ -183,6 +210,11 @@ void HttpReq_SetFd(HttpReq *req, i32 fd){
 void HttpReq_ExpectRecv(HttpReq *req){
     struct pollfd *pfd = (struct pollfd *)req->slot;
     pfd->events = POLLIN|POLLNVAL|POLLHUP|POLLERR;
+}
+
+void HttpReq_ExpectInternal(HttpReq *req){
+    struct pollfd *pfd = (struct pollfd *)req->slot;
+    pfd->events = POLLNVAL|POLLHUP|POLLERR;
 }
 
 void HttpReq_ExpectSend(HttpReq *req){

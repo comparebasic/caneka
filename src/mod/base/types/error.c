@@ -230,7 +230,7 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
      * ZERO: No further action is taken.
      * 
      */
-
+    m->type.state |= ERROR;
     if(_error){
         _crashing = TRUE;
         Fatal(m, func, file, line, fmt, args);

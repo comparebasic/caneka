@@ -114,7 +114,8 @@ status Io_InitLabels(MemCh *m, Lookup *lk){
         buffLabels[12] = Str_CstrRef(m, "STRVEC");
         buffLabels[13] = Str_CstrRef(m, "FLUSH");
         buffLabels[14] = Str_CstrRef(m, "UNBUFFERED");
-        buffLabels[15] = Str_CstrRef(m, "SLURP");
+        buffLabels[15] = Str_CstrRef(m, "COLOR");
+        buffLabels[16] = Str_CstrRef(m, "CLOBBER");
         Lookup_Add(m, lk, TYPE_BUFF, (void *)buffLabels);
         r |= SUCCESS;
     }

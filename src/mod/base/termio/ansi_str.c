@@ -10,22 +10,20 @@ Str *ansi_blue = NULL;
 Str *ansi_cyan = NULL;
 Str *ansi_dark = NULL;
 
-static boolean _AnsiSkip = FALSE;
-
-status Ansi_SetColor(boolean yesno){
-    if(_AnsiSkip == TRUE){
-        _AnsiSkip = FALSE;
+void Ansi_SetColor(Buff *bf, boolean yn){
+    if(yn) {
+        bf->type.state |= BUFF_COLOR;
     }else{
-        _AnsiSkip = TRUE;
+        bf->type.state &= ~BUFF_COLOR;
     }
-    return SUCCESS;
 }
 
-boolean Ansi_HasColor(){
-    return _AnsiSkip != TRUE;
+boolean Ansi_HasColor(Buff *bf){
+    return bf->type.state & BUFF_COLOR;
 }
 
-Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume){
+Str *Str_ConsumeAnsi(Buff *bf, char **_ptr, char *end, boolean consume){
+    MemCh *m = bf->m;
     char *ptr = *_ptr;
     char c;
     Str *s = Str_Make(m, ANSI_ESCAPE_MAX);
@@ -205,7 +203,7 @@ Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume){
     }
     *(b++) = 'm';
 
-    if(!_AnsiSkip){
+    if(bf->type.state & BUFF_COLOR){
         s->length = (word)(b - s->bytes);
     }
 
@@ -216,13 +214,13 @@ Str *Str_ConsumeAnsi(MemCh *m, char **_ptr, char *end, boolean consume){
     return s;
 }
 
-Str *Str_FromAnsi(MemCh *m, char **_ptr, char *end){
-    return Str_ConsumeAnsi(m, _ptr, end, FALSE);
+Str *Str_FromAnsi(Buff *bf, char **_ptr, char *end){
+    return Str_ConsumeAnsi(bf, _ptr, end, FALSE);
 }
 
-Str *Str_AnsiCstr(MemCh *m, char *cstr){
+Str *Str_AnsiCstr(Buff *bf, char *cstr){
     i64 length = strlen(cstr);
-    return Str_FromAnsi(m, &cstr, cstr+(length-1));
+    return Str_FromAnsi(bf, &cstr, cstr+(length-1));
 }
 
 status AnsiStr_Init(MemCh *m){

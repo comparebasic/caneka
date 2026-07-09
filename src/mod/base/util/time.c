@@ -23,6 +23,60 @@ void Time_Add(struct timespec *ts, struct timespec *add){
     }
 }
 
+duration Time_Duration(MemCh *m, struct timespec *ts, struct timespec *sub){
+    struct timespec total;
+    memcpy(&total, ts, sizeof(struct timespec));
+    Time_Sub(&total, sub);
+    i32 sec = (i32)total.tv_sec;
+    if(total.tv_sec < 0 || total.tv_sec > INT_MAX || total.tv_nsec > INT_MAX){
+        void *ar[] = {
+            I64_Wrapped(m, total.tv_sec),
+            NULL
+        };
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, 
+            "Number of seconds is greater than 32 bits or negative range $", ar);
+        return 0;
+    }
+    return (total.tv_sec << 32) + ((i32)total.tv_nsec);
+}
+
+void From_Duration(duration d, struct timespec *ts){
+    ts->tv_sec = d;
+    ts->tv_sec = ts->tv_sec >> 32;
+    ts->tv_nsec = (i64)((i32)d);
+}
+
+Str *Duration_Str(MemCh *m, duration d){
+    Str *s = Str_Make(m, STR_DEFAULT);
+    struct timespec ts;
+    From_Duration(d, &ts);
+    i64 div = 60 * 60;
+    byte *cptr = (byte *)"hms";
+    byte *ptr = s->bytes;
+    byte *end = s->bytes+s->length-1;
+    i64 sec = ts.tv_sec;
+    while(1){
+        i64 unit = sec / div;
+        if(div == 1 || unit > 0){
+            Str_AddI64(s, unit);
+            Str_Add(s, cptr, 1);
+        }
+        sec -= sec % div;
+        cptr++;
+        if(div < 60){
+            break;
+        }else{
+            if(unit > 0){
+                Str_Add(s, (byte *)" ", 1);
+            }
+            div /= 60;
+        }
+    }
+    Str_Add(s, (byte *)".", 1);
+    Str_AddI64(s, ts.tv_nsec);
+    return s;
+}
+
 void Time_Throttle(struct timespec *ts){
     if(ts->tv_sec == 0 && ts->tv_nsec == 0){
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, ts);

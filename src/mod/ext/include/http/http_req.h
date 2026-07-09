@@ -8,6 +8,10 @@ typedef struct http_req {
     i32 idx;
     util *slot;
     Iter routeIt;
+    struct {
+        struct timespec start;
+        struct timespec end;
+    } metrics;
     /* req end */
     HostEnt *clientEnt;
     struct {
@@ -32,6 +36,7 @@ status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv);
 
 void HttpReq_ExpectRecv(HttpReq *req);
 void HttpReq_ExpectSend(HttpReq *req);
+void HttpReq_ExpectInternal(HttpReq *req);
 void HttpReq_ParseBody(HttpReq *req);
 void HttpReq_SetFd(HttpReq *req, i32 fd);
 void HttpReq_Close(HttpReq *req);

@@ -92,7 +92,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         ReturnVoid(m);
     }
 
-    if(1 && srv->type.state & DEBUG){
+    if(srv->type.state & DEBUG){
         Buff_SetTemp(OutStream); 
         MemBookStats st;
         MemBook_GetStats(OutStream->m, &st);
@@ -101,34 +101,38 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         args[2] = I32_Wrapped(OutStream->m, srv->q->it.p->nvalues);
         args[3] = I32_Wrapped(OutStream->m, available);
         args[4] = NULL;
-        Out("^c.Serve.AcceptPoll @ Mem Used @ $requests $available^0\n", args);
+        Out("^D.Serve.AcceptPoll @ Mem Used @ $requests $available^0\n", args);
     }
 
-    while(available-- > 0){
-        i32 new_fd = accept(pfd->fd, (struct sockaddr*)NULL, NULL);
-        if(new_fd > 0){
-            fcntl(new_fd, F_SETFL, O_NONBLOCK);
+    if(available){
+        i32 max = 16;
+        while(max-- > 0){
+            i32 new_fd = accept(pfd->fd, (struct sockaddr*)NULL, NULL);
+            if(new_fd > 0){
+                fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
-            TcpSource *ts = (TcpSource *)srv->source;
-            ts->new_fd = new_fd;
-            ts->clientEnt = NULL;
+                TcpSource *ts = (TcpSource *)srv->source;
+                ts->new_fd = new_fd;
+                ts->clientEnt = NULL;
 
-            MemCh *rm = MemCh_Make();
-            Req *req = rm->owner = srv->def->mk(rm, srv);
-            srv->def->setup(req->m, req, srv);
-            req->idx = Queue_Add(srv->q, req);
+                MemCh *rm = MemCh_Make();
+                Req *req = rm->owner = srv->def->mk(rm, srv);
+                Time_Now(&req->metrics.start);
+                srv->def->setup(req->m, req, srv);
+                req->idx = Queue_Add(srv->q, req);
 
-            if(srv->type.state & DEBUG){
-                Buff_SetTemp(OutStream); 
-                void *ar[] = {
-                   I32_Wrapped(OutStream->m, new_fd), 
-                   I32_Wrapped(OutStream->m, req->idx), 
-                   NULL
-                };
-                Out("^c.NewConnection fd:$ qIdx:$^0\n", ar);
+                if(1 || srv->type.state & DEBUG){
+                    Buff_SetTemp(OutStream); 
+                    void *ar[] = {
+                       I32_Wrapped(OutStream->m, new_fd), 
+                       I32_Wrapped(OutStream->m, req->idx), 
+                       NULL
+                    };
+                    Out("^y.NewConnection fd:$ qIdx:$^0\n", ar);
+                }
+            }else{
+                break;
             }
-        }else{
-            break;
         }
     }
 
@@ -140,7 +144,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                I32_Wrapped(OutStream->m, srv->q->it.idx), 
                NULL
             };
-            Out("^c.Handling qIdx:$^0\n", ar);
+            Out("^y.   Handling qIdx:$^0\n", ar);
         }
         srv->type.state &= ~(NOOP|PROCESSING);
         Req *req = (Req *)Queue_Get(srv->q);
@@ -153,15 +157,6 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         }
     }
 
-    if(0 && srv->type.state & DEBUG){
-        Buff_SetTemp(OutStream); 
-        void *ar[] = {
-           I32_Wrapped(OutStream->m, srv->q->it.p->nvalues), 
-           NULL
-        };
-        Out("^c.End AcceptPoll open:$^0\n", ar);
-    }
-
     ReturnVoid(m);
 }
 
@@ -170,20 +165,13 @@ struct pollfd *Serve_TcpGetPollFd(Req *req){
 }
 
 void Serve_ServeTcp(Serve *srv){
-    QueueCrit *crit = QueueCrit_Make(srv->m, QueueCrit_Fds, ZERO);
+    QueueCrit *crit = QueueCrit_Make(srv->m, QueueCrit_WorkFds, ZERO);
     Queue_AddHandler(srv->q, crit);
 
     ServeTcp_OpenTcp(srv);
 
     while((srv->type.state & ERROR) == 0){
         ServeTcp_AcceptPoll(srv);
-        /*
-        struct timespec ts;
-        struct timespec remaining;
-        ts.tv_sec = 0;
-        ts.tv_nsec = 500000000;
-        Time_Delay(&ts, &remaining);
-        */
     }
 
     return;

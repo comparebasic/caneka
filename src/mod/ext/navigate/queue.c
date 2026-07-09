@@ -135,6 +135,10 @@ status Queue_Next(Queue *q){
                     crit->type.state |= (q->type.state & DEBUG);
                     if(slab != NULL){
                         q->go |= crit->func(crit, slab);
+                        /*
+                        Bits_Print(OutStream, (byte *)&q->go, sizeof(util), MORE|DEBUG);
+                        Buff_AddBytes(OutStream, (byte *)"\n", 1); 
+                        */
                     }
                 }
             }

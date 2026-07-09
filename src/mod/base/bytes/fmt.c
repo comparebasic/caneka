@@ -140,7 +140,7 @@ status Fmt(Buff *bf, char *fmt, void *args[]){
                 Str *s = (Str *)a;
                 if(s->type.state & STRING_FMT_ANSI){
                     char *cstr_end = (char *)s->bytes+(s->length-1);
-                    s = Str_FromAnsi(m, (char **)&s->bytes, cstr_end);
+                    s = Str_FromAnsi(bf, (char **)&s->bytes, cstr_end);
                     if((state & (DEBUG|MORE)) != (DEBUG|MORE)){
                         Buff_AddBytes(bf, s->bytes, s->length);
                         goto next;
@@ -193,7 +193,7 @@ status Fmt(Buff *bf, char *fmt, void *args[]){
                 }
                 args++;
             }else{
-                Str *s = Str_ConsumeAnsi(m, &ptr, end, TRUE);
+                Str *s = Str_ConsumeAnsi(bf, &ptr, end, TRUE);
                 Buff_AddBytes(bf, s->bytes, s->length);
             }
             start = ptr+1;

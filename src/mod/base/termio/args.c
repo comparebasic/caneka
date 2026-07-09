@@ -154,7 +154,7 @@ status CharPtr_ToHelp(CliArgs *cli){
 
     Str *noColorKey = K(m, "no-color");
     if(Table_GetHashed(cli->args, noColorKey) != NULL){
-        Ansi_SetColor(FALSE);
+        OutStream->type.state &= ~BUFF_COLOR;
     }
 
     Out("^c.$^0.\n\n", args);

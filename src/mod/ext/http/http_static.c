@@ -7,12 +7,6 @@ static void HttpStatic_Setup(MemCh *m, Req *req, Serve *srv){
 }
 
 static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
-    void *ar[] = {
-        Type_StateVec(m, req->type.of, req->type.state),
-        NULL
-    };
-    Out("^y.Req.type.state @^0\n", ar);
-
     if(req->type.state & ERROR){
         Single *sg = Iter_GetByIdx(&req->routeIt, req->routeIt.p->max_idx);
     }else{
@@ -35,7 +29,28 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
 }
 
 static void HttpStatic_Finalize(MemCh *m, HttpReq *req, Serve *srv){
-    void *ar[] = {req, NULL};
+    struct pollfd *pfd = (struct pollfd *)req->slot;
+    Buff_SetSocket(req->out, pfd->fd);
+    close(pfd->fd);
+
+    Time_Now(&req->metrics.end);
+    duration d = Time_Duration(m, &req->metrics.end, &req->metrics.start);
+    void *ar[] = {
+        req->path, 
+        Duration_Str(m, d),
+        NULL
+    };
+
+    if((req->type.state & (ERROR|NOOP)) == (ERROR|NOOP)){
+        Out("^y.Request 404 $ $^0\n", ar);
+    }else if(req->type.state & ERROR){
+        Out("^r.Request 500 $ $^0\n", ar);
+    }else if(req->type.state & NOOP){
+        Out("^g.Request 304 $ $^0\n", ar);
+    }else{
+        Out("^g.Request 200 $ $^0\n", ar);
+    }
+
     return;
 }
 
@@ -68,20 +83,10 @@ status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
         HttpReq_SetHeader(req, S(m, "Content-Type"), mime);
     }
 
-    void *ar[] = {
-        local,
-        req->path,
-        path,
-        NULL
-    };
-    Out("^y.Local @ from @^0\n", ar);
-
-
     Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
     File_Open(bf, path, O_RDONLY);
     if(bf->type.state & ERROR){
-        void *ar[] = {req->path, NULL};
-        Error(m, FUNCNAME, FILENAME, LINENUMBER, "File Not Found $", ar);
+        req->type.state |= NOOP;
         Return(m, req->type.state);
     }
     Buff_Stat(bf);
@@ -128,6 +133,7 @@ status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
         HttpReq_SetHeader(req, S(m, "Last-Modified"), timeStr);
     }
 
+    HttpReq_ExpectSend(req);
     req->type.state |= SUCCESS;
     Return(m, req->type.state);
 }
@@ -157,7 +163,7 @@ HandlerDef *HttpStatic_DefMake(MemCh *m){
 
 status HttpStatic_Error(MemCh *m, HttpReq *req, ErrorMsg *msg){
     void *_ar[] = {msg, NULL};
-    Out("^r.Error @^0\n", _ar);
+    Out("^yE.Error @^0\n", _ar);
 
     req->type.state |= ERROR;
     req->type.state &= ~NOOP;

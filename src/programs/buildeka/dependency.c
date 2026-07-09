@@ -130,7 +130,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
     StrVec_Add(ctx->current.source, K(m, "dependencies.txt"));
 
-    Buff *bf = Buff_Make(m, ZERO|BUFF_SLURP);
+    Buff *bf = Buff_Make(m, ZERO);
     bf->type.state |= NOOP;
     File_Open(bf, StrVec_Str(m, ctx->current.source), O_RDONLY);
     if(bf->type.state & ERROR){

@@ -37,7 +37,7 @@ static PyObject *PynekaCtx_new(PyTypeObject *type,
 
         Caneka_Init(pnk->m);
         Inter_Init(pnk->m);
-        Ansi_SetColor(FALSE);
+        Ansi_SetColor(OutStream, FALSE);
     }
     return (PyObject *)pnk;
 }

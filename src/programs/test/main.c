@@ -56,13 +56,13 @@ i32 main(int argc, char **argv){
     CliArgs_Parse(cli);
 
     if(CliArgs_Get(cli, noColor)){
-        Ansi_SetColor(FALSE);
+        Ansi_SetColor(OutStream, FALSE);
     }
 
     Buff *bf = Buff_Make(m, ZERO);
     Str *path = Str_Make(m, STR_DEFAULT);
     if(CliArgs_Get(cli, dist) != NULL){
-        Ansi_SetColor(FALSE);
+        Ansi_SetColor(OutStream, FALSE);
         Str *dir = IoUtil_GetAbsPath(m, S(m, "dist/output"));
         Dir_CheckCreate(m, dir);
 
