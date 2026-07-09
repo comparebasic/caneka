@@ -33,3 +33,4 @@ status IoPath_Descendent(StrVec *orig, StrVec *compare);
 status IoUtil_AddDotPath(StrVec *path, StrVec *dot, Str *ext);
 Str *IoUtil_ExtSep(MemCh *m);
 void IoUtil_TrimDir(MemCh *m, StrVec *v);
+boolean IoUtil_IsSep(Str *s);

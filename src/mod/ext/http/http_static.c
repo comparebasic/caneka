@@ -43,6 +43,17 @@ status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
     StrVec *local = IoPath_FromVec(m, req->path);
     IoUtil_Relativise(m, local);
 
+    if(IoUtil_IsSep(Span_Get(local->p, local->p->max_idx))){
+        StrVec_Add(local, S(m, "index.html"));
+    }
+
+    void *ar[] = {
+        local,
+        req->path,
+        NULL
+    };
+    Out("^y.Local @ from @^0\n", ar);
+
     Str *dir = Seel_Get(srv->config, K(m, "dir"));
     StrVec *path = Clone(m, dir);
     StrVec_AddVec(path, local);
@@ -90,8 +101,6 @@ status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
             Equals(since, etagLatest) && Equals(lastEtag, etagStr)){
         req->type.state |= NOOP;
         File_Close(bf);
-        printf("Etag set\n");
-        fflush(stdout);
     }else{
         Span_Add(req->sections, bf);
     }

@@ -67,6 +67,10 @@ status IoUtil_Relativise(MemCh *m, StrVec *path){
     return r;
 }
 
+boolean IoUtil_IsSep(Str *s){
+    return s != NULL && (s->type.state & MORE) && s->length == 1 && s->bytes[0] == '/';
+}
+
 Str *IoUtil_PathSep(MemCh *m){
     return Str_Ref(m, (byte *)"/", 1, 1, STRING_COPY|MORE);
 }
