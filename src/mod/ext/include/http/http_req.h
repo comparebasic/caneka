@@ -41,3 +41,4 @@ void HttpReq_Serve(MemCh *m, HttpReq *req, Serve *srv);
 void HttpReq_SetToRecv(HttpReq *req);
 void HttpReq_SetToResponse(HttpReq *req, i32 fd);
 void HttpReq_SetHeader(HttpReq *req, Str *key, void *value);
+void HttpReq_RemoveHeader(HttpReq *req, Str *key);

@@ -245,6 +245,7 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
         a = m->owner;
         if(a->type.of == TYPE_MEMCTX){
             m = (MemCh *)a;
+            a = NULL;
         }else{
             break;
         }

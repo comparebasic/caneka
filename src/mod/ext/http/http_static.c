@@ -7,14 +7,24 @@ static void HttpStatic_Setup(MemCh *m, Req *req, Serve *srv){
 }
 
 static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
-    Str *key = K(m, "static");
-    Hashed *h = Table_GetHashedByIter(&srv->def->routeIt, key);
-    Span *chain = Ifc(m, h->value, TYPE_SPAN);
-    if((req->routeIt.type.state & PROCESSING) == 0){
-        Iter_Init(&req->routeIt, chain);
-        Iter_Next(&req->routeIt);
-    }else if(req->type.state & SUCCESS){
-        Iter_Next(&req->routeIt);
+    void *ar[] = {
+        Type_StateVec(m, req->type.of, req->type.state),
+        NULL
+    };
+    Out("^y.Req.type.state @^0\n", ar);
+
+    if(req->type.state & ERROR){
+        Single *sg = Iter_GetByIdx(&req->routeIt, req->routeIt.p->max_idx);
+    }else{
+        Str *key = K(m, "static");
+        Hashed *h = Table_GetHashedByIter(&srv->def->routeIt, key);
+        Span *chain = Ifc(m, h->value, TYPE_SPAN);
+        if((req->routeIt.type.state & PROCESSING) == 0){
+            Iter_Init(&req->routeIt, chain);
+            Iter_Next(&req->routeIt);
+        }else if(req->type.state & SUCCESS){
+            Iter_Next(&req->routeIt);
+        }
     }
 
     Single *sg = Iter_Get(&req->routeIt);
@@ -47,12 +57,6 @@ status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
         StrVec_Add(local, S(m, "index.html"));
     }
 
-    void *ar[] = {
-        local,
-        req->path,
-        NULL
-    };
-    Out("^y.Local @ from @^0\n", ar);
 
     Str *dir = Seel_Get(srv->config, K(m, "dir"));
     StrVec *path = Clone(m, dir);
@@ -64,8 +68,22 @@ status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
         HttpReq_SetHeader(req, S(m, "Content-Type"), mime);
     }
 
+    void *ar[] = {
+        local,
+        req->path,
+        path,
+        NULL
+    };
+    Out("^y.Local @ from @^0\n", ar);
+
+
     Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
     File_Open(bf, path, O_RDONLY);
+    if(bf->type.state & ERROR){
+        void *ar[] = {req->path, NULL};
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, "File Not Found $", ar);
+        Return(m, req->type.state);
+    }
     Buff_Stat(bf);
 
     Str *timeStr = Time_ToRStr(m, &bf->st.st_mtim);
@@ -135,4 +153,27 @@ HandlerDef *HttpStatic_DefMake(MemCh *m){
     def->routeIt.metrics.selected = h->idx;
 
     return def;
+}
+
+status HttpStatic_Error(MemCh *m, HttpReq *req, ErrorMsg *msg){
+    void *_ar[] = {msg, NULL};
+    Out("^r.Error @^0\n", _ar);
+
+    req->type.state |= ERROR;
+    req->type.state &= ~NOOP;
+    HttpReq_RemoveHeader(req, S(m, "Etag"));
+    HttpReq_RemoveHeader(req, S(m, "Last-Modified"));
+
+    Span_Wipe(req->sections);
+
+    Buff *bf = Buff_Make(m, ZERO);
+    Buff_Add(bf, S(m, "<h1>Error</h1><p>"));
+    ErrorMsg_Fmt(bf, msg);
+    Buff_Add(bf, S(m, "</p>"));
+
+    Span_Add(req->sections, bf);
+}
+
+void HttpStatic_Init(MemCh *m){
+    Lookup_Add(m, ErrorHandlers, TYPE_HTTP_REQ, (void *)HttpStatic_Error);
 }

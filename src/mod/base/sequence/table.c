@@ -71,7 +71,7 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
         }
 
         if(record == NULL || record->orderIdx == -1){
-            if(op & SPAN_OP_GET){
+            if(op & (SPAN_OP_GET|SPAN_OP_REMOVE)){
                 if(Table_HKeyMiss(&hk) & END){
                     tbl->type.state |= NOOP;
                     return NULL;
@@ -91,7 +91,7 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
                 tbl->type.state |= SUCCESS;
                 return h;
             }
-        }else if(record->id == parity &&  Equals(record->key, key)){
+        }else if(record->id == parity && Equals(record->key, key)){
             if(op & SPAN_OP_SET){
                 record->value = value;
             }
@@ -256,6 +256,23 @@ i32 Table_Set(Table *tbl, void *_a, void *_value){
     }
 
     return h->idx;
+}
+
+void Table_Unset(Table *tbl, void *_a, void *_value){
+    Abstract *value = (Abstract *)_value;
+
+    Iter it;
+    Iter_Init(&it, tbl);
+    Table_UnsetIter(&it, _a);
+}
+
+void Table_UnsetIter(Iter *it, void *_a){
+    Abstract *a = (Abstract *)_a;
+
+    Hashed *h = Table_GetSetHashed(it, SPAN_OP_REMOVE, a, NULL);
+    if(h != NULL){
+        h->key = h->value = NULL;
+    }
 }
 
 i32 Table_SetByIter(Iter *it, void *_a, void *_value){

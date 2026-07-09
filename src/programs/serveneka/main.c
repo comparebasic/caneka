@@ -45,6 +45,7 @@ i32 main(int argc, char **argv){
     Str *portStr = CliArgs_Get(cli, portKey);
     i32 port = Int_FromStr(portStr); 
 
+    HttpStatic_Init(m);
     HandlerDef *def = HttpStatic_DefMake(m);
 
     StrVec *dir = IoUtil_GetAbsVec(m, CliArgs_Get(cli, dirKey));

@@ -24,7 +24,11 @@ static void Buff_addTail(Buff *bf){
 }
 
 static void Buff_setUnsentStr(Buff *bf){
-    Str *s = (Str *)Str_Rec(bf->m, Span_Get(bf->v->p, bf->unsent.idx));
+    Str *s = NULL;
+    Str *_s = Span_Get(bf->v->p, bf->unsent.idx);
+    if(_s != NULL){
+        s = (Str *)Str_Rec(bf->m, _s);
+    }
     if(s != NULL){
         s = Str_Rec(bf->m, s);
     }
@@ -121,13 +125,15 @@ static status Buff_vecPosFrom(Buff *bf, i32 offset, i64 whence){
             bf->unsent.total += length;
         }
 
-        while(bf->unsent.s->length < offset){
-            offset -= bf->unsent.s->length;
-            bf->unsent.total += bf->unsent.s->length;
-            bf->unsent.idx--;
-            Buff_setUnsentStr(bf);
-            if(bf->unsent.s == NULL){
-                break;
+        if(bf->unsent.s != NULL){
+            while(bf->unsent.s->length < offset){
+                offset -= bf->unsent.s->length;
+                bf->unsent.total += bf->unsent.s->length;
+                bf->unsent.idx--;
+                Buff_setUnsentStr(bf);
+                if(bf->unsent.s == NULL){
+                    break;
+                }
             }
         }
 

@@ -26,3 +26,7 @@ ErrorMsg *ErrorMsg_Make(MemCh *m, char *func, char *file, int line, char *fmt, v
 
     return msg;
 }
+
+void ErrorMsg_Fmt(Buff *bf, ErrorMsg *msg){
+    Fmt(bf, (char *)msg->fmt->bytes, msg->args);
+}

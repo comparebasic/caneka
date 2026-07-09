@@ -113,7 +113,8 @@ static void ServeTcp_AcceptPoll(Serve *srv){
             ts->new_fd = new_fd;
             ts->clientEnt = NULL;
 
-            Req *req = srv->def->mk(MemCh_Make(), srv);
+            MemCh *rm = MemCh_Make();
+            Req *req = rm->owner = srv->def->mk(rm, srv);
             srv->def->setup(req->m, req, srv);
             req->idx = Queue_Add(srv->q, req);
 
@@ -145,7 +146,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         Req *req = (Req *)Queue_Get(srv->q);
 
         srv->def->handle(req->m, req, srv);
-        if(req->type.state & (END|ERROR)){
+        if(req->type.state & END){
             Queue_Remove(srv->q, req->idx);
             srv->def->finalize(req->m, req, srv);
             MemCh_Free(req->m);

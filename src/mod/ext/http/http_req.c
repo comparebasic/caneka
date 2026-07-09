@@ -49,6 +49,13 @@ void HttpReq_SetHeader(HttpReq *req, Str *key, void *value){
     Table_Set(req->headersOut, key, value);
 }
 
+void HttpReq_RemoveHeader(HttpReq *req, Str *key){
+    if(req->headersOut != NULL){
+        req->headersOut = Table_Make(req->m);
+        Table_UnSet(req->headersOut, key);
+    }
+}
+
 status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
@@ -89,7 +96,11 @@ status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
     }else if(req->sections->nvalues == 0){
         Buff_Add(req->out, K(m, "HTTP/1.1 404 Not Found\r\n"));
     }else{
-        Buff_Add(req->out, K(m, "HTTP/1.1 200 Ok\r\n"));
+        if(req->type.state & ERROR){
+            Buff_Add(req->out, K(m, "HTTP/1.1 500 Error\r\n"));
+        }else{
+            Buff_Add(req->out, K(m, "HTTP/1.1 200 Ok\r\n"));
+        }
         Iter_Init(&it, req->sections);
         while((Iter_Next(&it) & END) == 0){
             Buff *bf = Iter_Get(&it);
