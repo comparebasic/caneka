@@ -244,8 +244,9 @@ void HttpReq_Setup(MemCh *m, Req *_req, Serve *srv){
 
     TcpSource *ts = (TcpSource *)srv->source;
     req->clientEnt = ts->clientEnt;
+    req->crit = ReqCrit_Make(rm);
+    req->crit->pfd->fd = ts->new_fd;
 
-    Queue_SetCriteria(srv->q, 0, req->idx, &req->slot);
     HttpReq_SetFd(req, ts->new_fd);
     HttpReq_ExpectRecv(req);
 }

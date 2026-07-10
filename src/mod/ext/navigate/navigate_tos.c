@@ -29,13 +29,13 @@ static status CompResult_Print(Buff *bf, void *a, cls type, word flags){
     }
 }
 
-static status QueueCrit_Print(Buff *bf, void *a, cls type, word flags){
-    QueueCrit *crit = (QueueCrit *)Ifc(bf->m, a, TYPE_QUEUE_CRIT);
+static status SlotterCrit_Print(Buff *bf, void *a, cls type, word flags){
+    SlotterCrit *crit = (SlotterCrit *)Ifc(bf->m, a, TYPE_SLOTTER_CRIT);
     void *args[3];
     args[0] = Type_StateVec(bf->m, crit->type.of, crit->type.state); 
     args[1] = &crit->u;
     args[2] = NULL;
-    Fmt(bf, "QueueCrit<@ \\@^I.@^i. ", args);
+    Fmt(bf, "SlotterCrit<@ \\@^I.@^i. ", args);
 
     boolean first = TRUE;
     if(flags & MORE){
@@ -46,7 +46,7 @@ static status QueueCrit_Print(Buff *bf, void *a, cls type, word flags){
             for(i32 i = 0; i < CRIT_SLAB_STRIDE; i++){
                if(slab[i] != -1 && slab[i] != 0){
                     Abstract *value = NULL;
-                    if(crit->type.state & QUEUE_CRIT_PFD){
+                    if(crit->type.state & SLOTTER_CRIT_PFD){
                         struct pollfd *pfd = (struct pollfd *)slab+i;
                         value = (Abstract *)I64_Wrapped(bf->m, pfd->fd);
                     }else{
@@ -69,18 +69,18 @@ static status QueueCrit_Print(Buff *bf, void *a, cls type, word flags){
         
         Buff_AddBytes(bf, (byte *)">", 1);
     }else{
-        Buff_AddBytes(bf, (byte *)"QueueCrit<>", 11);
+        Buff_AddBytes(bf, (byte *)"SlotterCrit<>", 11);
     }
     return ZERO;
 }
 
-static status Queue_Print(Buff *bf, void *a, cls type, word flags){
-    Queue *q = (Queue *)Ifc(bf->m, a, TYPE_QUEUE);
+static status Slotter_Print(Buff *bf, void *a, cls type, word flags){
+    Slotter *q = (Slotter *)Ifc(bf->m, a, TYPE_SLOTTER);
     status r = READY;
     void *args[6];
     args[0] = Type_StateVec(bf->m, q->type.of, q->type.state);
     args[1] = NULL;
-    r |= Fmt(bf, "Queue<@ ", args);
+    r |= Fmt(bf, "Slotter<@ ", args);
     r |= Bits_Print(bf, (byte *)&q->go, sizeof(util), ZERO);
     if(flags & DEBUG){
         args[0] = I32_Wrapped(bf->m, q->slabIdx*CRIT_SLAB_STRIDE);
@@ -131,7 +131,7 @@ status Navigate_InitLabels(MemCh *m, Lookup *lk){
         queueLabels = (Str **)Arr_Make(m, 17);
         queueLabels[9] = Str_CstrRef(m, "SINGLE_IDX");
         queueLabels[16] = Str_CstrRef(m, "REVERSE");
-        Lookup_Add(m, lk, TYPE_QUEUE, (void *)queueLabels);
+        Lookup_Add(m, lk, TYPE_SLOTTER, (void *)queueLabels);
         r |= SUCCESS;
     }
 
@@ -161,7 +161,7 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Navigate_InitLabels(m, ToSFlagLookup);
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
-    r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
-    r |= Lookup_Add(m, lk, TYPE_QUEUE_CRIT, (void *)QueueCrit_Print);
+    r |= Lookup_Add(m, lk, TYPE_SLOTTER, (void *)Slotter_Print);
+    r |= Lookup_Add(m, lk, TYPE_SLOTTER_CRIT, (void *)SlotterCrit_Print);
     return r;
 }

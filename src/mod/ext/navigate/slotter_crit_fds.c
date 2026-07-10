@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-gobits QueueCrit_Fds(QueueCrit *crit, util *values){
+gobits SlotterCrit_Fds(SlotterCrit *crit, util *values){
     gobits go = 0;
     util *u = values;
     for(i32 i = 0; i < CRIT_SLAB_STRIDE; i++){

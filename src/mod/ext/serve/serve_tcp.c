@@ -116,15 +116,15 @@ static void ServeTcp_AcceptPoll(Serve *srv){
             if(new_fd > 0){
                 fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
+                MemCh *rm = MemCh_Make();
                 TcpSource *ts = (TcpSource *)srv->source;
                 ts->new_fd = new_fd;
                 ts->clientEnt = NULL;
 
-                MemCh *rm = MemCh_Make();
                 Req *req = rm->owner = srv->def->mk(rm, srv);
                 Time_Now(&req->metrics.start);
                 srv->def->setup(req->m, req, srv);
-                req->idx = Queue_Add(srv->q, req);
+                req->idx = Queue_Add(srv->q, req, req->crit);
 
                 if(1 || srv->type.state & DEBUG){
                     Buff_SetTemp(OutStream); 

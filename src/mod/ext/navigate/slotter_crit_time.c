@@ -1,7 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
-gobits QueueCrit_Time(QueueCrit *crit, util *values){
+gobits SlotterCrit_Time(SlotterCrit *crit, util *values){
     gobits go = 0;
     ApproxTime *dest = (ApproxTime *)&crit->u;
     ApproxTime *tp = (ApproxTime *)values;
