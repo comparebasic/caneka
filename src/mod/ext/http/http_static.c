@@ -1,6 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
+
 static void HttpStatic_Setup(MemCh *m, Req *req, Serve *srv){
     HttpReq_Setup(m, req, srv);
     HttpReq_SetToRecv((HttpReq *)req);
@@ -30,10 +31,7 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
 }
 
 static void HttpStatic_Finalize(MemCh *m, HttpReq *req, Serve *srv){
-    struct pollfd *pfd = (struct pollfd *)req->slot;
-    printf("finalize closing %d\n", pfd->fd);
-    fflush(stdout);
-    close(pfd->fd);
+    close(req->crit->pfd.fd);
 
     Time_Now(&req->metrics.end);
     duration d = Time_Duration(m, &req->metrics.end, &req->metrics.start);
@@ -180,6 +178,7 @@ status HttpStatic_Error(MemCh *m, HttpReq *req, ErrorMsg *msg){
     Buff_Add(bf, S(m, "</p>"));
 
     Span_Add(req->sections, bf);
+    return ZERO;
 }
 
 void HttpStatic_Init(MemCh *m){

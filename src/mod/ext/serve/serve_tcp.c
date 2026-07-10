@@ -151,8 +151,6 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                NULL
             };
             Out("^y.   Handling qIdx:$ ", ar);
-            Bits_Print(OutStream, (byte *)&srv->q->go, sizeof(util), ZERO);
-            Out("^0\n", NULL);
         }
         srv->type.state &= ~(NOOP|PROCESSING);
         Req *req = (Req *)Queue_Get(srv->q);
@@ -169,7 +167,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
 }
 
 struct pollfd *Serve_TcpGetPollFd(Req *req){
-     return (struct pollfd *)req->slot;
+     return (struct pollfd *)&req->crit->pfd;
 }
 
 void Serve_ServeTcp(Serve *srv){

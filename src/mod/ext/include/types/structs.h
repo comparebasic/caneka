@@ -7,3 +7,6 @@ struct binseg_ctx;
 struct binseg_hdr;
 struct auth_cred;
 struct auth_target;
+struct queue;
+struct slotter;
+struct slotter_crit;

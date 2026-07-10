@@ -24,6 +24,7 @@ void Queue_Set(Queue *q, i32 idx, void *a, void *crit){
 }
 
 void Queue_Remove(Queue *q, i32 idx){
+    MemCh *m = q->it.p->m;
     Iter_RemoveByIdx(&q->it, idx);
     Iter_RemoveByIdx(&q->critIt, idx);
 
@@ -44,7 +45,7 @@ void *Queue_GetCriteria(Queue *q, i32 idx){
     return crit;
 }
 
-void Queue_Next(Queue *q){
+status Queue_Next(Queue *q){
     if(q->it.type.state & END){
         Queue_Reset(q);
     }
@@ -61,6 +62,9 @@ void Queue_Next(Queue *q){
             }
         }
     }
+
+    q->type.state |= q->it.type.state;
+    return q->type.state;
 }
 
 void Queue_Reset(Queue *q){
@@ -70,7 +74,7 @@ void Queue_Reset(Queue *q){
 }
 
 void *Queue_Get(Queue *q){
-    return Iter_Get(&g->it);
+    return Iter_Get(&q->it);
 }
 
 Queue *Queue_Make(MemCh *m, QueueCritFunc func){
@@ -80,6 +84,6 @@ Queue *Queue_Make(MemCh *m, QueueCritFunc func){
     Iter_Init(&q->it, Span_Make(m));
     Iter_Init(&q->availableIt, Span_Make(m));
     Iter_Init(&q->critIt, Span_Make(m));
-    ApproxTime_Init(&a->time.delta);
+    ApproxTime_Init(&q->time.delta);
     return q;
 }

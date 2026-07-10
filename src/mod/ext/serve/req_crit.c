@@ -3,13 +3,13 @@
 
 
 boolean ReqCrit_Func(Queue *q, Req *req, ReqCrit *crit){
-    return crit->pfd->fd != -1 && 
+    return crit->pfd.fd != -1 && 
         ((crit->pfd.events & (POLLIN|POLLOUT)) == 0 || poll(&crit->pfd, 1, 0) == 1);
 }
 
 ReqCrit *ReqCrit_Make(MemCh *m){
     ReqCrit *crit = MemCh_AllocOf(m, sizeof(ReqCrit), TYPE_REQ_CRIT);
     crit->type.of = TYPE_REQ_CRIT;
-    crit->pfd->fd = -1;
+    crit->pfd.fd = -1;
     return crit;
 }

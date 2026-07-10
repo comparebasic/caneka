@@ -14,7 +14,7 @@ static status queueScaleTest(MemCh *m, i32 max){
     status r = READY;
     void *args[5];
 
-    Queue *q = Queue_Make(m, Queue_timeFunc);
+    Queue *q = Queue_Make(m, (QueueCritFunc)Queue_timeFunc);
 
     i32 patCount = 4;
     i32 patIdx = 0;
@@ -60,7 +60,7 @@ static status queueScaleTest(MemCh *m, i32 max){
             args[0] = I32_Wrapped(m, max);
             args[1] = I16_Wrapped(m, guard);
             args[2] = q;
-            args[3] = Util_Wrapped(m, crit->u);
+            args[3] = &q->time.delta;
             args[4] = NULL;
             r |= Test(FALSE, "All $ Queue items were handled, too many rounds,"
                 " round=$ q=@ \\@$", args);
@@ -92,7 +92,7 @@ status QueueScale_Tests(MemCh *m){
     status r = READY;
     void *args[6];
 
-    Queue *q = Queue_Make(m, Queue_timeFunc);
+    Queue *q = Queue_Make(m, (QueueCritFunc)Queue_timeFunc);
     Queue_Next(q);
 
     i32 idx = 16;
@@ -110,7 +110,7 @@ status QueueScale_Tests(MemCh *m){
     idx = 65;
     Queue_Set(q, idx, S(m, "SixyFivey"), ApproxTime_Make(m, APPROXTIME_SEC, 1));
 
-    q->time.delta.state = APPROXTIME_SEC;
+    q->time.delta.type.state = APPROXTIME_SEC;
     q->time.delta.value = 2;
     Queue_Next(q);
 

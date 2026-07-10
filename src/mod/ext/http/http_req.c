@@ -61,8 +61,7 @@ static void HttpReq_writeBody(MemCh *m, HttpReq *req){
 status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
-    struct pollfd *pfd = (struct pollfd *)req->slot;
-    Buff_SetSocket(req->in, pfd->fd);
+    Buff_SetSocket(req->in, req->crit->pfd.fd);
     if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
             (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
         Roebling_Run(req->rbl);
@@ -119,8 +118,7 @@ void HttpReq_RemoveHeader(HttpReq *req, Str *key){
 status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
-    struct pollfd *pfd = (struct pollfd *)req->slot;
-    Buff_SetSocket(req->in, pfd->fd);
+    Buff_SetSocket(req->in, req->crit->pfd.fd);
     if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
             (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
         Roebling_Run(req->rbl);
@@ -146,8 +144,7 @@ status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
     HttpReq_SetHeader(req, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
-    struct pollfd *pfd = (struct pollfd *)req->slot;
-    Buff_SetSocket(req->out, pfd->fd);
+    Buff_SetSocket(req->out, req->crit->pfd.fd);
 
     printf("Write\n");
     fflush(stdout);
@@ -203,26 +200,19 @@ void HttpReq_Close(HttpReq *req){
 }
 
 void HttpReq_SetFd(HttpReq *req, i32 fd){
-    struct pollfd *pfd = (struct pollfd *)req->slot;
-    pfd->fd = fd;
-
-    printf("Setting fd%d\n", pfd->fd);
-    fflush(stdout);
+    req->crit->pfd.fd = fd;
 }
 
 void HttpReq_ExpectRecv(HttpReq *req){
-    struct pollfd *pfd = (struct pollfd *)req->slot;
-    pfd->events = POLLIN|POLLNVAL|POLLHUP|POLLERR;
+    req->crit->pfd.events = POLLIN|POLLNVAL|POLLHUP|POLLERR;
 }
 
 void HttpReq_ExpectInternal(HttpReq *req){
-    struct pollfd *pfd = (struct pollfd *)req->slot;
-    pfd->events = POLLNVAL|POLLHUP|POLLERR;
+    req->crit->pfd.events = POLLNVAL|POLLHUP|POLLERR;
 }
 
 void HttpReq_ExpectSend(HttpReq *req){
-    struct pollfd *pfd = (struct pollfd *)req->slot;
-    pfd->events = POLLOUT|POLLNVAL|POLLHUP|POLLERR;
+    req->crit->pfd.events = POLLOUT|POLLNVAL|POLLHUP|POLLERR;
 }
 
 Req *HttpReq_Mk(MemCh *m, Serve *srv){
@@ -244,8 +234,8 @@ void HttpReq_Setup(MemCh *m, Req *_req, Serve *srv){
 
     TcpSource *ts = (TcpSource *)srv->source;
     req->clientEnt = ts->clientEnt;
-    req->crit = ReqCrit_Make(rm);
-    req->crit->pfd->fd = ts->new_fd;
+    req->crit = ReqCrit_Make(m);
+    req->crit->pfd.fd = ts->new_fd;
 
     HttpReq_SetFd(req, ts->new_fd);
     HttpReq_ExpectRecv(req);

@@ -6,7 +6,7 @@ typedef struct http_req {
     Type type;
     MemCh *m;
     i32 idx;
-    util *slot;
+    ReqCrit *crit;
     Iter routeIt;
     struct {
         struct timespec start;

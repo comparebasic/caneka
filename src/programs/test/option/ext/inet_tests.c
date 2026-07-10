@@ -3,8 +3,7 @@
 #include <test_module.h>
 
 static status InetExample_finalize(Req *req){
-    struct pollfd *pfd = (struct pollfd *)req->slot;
-    close(pfd->fd);
+    close(req->crit->pfd.fd);
     return SUCCESS;
 }
 

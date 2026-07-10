@@ -15,9 +15,10 @@ status QueueAddRemove_Tests(MemCh *m){
     status r = READY;
     void *args[8];
 
-    Queue *q = Queue_Make(m, Queue_timeFunc);
-    i32 idx = Queue_Add(q, Str_FromCstr(m, "Temporary", ZERO));
-    Queue_Remove(q, idx, ApproxTime_Make(m, ZERO, 0));
+    Queue *q = Queue_Make(m, (QueueCritFunc)Queue_timeFunc);
+    i32 idx = Queue_Add(q, Str_FromCstr(m, "Temporary", ZERO),
+        ApproxTime_Make(m, ZERO, 0));
+    Queue_Remove(q, idx);
 
     r |= Test((q->availableIt.metrics.selected == 0),
         "Queue has the 0th item available", args);
@@ -63,7 +64,7 @@ status QueueAddRemove_Tests(MemCh *m){
     r |= Test(Equals(args[0], args[1]) && args[2] == NULL && args[3] == NULL && Equals(args[4], args[5]), "Expected @ = @, null(@) = null(@), @ = @", args);
 
     s = Str_FromCstr(m, "Bravo-two", ZERO);
-    idx = Queue_Add(q, s);
+    idx = Queue_Add(q, s, ApproxTime_Make(m, ZERO, 0));
 
     args[0] = Span_Get(q->it.p, 0);
     args[1] = Str_FromCstr(m, "Alpha", ZERO);
@@ -83,7 +84,7 @@ status QueueIter_Tests(MemCh *m){
     status r = READY;
     void *args[8];
 
-    Queue *q = Queue_Make(m);
+    Queue *q = Queue_Make(m, (QueueCritFunc)Queue_timeFunc);
 
     r |= Test(Queue_Next(q) & END, "Empty Queue_Next returns END flag", NULL);
     
@@ -189,7 +190,7 @@ status QueueCriteria_Tests(MemCh *m){
     void *args[8];
     i32 i = 0;
 
-    Queue *q = Queue_Make(m, Queue_timeFunc);
+    Queue *q = Queue_Make(m, (QueueCritFunc)Queue_timeFunc);
 
     Str *s = Str_FromCstr(m, "Two Days", ZERO);
     
@@ -228,8 +229,8 @@ status QueueCriteria_Tests(MemCh *m){
     args[2] = NULL;
     r |= Test(i == 1, "Only one item was available to run, i is $, at $ from start", args);
 
-    q->time.type.state = APPROXTIME_MIN;
-    q->time.value = 15;
+    q->time.delta.type.state = APPROXTIME_MIN;
+    q->time.delta.value = 15;
 
     expected[0] = Str_FromCstr(m, "Three Seconds", ZERO);
     expected[1] = Str_FromCstr(m, "Ten Minutes", ZERO);

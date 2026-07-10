@@ -4,14 +4,13 @@
 static status HttpReq_Print(Buff *bf, void *a, cls type, word flags){
     HttpReq *req = (HttpReq *)a;
     MemCh *m = bf->m;
-    struct pollfd *pfd = (struct pollfd *)req->slot;
     if(flags & DEBUG){
         void *args[] = {
             Type_StateVec(m, req->type.of, req->type.state),
             HttpMethodStr(m, req->address.method),
             req->path,
-            Serve_PollFlagVec(m, pfd),
-            I32_Wrapped(m, pfd->fd),
+            Serve_PollFlagVec(m, &req->crit->pfd),
+            I32_Wrapped(m, req->crit->pfd.fd),
             &req->routeIt,
             req->headersIt.p,
             req->queryIt.p,

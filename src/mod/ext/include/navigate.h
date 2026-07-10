@@ -1,5 +1,6 @@
 #include "navigate/node.h"
 #include "navigate/compare.h"
+#include "navigate/queue.h"
 #include "navigate/slotter.h"
 #include "navigate/slotter_crit.h"
 #include "navigate/slotter_crit_time.h"
