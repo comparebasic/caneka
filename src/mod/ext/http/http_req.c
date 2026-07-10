@@ -205,6 +205,9 @@ void HttpReq_Close(HttpReq *req){
 void HttpReq_SetFd(HttpReq *req, i32 fd){
     struct pollfd *pfd = (struct pollfd *)req->slot;
     pfd->fd = fd;
+
+    printf("Setting fd%d\n", pfd->fd);
+    fflush(stdout);
 }
 
 void HttpReq_ExpectRecv(HttpReq *req){

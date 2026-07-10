@@ -8,7 +8,6 @@ typedef util gobits;
 typedef struct queue {
     Type type;
     word _;
-    gobits go;
     i32 slabIdx;
     Abstract *value;
     Iter it;

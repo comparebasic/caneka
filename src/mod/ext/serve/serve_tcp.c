@@ -74,7 +74,7 @@ static i16 _g = 0;
 static void ServeTcp_AcceptPoll(Serve *srv){
     MemCh *m = srv->m;
     Debug_Push(m, srv);
-    Guard_Incr(m, &_g, 100, FUNCNAME, FILENAME, LINENUMBER);
+    Guard_Incr(m, &_g, 200, FUNCNAME, FILENAME, LINENUMBER);
 
     srv->type.state &= ~SUCCESS;
     void *args[8];
@@ -150,7 +150,9 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                I32_Wrapped(OutStream->m, srv->q->it.idx), 
                NULL
             };
-            Out("^y.   Handling qIdx:$^0\n", ar);
+            Out("^y.   Handling qIdx:$ ", ar);
+            Bits_Print(OutStream, (byte *)&srv->q->go, sizeof(util), ZERO);
+            Out("^0\n", NULL);
         }
         srv->type.state &= ~(NOOP|PROCESSING);
         Req *req = (Req *)Queue_Get(srv->q);
@@ -171,7 +173,7 @@ struct pollfd *Serve_TcpGetPollFd(Req *req){
 }
 
 void Serve_ServeTcp(Serve *srv){
-    QueueCrit *crit = QueueCrit_Make(srv->m, QueueCrit_WorkFds, ZERO);
+    QueueCrit *crit = QueueCrit_Make(srv->m, QueueCrit_Fds, ZERO);
     Queue_AddHandler(srv->q, crit);
 
     ServeTcp_OpenTcp(srv);

@@ -26,3 +26,6 @@ status Span_Remove(Span *p, i32 idx);
 status Span_Setup(Span *p);
 Span *Span_Make(struct mem_ctx *m);
 boolean Span_IsBlank(Span *p);
+
+util *Span_SetSlot(Span *p, i32 idx, util u);
+util *Span_GetSlot(Span *p, i32 idx);

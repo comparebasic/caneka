@@ -1,8 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-static gobits Queue_CheckSlab(Queue *q);
-
 i32 Queue_GetIdx(Queue *q){
     return q->it.idx;
 }
@@ -61,45 +59,38 @@ status Queue_Set(Queue *q, i32 idx, void *a){
 util *Queue_GetCriteria(Queue *q, i32 critIdx, i32 idx){
     Iter it;
     Iter_Init(&it, q->handlers);
-    i32 slabIdx = idx / CRIT_SLAB_STRIDE;
     QueueCrit *crit = (QueueCrit *)Span_Get(q->handlers, critIdx);
-    util *slab = (util *)Span_Get(crit->data, slabIdx);
-    i32 localIdx = idx & CRIT_SLAB_MASK;
-    return &slab[localIdx];
+    return Span_GetSlot(crit->data, idx);
 }
 
 status Queue_SetCriteria(Queue *q, i32 critIdx, i32 idx, util **value){
     status r = READY;
     void *args[2];
     MemCh *m = q->it.p->m;
-    i32 slabIdx = idx / CRIT_SLAB_STRIDE;
-    util *slab = NULL;
+    util *slot = NULL;
     QueueCrit *crit = Span_Get(q->handlers, critIdx);
+
     if(crit == NULL){
         args[0] = I32_Wrapped(ErrStream->m, critIdx);
         args[1] = NULL;
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Criteria object is null when adding criteria of critIdx $", args);
+            "Criteria object is null when adding criteria of critIdx $", 
+            args);
         return ERROR;
     }
-    if((slab = Span_Get(crit->data, slabIdx)) == NULL){
-        slab = (util *)Bytes_Alloc(m,
-            sizeof(util)*CRIT_SLAB_STRIDE, TYPE_BYTES_POINTER);
-        r |= Span_Set(crit->data, slabIdx, slab);
+
+    util *u = Span_GetSlot(crit->data, idx);
+    if(u == NULL){
+        u = Span_SetSlot(crit->data, idx, 0);
     } 
-    i32 localIdx = idx & CRIT_SLAB_MASK;
-    *value = &(slab[localIdx]);
+
+    *value = u;
     r |= SUCCESS;
     return r;
 }
 
-static status Queue_SetGo(Queue *q){
-    return q->go ? SUCCESS : NOOP;
-}
-
 status Queue_Reset(Queue *q){
     Iter_Init(&q->it, q->it.p);
-    q->go = 0;
     q->slabIdx = -1;
     q->type.state = q->type.state & DEBUG;
     return SUCCESS;
@@ -119,42 +110,21 @@ status Queue_Next(Queue *q){
     }
 
     while((Iter_Next(&q->it) & END) == 0){
-        if(q->handlers->nvalues > 0){
-            /* if first in slab set the go values */
-            util u = q->slabIdx+1;
-            if(q->it.idx >= u*CRIT_SLAB_STRIDE){
-                q->slabIdx = q->it.idx / CRIT_SLAB_STRIDE;
+        Iter it;
+        Iter_Init(&it, q->handlers);
+        while((Iter_Next(&it) & END) == 0){
+            QueueCrit *crit = (QueueCrit *)Iter_Get(&it);
+            util *slab = (util *)Span_Get(crit->data, q->slabIdx);
 
-                q->go = 0;
-                Iter it;
-                Iter_Init(&it, q->handlers);
-                while((Iter_Next(&it) & END) == 0){
-                    QueueCrit *crit = (QueueCrit *)Iter_Get(&it);
-                    util *slab = (util *)Span_Get(crit->data, q->slabIdx);
-
-                    crit->type.state |= (q->type.state & DEBUG);
-                    if(slab != NULL){
-                        q->go |= crit->func(crit, slab);
-                        /*
-                        Bits_Print(OutStream, (byte *)&q->go, sizeof(util), MORE|DEBUG);
-                        Buff_AddBytes(OutStream, (byte *)"\n", 1); 
-                        */
-                    }
-                }
+            crit->type.state |= (q->type.state & DEBUG);
+            if(slab != NULL){
+                q->go |= crit->func(crit, slab);
+                /*
+                Bits_Print(OutStream, (byte *)&q->go, sizeof(util), MORE|DEBUG);
+                Buff_AddBytes(OutStream, (byte *)"\n", 1); 
+                */
             }
-
-            util base = 1;
-            i32 localIdx = (q->it.idx & CRIT_SLAB_MASK); 
-            if((q->go & (base << localIdx)) != 0){
-                q->type.state |= SUCCESS;
-                q->value = Iter_Get(&q->it);
-                break;
-            }
-        }else{
-            q->value = Iter_Get(&q->it);
-            break;
         }
-
     }
 
     q->type.state |= (q->it.type.state & END);

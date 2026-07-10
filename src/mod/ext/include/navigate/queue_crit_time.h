@@ -1,1 +1,1 @@
-gobits QueueCrit_Time(QueueCrit *crit, util *values);
+boolean QueueCrit_Time(QueueCrit *crit, util *u);

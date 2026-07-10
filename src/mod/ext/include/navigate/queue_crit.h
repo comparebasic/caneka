@@ -9,7 +9,7 @@ enum queue_crit_flags {
     QUEUE_CRIT_PFD = 1 << 13,
 };
 
-typedef gobits (*QueueFunc)(struct queue_crit *crit, util *values);
+typedef boolean (*QueueFunc)(struct queue_crit *crit, util *u);
 
 typedef struct queue_crit {
     Type type;
