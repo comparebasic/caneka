@@ -30,7 +30,8 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
 
 static void HttpStatic_Finalize(MemCh *m, HttpReq *req, Serve *srv){
     struct pollfd *pfd = (struct pollfd *)req->slot;
-    Buff_SetSocket(req->out, pfd->fd);
+    printf("finalize closing %d\n", pfd->fd);
+    fflush(stdout);
     close(pfd->fd);
 
     Time_Now(&req->metrics.end);

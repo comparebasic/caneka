@@ -43,6 +43,9 @@ static i32 openPortToFd(i32 port){
 		return -1;
     };
 
+    printf("opened socket fd %d\n", fd);
+    fflush(stdout);
+
     return fd;
 }
 
@@ -67,9 +70,11 @@ static void ServeTcp_OpenTcp(Serve *srv){
     Out("^c.Opened Socket ^D.$^d.fd for @. Ready to Serve on port $^0\n", args);
 }
 
+static i16 _g = 0;
 static void ServeTcp_AcceptPoll(Serve *srv){
     MemCh *m = srv->m;
     Debug_Push(m, srv);
+    Guard_Incr(m, &_g, 100, FUNCNAME, FILENAME, LINENUMBER);
 
     srv->type.state &= ~SUCCESS;
     void *args[8];
@@ -126,9 +131,10 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                     void *ar[] = {
                        I32_Wrapped(OutStream->m, new_fd), 
                        I32_Wrapped(OutStream->m, req->idx), 
+                       I32_Wrapped(OutStream->m, srv->q->it.p->nvalues), 
                        NULL
                     };
-                    Out("^y.NewConnection fd:$ qIdx:$^0\n", ar);
+                    Out("^y.NewConnection fd:$ qIdx:$ $requests now^0\n", ar);
                 }
             }else{
                 break;
@@ -151,8 +157,8 @@ static void ServeTcp_AcceptPoll(Serve *srv){
 
         srv->def->handle(req->m, req, srv);
         if(req->type.state & END){
-            Queue_Remove(srv->q, req->idx);
             srv->def->finalize(req->m, req, srv);
+            Queue_Remove(srv->q, req->idx);
             MemCh_Free(req->m);
         }
     }
