@@ -10,7 +10,6 @@ status SnipModify_Tests(MemCh *m);
 status QueueIter_Tests(MemCh *m);
 status QueueCriteria_Tests(MemCh *m);
 status QueueScale_Tests(MemCh *m);
-status Queue_Tests(MemCh *m);
 status QueueAddRemove_Tests(MemCh *m);
 status Relation_Tests(MemCh *m);
 status Object_Tests(MemCh *m);
@@ -199,12 +198,6 @@ static TestSet ExtTests[] = {
     },
 #endif
     {
-        "Queue Tests",
-        Queue_Tests,
-        "Queue tests for file descriptors.",
-        SKIP_TEST,
-    },
-    {
         "Queue Add Remove Tests",
         QueueAddRemove_Tests,
         "Queue tests for adding and removing items.",
@@ -220,13 +213,13 @@ static TestSet ExtTests[] = {
         "Queue Criteria Tests",
         QueueCriteria_Tests,
         "Queue tests for multi-critiria items (time/file descriptor).",
-        SKIP_TEST,
+        FEATURE_COMPLETE,
     },
     {
         "Queue Scale Tests",
         QueueScale_Tests,
         "Queue testing adding and removing Queue items over time.",
-        SKIP_TEST,
+        FEATURE_COMPLETE,
     },
     {
         NULL,

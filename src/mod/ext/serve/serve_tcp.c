@@ -173,9 +173,6 @@ struct pollfd *Serve_TcpGetPollFd(Req *req){
 }
 
 void Serve_ServeTcp(Serve *srv){
-    QueueCrit *crit = QueueCrit_Make(srv->m, QueueCrit_Fds, ZERO);
-    Queue_AddHandler(srv->q, crit);
-
     ServeTcp_OpenTcp(srv);
 
     while((srv->type.state & ERROR) == 0){

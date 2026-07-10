@@ -13,6 +13,6 @@ Serve *Serve_Make(MemCh *m){
     Serve *srv = MemCh_AllocOf(m, sizeof(Serve), TYPE_SERVE);
     srv->type.of = TYPE_SERVE;
     srv->m = m;
-    srv->q = Queue_Make(m);
+    srv->q = Queue_Make(m, ReqCrit_Func);
     return srv;
 }

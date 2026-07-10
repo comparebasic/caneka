@@ -69,11 +69,17 @@ void Queue_Reset(Queue *q){
     q->type.state = q->it.type.state;
 }
 
-Queue *Queue_Make(MemCh *m){
+void *Queue_Get(Queue *q){
+    return Iter_Get(&g->it);
+}
+
+Queue *Queue_Make(MemCh *m, QueueCritFunc func){
     Queue *q = MemCh_AllocOf(m, sizeof(Queue), TYPE_QUEUE);
     q->type.of = TYPE_QUEUE;
+    q->func = func;
     Iter_Init(&q->it, Span_Make(m));
     Iter_Init(&q->availableIt, Span_Make(m));
     Iter_Init(&q->critIt, Span_Make(m));
+    ApproxTime_Init(&a->time.delta);
     return q;
 }

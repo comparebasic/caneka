@@ -30,6 +30,8 @@ Single *Time_Wrapped(MemCh *m, struct timespec *ts);
 
 status ApproxTime_Beyond(struct timespec *delta, ApproxTime *mt);
 status ApproxTime_Set(struct timespec *present, struct timespec *start, ApproxTime *at);
+ApproxTime *ApproxTime_Make(MemCh *m, word unit, quad value);
+void ApproxTime_Init(ApproxTime *at);
 
 duration Time_Duration(MemCh *m, struct timespec *ts, struct timespec *sub);
 void From_Duration(duration d, struct timespec *ts);

@@ -211,3 +211,15 @@ status ApproxTime_Set(struct timespec *present, struct timespec *start, ApproxTi
 
     return NOOP;
 }
+
+void ApproxTime_Init(ApproxTime *at){
+    at->type.of = TYPE_APPROXTIME;
+}
+
+ApproxTime *ApproxTime_Make(MemCh *m, word unit, quad value){
+    ApproxTime *at = MemCh_AllocOf(m, sizeof(ApproxTime), TYPE_APPROXTIME);
+    at->type.of = TYPE_APPROXTIME;
+    at->type.state = unit;
+    at->value = value;
+    return at;
+}
