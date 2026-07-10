@@ -1,1 +1,1 @@
-boolean QueueCrit_Fds(QueueCrit *crit, util *u);
+gobits QueueCrit_Fds(QueueCrit *crit, util *values);

@@ -1,12 +1,26 @@
 #include <external.h>
 #include <caneka.h>
 
-boolean QueueCrit_Fds(QueueCrit *crit, util *u){
-    if(*u == 0){
-        ((struct pollfd *)u)->fd = -1;
+gobits QueueCrit_Fds(QueueCrit *crit, util *values){
+    gobits go = 0;
+    util *u = values;
+    for(i32 i = 0; i < CRIT_SLAB_STRIDE; i++){
+        if(*u == 0){
+            ((struct pollfd *)u)->fd = -1;
+        }
+        u++;
     }
-    struct pollfd *pfd = (struct pollfd *)u;
-    return pfd->fd && 
-        (pfd->events & (POLLIN|POLLOUT) == 0) || 
-        poll((struct pollfd *)u, 1, 0) == 1;
+    struct pollfd *pfds = (struct pollfd *)values;
+    i32 ready = poll(pfds, CRIT_SLAB_STRIDE, 0);
+
+    util base = 1;
+    for(i32 i = 0; i < CRIT_SLAB_STRIDE && ready > 0; i++){
+        struct pollfd *pfd = pfds+i;
+
+        if(poll(pfd, 1, 0) > 0){
+            go |= (base << i);
+            ready--;
+        }
+    }
+    return go;
 }
