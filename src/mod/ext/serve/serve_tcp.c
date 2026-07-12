@@ -111,14 +111,17 @@ static void ServeTcp_AcceptPoll(Serve *srv){
     if(available){
         i32 max = 16;
         while(max-- > 0){
-            i32 new_fd = accept(pfd->fd, (struct sockaddr*)NULL, NULL);
+            struct sockaddr_in cliaddr;
+            socklen_t len = sizeof(cliaddr);
+            i32 new_fd = accept(pfd->fd, (struct sockaddr*)&cliaddr, &len);
             if(new_fd > 0){
                 fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
                 MemCh *rm = MemCh_Make();
                 TcpSource *ts = (TcpSource *)srv->source;
                 ts->new_fd = new_fd;
-                ts->clientEnt = NULL;
+                ts->addr = NetAddr_Make4(m);
+                memcpy(&ts->addr->net.ip4addr, &cliaddr, sizeof(cliaddr));
 
                 Req *req = rm->owner = srv->def->mk(rm, srv);
                 Time_Now(&req->metrics.start);

@@ -16,6 +16,27 @@ StrVec *Serve_PollFlagVec(MemCh *m, struct pollfd *pfd){
     return v;
 }
 
+static status NetAddr_Print(Buff *bf, void *a, cls type, word flags){
+    MemCh *m = bf->m;
+    NetAddr *addr = (NetAddr*)a;
+    void *args[4];
+    if(addr->type.of == TYPE_NET_ADDR4){
+        args[0] = S(m, "ip4");
+        args[1] = Ip4_ToStr(m, (quad )addr->net.ip4addr.sin_addr.s_addr);
+        args[2] = NULL;
+    }else if(addr->type.of == TYPE_NET_ADDR6){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Ipv6 not yet supported ", NULL);
+        return ERROR;
+    }else{
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Unknown address type", NULL);
+        return ERROR;
+    }
+
+    return Fmt(bf, "$=$", args);
+}
+
 static status Serve_Print(Buff *bf, void *a, cls type, word flags){
     Serve *ctx = (Serve*)a;
     void *args[] = {
@@ -64,5 +85,7 @@ status Serve_TosInit(MemCh *m){
     r |= Lookup_Add(m, lk, TYPE_SERVE, (void *)Serve_Print);
     r |= Lookup_Add(m, lk, TYPE_REQ, (void *)Req_Print);
     r |= Lookup_Add(m, lk, TYPE_HOST_ENT, (void *)HostEnt_Print);
+    r |= Lookup_Add(m, lk, TYPE_NET_ADDR4, (void *)NetAddr_Print);
+    r |= Lookup_Add(m, lk, TYPE_NET_ADDR6, (void *)NetAddr_Print);
     return r;
 }

@@ -13,7 +13,7 @@ typedef struct http_req {
         struct timespec end;
     } metrics;
     /* req end */
-    HostEnt *clientEnt;
+    NetAddr *addr;
     struct {
         i16 method;
         i16 proto;

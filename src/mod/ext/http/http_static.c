@@ -37,17 +37,18 @@ static void HttpStatic_Finalize(MemCh *m, HttpReq *req, Serve *srv){
     void *ar[] = {
         req->path, 
         Duration_Str(m, d),
+        req->addr,
         NULL
     };
 
     if((req->type.state & (ERROR|NOOP)) == (ERROR|NOOP)){
-        Out("^y.Request 404 $ $^0\n", ar);
+        Out("^y.Request 404 $ $ from:$^0\n", ar);
     }else if(req->type.state & ERROR){
-        Out("^r.Request 500 $ $^0\n", ar);
+        Out("^r.Request 500 $ $ from:$^0\n", ar);
     }else if(req->type.state & NOOP){
-        Out("^g.Request 304 $ $^0\n", ar);
+        Out("^g.Request 304 $ $ from:$^0\n", ar);
     }else{
-        Out("^g.Request 200 $ $^0\n", ar);
+        Out("^g.Request 200 $ $ from:$^0\n", ar);
     }
 
     return;

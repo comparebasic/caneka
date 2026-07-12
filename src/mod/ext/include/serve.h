@@ -16,6 +16,7 @@ enum serve_types {
 #include "serve/etag.h"
 #include "serve/hostent.h"
 #include "serve/conn.h"
+#include "serve/netaddr.h"
 #include "serve/serve.h"
 #include "serve/serve_tcp.h"
 #include "serve/tcp_source.h"

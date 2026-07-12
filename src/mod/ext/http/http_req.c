@@ -228,7 +228,7 @@ void HttpReq_Setup(MemCh *m, Req *_req, Serve *srv){
     srv->metrics.open++;
 
     TcpSource *ts = (TcpSource *)srv->source;
-    req->clientEnt = ts->clientEnt;
+    req->addr = ts->addr;
     req->crit = ReqCrit_Make(m);
     req->crit->pfd.fd = ts->new_fd;
 
