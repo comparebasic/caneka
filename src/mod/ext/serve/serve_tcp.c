@@ -74,7 +74,6 @@ static i16 _g = 0;
 static void ServeTcp_AcceptPoll(Serve *srv){
     MemCh *m = srv->m;
     Debug_Push(m, srv);
-    Guard_Incr(m, &_g, 200, FUNCNAME, FILENAME, LINENUMBER);
 
     srv->type.state &= ~SUCCESS;
     void *args[8];

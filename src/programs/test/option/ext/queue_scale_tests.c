@@ -6,8 +6,8 @@
 static boolean Queue_timeFunc(Queue *q, Str *item, ApproxTime *crit){
     ApproxTime *delta = &q->time.delta;
     return (delta->type.state & UPPER_FLAGS) &&     
-            (delta->type.state & UPPER_FLAGS) <= (crit->type.state & UPPER_FLAGS) && 
-            delta->value <= crit->value;
+            (delta->type.state & UPPER_FLAGS) >= (crit->type.state & UPPER_FLAGS) && 
+            delta->value >= crit->value;
 }
 
 static status queueScaleTest(MemCh *m, i32 max){
