@@ -185,6 +185,5 @@ Serve *Serve_MakeTcp(MemCh *m, HandlerDef *def, HostEnt *ent){
     srv->def = def;
     srv->address.ent = ent;
 
-    srv->type.state |= DEBUG;
     return srv;
 }

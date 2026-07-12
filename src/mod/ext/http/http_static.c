@@ -25,7 +25,6 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
     Single *sg = Iter_Get(&req->routeIt);
     ReqFunc func = (ReqFunc)sg->val.ptr;
     func(m, (Req *)req, srv);
-    printf("Handle funcIdx:%d\n", req->routeIt.idx);
 
     return;
 }
@@ -162,9 +161,6 @@ HandlerDef *HttpStatic_DefMake(MemCh *m){
 }
 
 status HttpStatic_Error(MemCh *m, HttpReq *req, ErrorMsg *msg){
-    void *_ar[] = {msg, NULL};
-    Out("^yE.Error @^0\n", _ar);
-
     req->type.state |= ERROR;
     req->type.state &= ~NOOP;
     HttpReq_RemoveHeader(req, S(m, "Etag"));

@@ -146,16 +146,11 @@ status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
     HttpReq_SetHeader(req, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
     Buff_SetSocket(req->out, req->crit->pfd.fd);
 
-    printf("Write\n");
-    fflush(stdout);
-
     HttpReq_writeStatus(m, req);
     HttpReq_setLength(m, req);
     HttpReq_writeHeaders(m, req);
     HttpReq_writeBody(m, req);
 
-    printf("Written\n");
-    fflush(stdout);
     req->type.state |= (SUCCESS|END);
     Return(m, req->type.state);
 }
