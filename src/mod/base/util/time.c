@@ -214,6 +214,7 @@ status ApproxTime_Set(struct timespec *present, struct timespec *start, ApproxTi
 
 void ApproxTime_Init(ApproxTime *at){
     at->type.of = TYPE_APPROXTIME;
+    at->type.state = APPROXTIME_MILLISEC;
 }
 
 ApproxTime *ApproxTime_Make(MemCh *m, word unit, quad value){

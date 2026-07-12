@@ -14,6 +14,19 @@ static status indentStream(Buff *bf, i32 indent){
     return SUCCESS;
 }
 
+static status Queue_Print(Buff *bf, void *a, cls type, word flags){
+    MemCh *m = bf->m;
+    Queue *q = (Queue*)Ifc(bf->m, a, TYPE_QUEUE);
+    void *ar[] = {
+        Type_StateVec(m, q->type.of, q->type.state),
+        I32_Wrapped(m, q->it.p->nvalues),
+        I32_Wrapped(m, q->availableIt.p->nvalues),
+        Time_ToRStr(m, &q->time.present),
+        NULL
+    };
+    return Fmt(bf, "<Queue @ ^D.$^d.nvalues ^D.$^d.available present:$^>", ar);
+}
+
 static status CompResult_Print(Buff *bf, void *a, cls type, word flags){
     CompResult *cr = (CompResult*)Ifc(bf->m, a, TYPE_COMPRESULT);
     void *args[] = {
@@ -161,6 +174,7 @@ status Navigate_ToSInit(MemCh *m, Lookup *lk){
     r |= Navigate_InitLabels(m, ToSFlagLookup);
     r |= Lookup_Add(m, lk, TYPE_COMP, (void *)Comp_Print);
     r |= Lookup_Add(m, lk, TYPE_COMPRESULT, (void *)CompResult_Print);
+    r |= Lookup_Add(m, lk, TYPE_QUEUE, (void *)Queue_Print);
     r |= Lookup_Add(m, lk, TYPE_SLOTTER, (void *)Slotter_Print);
     r |= Lookup_Add(m, lk, TYPE_SLOTTER_CRIT, (void *)SlotterCrit_Print);
     return r;
