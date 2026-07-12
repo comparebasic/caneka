@@ -16,9 +16,19 @@ i32 Queue_Add(Queue *q, void *a, void *crit){
 }
 
 void Queue_Set(Queue *q, i32 idx, void *a, void *crit){
+    MemCh *m = q->it.p->m;
     i32 prev = q->it.idx;
     Iter_SetByIdx(&q->it, idx, a);
     Iter_GetByIdx(&q->it, prev);
+
+    void *ar[] = {
+        I32_Wrapped(m, idx),
+        a,
+        crit,
+        NULL
+    };
+
+    Out("^p.Adding at $ @ crit @^0\n", ar);
 
     Iter_SetByIdx(&q->critIt, idx, crit);
 }
@@ -51,8 +61,10 @@ status Queue_Next(Queue *q){
     }
     q->type.state |= MORE;
 
-    while((q->type.state & MORE) && (q->it.type.state & END) == 0){
-        Iter_Next(&q->it);
+    while((q->type.state & MORE)){
+        if(Iter_Next(&q->it) & END){;
+            break;
+        }
         if(q->func != NULL){
             void *crit = Iter_GetByIdx(&q->critIt, q->it.idx);
             if(q->func(q, Iter_Get(&q->it), crit)){

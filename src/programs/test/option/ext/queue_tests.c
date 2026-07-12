@@ -6,8 +6,8 @@
 static boolean Queue_timeFunc(Queue *q, Str *item, ApproxTime *crit){
     ApproxTime *delta = &q->time.delta;
     return (delta->type.state & UPPER_FLAGS) &&     
-            (delta->type.state & UPPER_FLAGS) <= (crit->type.state & UPPER_FLAGS) && 
-            delta->value <= crit->value;
+            (delta->type.state & UPPER_FLAGS) >= (crit->type.state & UPPER_FLAGS) && 
+            delta->value >= crit->value;
 }
 
 status QueueAddRemove_Tests(MemCh *m){
@@ -17,7 +17,7 @@ status QueueAddRemove_Tests(MemCh *m){
 
     Queue *q = Queue_Make(m, (QueueCritFunc)Queue_timeFunc);
     i32 idx = Queue_Add(q, Str_FromCstr(m, "Temporary", ZERO),
-        ApproxTime_Make(m, ZERO, 0));
+        ApproxTime_Make(m, APPROXTIME_MILLISEC, 0));
     Queue_Remove(q, idx);
 
     r |= Test((q->availableIt.metrics.selected == 0),
@@ -27,7 +27,7 @@ status QueueAddRemove_Tests(MemCh *m){
 
 
     Str *s = Str_FromCstr(m, "Alpha", ZERO);
-    idx = Queue_Add(q, s, ApproxTime_Make(m, ZERO, 0));
+    idx = Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_MILLISEC, 0));
 
     r |= Test(q->it.p->nvalues == 1 && q->it.p->max_idx == 0, "first item is in the first slot", NULL);
     args[0] = Span_Get(q->it.p, 0);
@@ -36,10 +36,10 @@ status QueueAddRemove_Tests(MemCh *m){
     r |= Test(Equals(args[0], args[1]), "first item is in the first slot, expected @, have @", args);
 
     s = Str_FromCstr(m, "Bravo", ZERO);
-    idx = Queue_Add(q, s, ApproxTime_Make(m, ZERO, 0));
+    idx = Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_MILLISEC, 0));
 
     s = Str_FromCstr(m, "Charlie", ZERO);
-    idx = Queue_Add(q, s, ApproxTime_Make(m, ZERO, 0));
+    idx = Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_MILLISEC, 0));
 
     args[0] = Span_Get(q->it.p, 0);
     args[1] = Str_FromCstr(m, "Alpha", ZERO);
@@ -64,7 +64,7 @@ status QueueAddRemove_Tests(MemCh *m){
     r |= Test(Equals(args[0], args[1]) && args[2] == NULL && args[3] == NULL && Equals(args[4], args[5]), "Expected @ = @, null(@) = null(@), @ = @", args);
 
     s = Str_FromCstr(m, "Bravo-two", ZERO);
-    idx = Queue_Add(q, s, ApproxTime_Make(m, ZERO, 0));
+    idx = Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_MILLISEC, 0));
 
     args[0] = Span_Get(q->it.p, 0);
     args[1] = Str_FromCstr(m, "Alpha", ZERO);
@@ -89,7 +89,7 @@ status QueueIter_Tests(MemCh *m){
     r |= Test(Queue_Next(q) & END, "Empty Queue_Next returns END flag", NULL);
     
     Str *s = Str_FromCstr(m, "One", ZERO);
-    Queue_Add(q, s, ApproxTime_Make(m, ZERO, 0));
+    Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_MILLISEC, 0));
 
     void *expected[10];
     expected[0] = Str_FromCstr(m, "One", ZERO);
@@ -110,21 +110,24 @@ status QueueIter_Tests(MemCh *m){
     r |= Test(i == 1, "Queue runs for the number of items in it, have $, for @", args);
     
     s = Str_FromCstr(m, "Two", ZERO);
-    Queue_Add(q, s, ApproxTime_Make(m, ZERO, 0));
+    Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_MILLISEC, 10));
     s = Str_FromCstr(m, "Three", ZERO);
-    Queue_Add(q, s, ApproxTime_Make(m, ZERO, 0));
+    Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_MILLISEC, 20));
     s = Str_FromCstr(m, "Four", ZERO);
-    Queue_Add(q, s, ApproxTime_Make(m, ZERO, 0));
+    Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_MILLISEC, 30));
     s = Str_FromCstr(m, "Five", ZERO);
-    Queue_Add(q, s, ApproxTime_Make(m, ZERO, 0));
+    Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_MILLISEC, 40));
 
     expected[0] = Str_FromCstr(m, "One", ZERO);
     expected[1] = Str_FromCstr(m, "Two", ZERO);
     expected[2] = Str_FromCstr(m, "Three", ZERO);
     expected[3] = Str_FromCstr(m, "Four", ZERO);
-    expected[4] = Str_FromCstr(m, "Five", ZERO);
     expected[5] = NULL;
+
+    q->time.delta.value = 35;
+
     i = 0;
+    Queue_Reset(q);
     while((Queue_Next(q) & END) == 0){
         args[0] = expected[i];
         args[1] = Queue_Get(q);
@@ -137,7 +140,35 @@ status QueueIter_Tests(MemCh *m){
     args[0] = I32_Wrapped(m, i);
     args[1] = q;
     args[2] = NULL;
-    r |= Test(i == 5, "Queue runs for the number of items in it, have $, for @", args);
+    r |= Test(i == 4, "Queue runs for the number of items in it, have $, for @", args);
+
+    q->time.delta.value = 40;
+
+    expected[0] = Str_FromCstr(m, "One", ZERO);
+    expected[1] = Str_FromCstr(m, "Two", ZERO);
+    expected[2] = Str_FromCstr(m, "Three", ZERO);
+    expected[3] = Str_FromCstr(m, "Four", ZERO);
+    expected[4] = Str_FromCstr(m, "Five", ZERO);
+    expected[5] = NULL;
+
+    q->time.delta.value = 35;
+
+    i = 0;
+    Queue_Reset(q);
+    while((Queue_Next(q) & END) == 0){
+        args[0] = expected[i];
+        args[1] = Queue_Get(q);
+        args[2] = NULL;
+        r |= Test(Equals(args[1], expected[i]),
+            "Queue item matches, expected @, have @", args);
+        i++;
+    };
+
+    args[0] = I32_Wrapped(m, i);
+    args[1] = q;
+    args[2] = NULL;
+    r |= Test(i == 4, "Queue runs for the number of items in it, have $, for @", args);
+
 
     Queue_Remove(q, 3);
 
@@ -158,7 +189,7 @@ status QueueIter_Tests(MemCh *m){
     };
 
     s = Str_FromCstr(m, "Four-two", ZERO);
-    Queue_Add(q, s, ApproxTime_Make(m, ZERO, 0));
+    Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_MILLISEC, 0));
 
     expected[0] = Str_FromCstr(m, "One", ZERO);
     expected[1] = Str_FromCstr(m, "Two", ZERO);
@@ -166,7 +197,11 @@ status QueueIter_Tests(MemCh *m){
     expected[3] = Str_FromCstr(m, "Four-two", ZERO);
     expected[4] = Str_FromCstr(m, "Five", ZERO);
     expected[5] = NULL;
+
+    q->time.delta.value = 41;
+
     i = 0;
+    Queue_Reset(q);
     while((Queue_Next(q) & END) == 0){
         args[0] = expected[i];
         args[1] = Queue_Get(q);
@@ -193,12 +228,9 @@ status QueueCriteria_Tests(MemCh *m){
     Queue *q = Queue_Make(m, (QueueCritFunc)Queue_timeFunc);
 
     Str *s = Str_FromCstr(m, "Two Days", ZERO);
-    
-    i32 idx = Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_DAY, 1));
-
+    i32 idx = Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_DAY, 2));
     s = Str_FromCstr(m, "Three Seconds", ZERO);
     idx = Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_SEC, 3));
-
     s = Str_FromCstr(m, "Ten Minutes", ZERO);
     idx = Queue_Add(q, s, ApproxTime_Make(m, APPROXTIME_MIN, 10));
 
@@ -253,7 +285,7 @@ status QueueCriteria_Tests(MemCh *m){
 
 
     q->time.delta.type.state = APPROXTIME_DAY;
-    q->time.delta.value = 1;
+    q->time.delta.value = 3;
 
     expected[0] = Str_FromCstr(m, "Two Days", ZERO);
     expected[1] = Str_FromCstr(m, "Three Seconds", ZERO);
