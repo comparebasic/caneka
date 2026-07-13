@@ -10,10 +10,30 @@ enum crypto_range {
     _TYPE_CRYPTO_START = _TYPE_INTER_END,
     TYPE_ECKEY,
     TYPE_ECKEY_PUB,
+    TYPE_TLS_CTX,
+    TYPE_TLS_INFO,
+    TYPE_TLS_CAPSULE,
     _TYPE_CRYPTO_END,
 };
 
+typedef struct crypto_tls_ctx {
+    Type type;
+    void *tlsCtx;
+} TlsCtx;
+
+typedef struct crypto_tls_info {
+    Type type;
+    i32 fd;
+    void *tls;
+    TlsCtx *ctx;
+} TlsInfo;
+
 typedef byte digest[DIGEST_SIZE];
+
+void Tls_Init(MemCh *m);
+TlsCtx *TlsCtx_Make(MemCh *m, StrVec *cert, StrVec *key);
+void TlsCtx_Destroy(MemCh *m, TlsCtx *ctx);
+TlsInfo *TlsInfo_Make(MemCh *m, i32 fd, TlsCtx *ctx);
 
 status Str_ToSha256(MemCh *m, Str *s, digest *hash);
 status StrVec_ToSha256(MemCh *m, StrVec *v, digest *hash);
