@@ -1,5 +1,6 @@
 include=/usr/local/include/
 lib=/usr/local/lib/
 link=openssl@crypto
+link=openssl@ssl
 ext
 base

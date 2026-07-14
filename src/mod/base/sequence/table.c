@@ -218,6 +218,9 @@ void *Table_GetKey(Table *tbl, i32 idx){
 
 void *Table_Get(Table *tbl, void *_a){
     Abstract *a = (Abstract *)_a;
+    if(tbl->nvalues <= 0){
+        return NULL;
+    }
 
     Iter it;
     Iter_Init(&it, tbl);

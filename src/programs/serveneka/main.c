@@ -25,6 +25,8 @@ i32 main(int argc, char **argv){
     Str *noColorKey = K(m, "no-color");
     Str *portKey = K(m, "port");
     Str *dirKey = K(m, "dir");
+    Str *tlsCertKey = K(m, "tls-cert");
+    Str *tlsKeyKey = K(m, "tls-key");
 
     Args_Add(cli, helpKey, NULL, ARG_OPTIONAL,
         Sv(m, "Show this help message."));
@@ -34,6 +36,10 @@ i32 main(int argc, char **argv){
         Sv(m, "Port to use."));
     Args_Add(cli, dirKey, NULL, ZERO,
         Sv(m, "Directory to serve files from."));
+    Args_Add(cli, tlsCertKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Tls certificate."));
+    Args_Add(cli, tlsKeyKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Tls key."));
 
     CliArgs_Parse(cli);
 
@@ -47,6 +53,13 @@ i32 main(int argc, char **argv){
     StrVec *dir = IoUtil_GetAbsVec(m, CliArgs_Get(cli, dirKey));
     IoUtil_TrimDir(m, dir);
     Node *config = Inst_Make(m, TYPE_HTTP_CONFIG);
+
+    Str *tlsCertStr = CliArgs_Get(cli, tlsCertKey);
+    Str *tlsKeyStr = CliArgs_Get(cli, tlsKeyKey);
+    if(tlsCertStr != NULL && tlsKeyKey != NULL){
+       Inst_SetAtt(config, S(m, "tls-cert"), tlsCertStr); 
+       Inst_SetAtt(config, S(m, "tls-key"), tlsKeyStr); 
+    }
 
     Serveneka_Serve(m, port, dir, config);
 

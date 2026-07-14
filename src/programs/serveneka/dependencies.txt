@@ -1,4 +1,6 @@
 exec=main.c
-option=crypto
+include=/usr/local/include/
+lib=/usr/local/lib/
+option=crypto@third/openssl
 ext
 base

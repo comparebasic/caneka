@@ -11,6 +11,19 @@ void Serveneka_Serve(MemCh *m, i32 port, StrVec *dir, Node *config){
     Seel_AddTo(config, K(m, "addrs"), NULL, ent);
     Seel_Set(config, K(m, "dir"), dir);
 
+    Str *tlsCert = Inst_Att(config, K(m, "tls-cert"));
+    Str *tlsKey = Inst_Att(config, K(m, "tls-key"));
+
+    if(tlsCert != NULL && tlsKey != NULL){
+        args[0] = tlsCert;
+        args[1] = tlsKey;
+        args[2] = NULL;
+        Out("^b.Tls cert:@ key:@^0\n", args);
+        Tls_Init(m);
+
+        TlsCtx *ctx = TlsCtx_Make(m, IoPath_From(m, tlsCert), IoPath_From(m, tlsKey));
+    }
+
     Serve *srv = Serve_MakeTcp(m, def, ent);
     srv->config = config;
 
