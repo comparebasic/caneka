@@ -8,21 +8,20 @@ typedef struct capsule {
 
 typedef struct capsule_def {
     Type type;
-    SourceFunc open, 
-    SourceFunc close, 
-    SourceFunc readTo,
-    SourceFunc writeTo;
+    Func open;
+    Func close;
+    Func readTo;
+    Func writeTo;
 } CapsuleDef;
 
 extern Lookup *CapsuleDefLookup;
 
-Capsule *Capsule_Make(MemCh *m, Buff *enc, Buff *plain, CapsuleDef *def);
+Capsule *Capsule_Make(MemCh *m, cls typeOf, Buff *plain, void *source);
 
 CapsuleDef *CapsuleDef_Make(MemCh *m, 
-    SourceFunc open, 
-    SourceFunc close, 
-    SourceFunc readTo,
-    SourceFunc writeTo);
-
+    Func open, 
+    Func close, 
+    Func readTo,
+    Func writeTo);
 
 void Capsule_Init(MemCh *m);

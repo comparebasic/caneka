@@ -6,7 +6,6 @@ i32 main(int argc, char **argv){
 
     status r = READY;
     MemBook *cp = MemBook_Make(NULL);
-    void *args[5];
     if(cp == NULL){
         Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "MemBook created successfully", NULL);
     }
@@ -45,26 +44,11 @@ i32 main(int argc, char **argv){
     Str *portStr = CliArgs_Get(cli, portKey);
     i32 port = Int_FromStr(portStr); 
 
-    HttpStatic_Init(m);
-    HandlerDef *def = HttpStatic_DefMake(m);
-
     StrVec *dir = IoUtil_GetAbsVec(m, CliArgs_Get(cli, dirKey));
     IoUtil_TrimDir(m, dir);
     Node *config = Inst_Make(m, TYPE_HTTP_CONFIG);
 
-    HostEnt *ent = HostEnt_Make(m);
-    ent->port = port;
-    Seel_AddTo(config, K(m, "addrs"), NULL, ent);
-    Seel_Set(config, K(m, "dir"), dir);
-
-    Serve *srv = Serve_MakeTcp(m, def, ent);
-    srv->config = config;
-
-    args[0] = config->m;
-    args[1] = NULL;
-    Out("^c.Config @^0\n", args);
-
-    Serve_ServeTcp(srv);
+    Serveneka_Serve(m, port, dir, config);
 
     return (r & ERROR) == 0 ? 0 : 1;
 }

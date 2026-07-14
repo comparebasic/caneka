@@ -19,19 +19,19 @@ Capsule *Capsule_Make(MemCh *m, cls typeOf, Buff *plain, void *source){
             "Error capsule type not found: $", ar);
         return NULL;
     }
-    def->open(m, cap, cap->source);
+    def->open(cap);
     if(cap->type.state & ERROR){
-        def->close(m, cap, cap->source);
+        def->close(cap);
         return NULL;
     }
     return cap;
 }
 
 CapsuleDef *CapsuleDef_Make(MemCh *m, 
-        SourceFunc open, 
-        SourceFunc close, 
-        SourceFunc readTo,
-        SourceFunc writeTo){
+        Func open, 
+        Func close, 
+        Func readTo,
+        Func writeTo){
    CapsuleDef *def = MemCh_AllocOf(m, sizeof(CapsuleDef), TYPE_CAPSULE_DEF); 
    def->type.of = TYPE_CAPSULE_DEF;
    def->open = open;

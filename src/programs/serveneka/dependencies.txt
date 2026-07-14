@@ -1,4 +1,4 @@
 exec=main.c
-option=crypto@third/openssl
+option=crypto
 ext
 base

@@ -7,7 +7,7 @@
 #define SIGNATURE_SIZE 96
 
 enum crypto_range {
-    _TYPE_CRYPTO_START = _TYPE_INTER_END,
+    _TYPE_CRYPTO_START = _TYPE_EXT_END,
     TYPE_ECKEY,
     TYPE_ECKEY_PUB,
     TYPE_TLS_CTX,

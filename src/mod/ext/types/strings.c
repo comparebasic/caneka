@@ -36,6 +36,8 @@ static char *extTypeStrings[] = {
     "TYPE_SOURCE",
     "TYPE_BINSEG_CTX",
     "TYPE_BINSEG_HEADER",
+    "TYPE_CAPSULE",
+    "TYPE_CAPSULE_DEF",
     "TYPE_FILEDB",
     "TYPE_QUEUE",
     "TYPE_QUEUE_CRIT",

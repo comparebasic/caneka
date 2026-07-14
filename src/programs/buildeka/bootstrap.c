@@ -90,8 +90,18 @@ char *buildWebServer[] = {
     "./dist/bin/buildeka",
     "--src",
     "src/programs/serveneka",
+    "--option",
+    "crypto@third/openssl",
     NULL
 };
+
+char *buildWebServerNoCrypto[] = {
+    "./dist/bin/buildeka",
+    "--src",
+    "src/programs/serveneka",
+    NULL
+};
+
 
 char *buildCli[] = {
     "./dist/bin/buildeka",
@@ -136,9 +146,10 @@ char *menuKeys[] = {
     "clean",
     "clean-doc",
     "build-cli",
-    "build-pyneka",
     "build-webserver",
+    "build-webserver-no-crypto",
     "build-run-webserver",
+    "build-pyneka",
     "read-documentation",
     "all",
     "invalid",
@@ -152,9 +163,10 @@ char *menuOptions[] = {
     "Clean (the ./build directory)",
     "Clean Docs (the docs ./dist/doc/html/ directory)",
     "Clineka - build the command line tool",
-    "Pyneka - build the python module",
     "Webserver - build",
+    "Webserver - build without TLS",
     "WebServer - build and RUN",
+    "Pyneka - build the python module",
     "Documentation - show website url",
     "All - build Tests/Clineka/Webserver",
     NULL
@@ -205,7 +217,6 @@ void RawMode(int enable){
            current_tios.c_cc[VTIME] = 0;
        }
    }else{
-       printf("RAW MODE FALSE\n");
        if(!change){
             return;
        }
@@ -458,6 +469,9 @@ int main(int argc, char *argv[]){
         runcmd[2] = NULL;
     }else if(compareCstr("build-webserver", choice)){
         runcmd[0] = buildWebServer;
+        runcmd[1] = NULL;
+    }else if(compareCstr("build-webserver-no-crypto", choice)){
+        runcmd[0] = buildWebServerNoCrypto;
         runcmd[1] = NULL;
     }else if(compareCstr("build-run-webserver", choice)){
         runcmd[0] = buildWebServer;

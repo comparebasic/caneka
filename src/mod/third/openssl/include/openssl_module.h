@@ -8,6 +8,7 @@
 #include <openssl/param_build.h>
 #include <openssl/conf.h>
 #include <openssl/encoder.h>
+#include <openssl/ssl.h>
 
 status OpenSsl_ExtFreeInit(MemCh *m);
 status OpenSsl_Error(Buff *bf);
