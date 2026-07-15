@@ -17,14 +17,14 @@ void Serveneka_Serve(MemCh *m, i32 port, StrVec *dir, Node *config){
     if(tlsCert != NULL && tlsKey != NULL){
         Tls_Init(m);
 
-        TlsCtx *ctx = TlsCtx_Make(m, IoPath_From(m, tlsCert), IoPath_From(m, tlsKey));
+        ent->ctx = TlsCtx_Make(m, IoPath_From(m, tlsCert), IoPath_From(m, tlsKey));
         void *ar[] = {
-            ctx, NULL
+            ent->ctx, NULL
         };
 
         args[0] = tlsCert;
         args[1] = tlsKey;
-        args[2] = ctx;
+        args[2] = ent->ctx;
         args[3] = NULL;
         Out("^b.Tls cert:@ key:@ -> @^0\n", args);
     }

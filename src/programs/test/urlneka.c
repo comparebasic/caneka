@@ -77,7 +77,7 @@ i32 main(int argc, char **argv){
     while((req->type.state & (SUCCESS|ERROR)) == 0){
         HttpReq_ReadToRbl(req->m, req, NULL);
     }
-    HttpReq_Close(req);
+    HttpReq_Close(m, req, NULL);
 
 #ifdef CNKOPT_CRYPTO
     Str *sha = Str_DigestAlloc(m);

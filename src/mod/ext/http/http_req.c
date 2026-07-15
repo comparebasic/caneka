@@ -61,7 +61,6 @@ static void HttpReq_writeBody(MemCh *m, HttpReq *req){
 status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
-    Buff_SetSocket(req->in, req->crit->pfd.fd);
     if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
             (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
         Roebling_Run(req->rbl);
@@ -183,17 +182,6 @@ void HttpReq_ParseBody(HttpReq *req){
     ReturnVoid(m);
 }
 
-void HttpReq_Close(HttpReq *req){
-    if(req->in != NULL){
-        close(req->in->fd);
-        Buff_UnsetFd(req->in);
-    }
-    if(req->out != NULL){
-        close(req->out->fd);
-        Buff_UnsetFd(req->out);
-    }
-}
-
 void HttpReq_SetFd(HttpReq *req, i32 fd){
     req->crit->pfd.fd = fd;
 }
@@ -218,9 +206,47 @@ Req *HttpReq_Mk(MemCh *m, Serve *srv){
     Iter_Init(&req->queryIt, Table_Make(m));
     req->meta = Table_Make(m);
     req->in = Buff_Make(m, ZERO);
-    req->out = Buff_Make(m, BUFF_UNBUFFERED);
+    req->out = Buff_Make(m, srv->capsule == NULL ? BUFF_UNBUFFERED : ZERO);
     req->sections = Span_Make(m);
     return (Req *)req;
+}
+
+status HttpReq_Accept(MemCh *m, Req *_req, Serve *srv){
+    printf("HttpReq_Accept...\n");
+    fflush(stdout);
+    HttpReq *req = (HttpReq *)_req;
+    if(srv->tls != NULL && srv->capsule != NULL){
+        if(req->cap == NULL){
+            TlsInfo *info = TlsInfo_Make(m, req->crit->pfd.fd, srv->tls);
+            req->cap = Capsule_Make(m, TYPE_TLS_CAPSULE, req->in, req->out, info); 
+            printf("Make Capsule\n");
+            fflush(stdout);
+        }else{
+            printf("Capsule Exists\n");
+            fflush(stdout);
+        }
+        if(srv->capsule->open(req->cap) & SUCCESS){;
+            req->type.state |= SUCCESS;
+            printf("      >>>>>>> Woohoo SSL Open!!!! >>>>>>>>\n");
+            fflush(stdout);
+        }else{
+            printf("Opened tried and did not yet succeed\n");
+            fflush(stdout);
+        }
+    }else{
+        Buff_SetSocket(req->in, req->crit->pfd.fd);
+    }
+
+    Return(m, req->type.state);
+}
+
+status HttpReq_Close(MemCh *m, Req *_req, Serve *srv){
+    HttpReq *req = (HttpReq *)_req;
+    if(srv->tls != NULL && srv->capsule != NULL){
+        srv->capsule->close(req->cap);
+    }
+    close(req->crit->pfd.fd);
+    Return(m, req->type.state);
 }
 
 void HttpReq_Setup(MemCh *m, Req *_req, Serve *srv){

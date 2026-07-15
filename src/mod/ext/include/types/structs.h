@@ -10,3 +10,4 @@ struct auth_target;
 struct queue;
 struct slotter;
 struct slotter_crit;
+struct crypto_tls_ctx;

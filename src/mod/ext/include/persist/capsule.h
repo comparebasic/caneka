@@ -2,7 +2,8 @@ typedef struct capsule {
     Type type;
     Type objType;
     MemCh *m;
-    Buff *plain;
+    Buff *in;
+    Buff *out;
     void *source;
 } Capsule;
 
@@ -16,7 +17,7 @@ typedef struct capsule_def {
 
 extern Lookup *CapsuleDefLookup;
 
-Capsule *Capsule_Make(MemCh *m, cls typeOf, Buff *plain, void *source);
+Capsule *Capsule_Make(MemCh *m, cls typeOf, Buff *in, Buff *out, void *source);
 
 CapsuleDef *CapsuleDef_Make(MemCh *m, 
     Func open, 

@@ -188,5 +188,10 @@ Serve *Serve_MakeTcp(MemCh *m, HandlerDef *def, HostEnt *ent){
     srv->def = def;
     srv->address.ent = ent;
 
+    if(ent->ctx != NULL){
+        srv->capsule = Lookup_Get(CapsuleDefLookup, TYPE_TLS_CAPSULE);
+        srv->tls = ent->ctx;
+    }
+
     return srv;
 }

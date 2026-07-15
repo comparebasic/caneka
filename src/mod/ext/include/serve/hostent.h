@@ -4,6 +4,7 @@ typedef struct host_ent_wr {
     Str *name;
     Span *addrs;
     struct addrinfo *info;
+    struct crypto_tls_ctx *ctx;
 } HostEnt;
 
 HostEnt *HostEnt_Make(MemCh *m);

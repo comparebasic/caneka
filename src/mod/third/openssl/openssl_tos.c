@@ -8,7 +8,7 @@ static status TlsCtx_Print(Buff *bf, void *a, cls type, word flags){
         Type_StateVec(m, ctx->type.of, ctx->type.state),
         NULL
     };
-    Fmt(bf, "TlsCtx<@>", ar);
+    return Fmt(bf, "TlsCtx<@>", ar);
 }
 
 status Tls_ToSInit(MemCh *m, Lookup *lk){
