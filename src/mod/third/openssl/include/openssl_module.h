@@ -12,3 +12,5 @@
 
 status OpenSsl_ExtFreeInit(MemCh *m);
 status OpenSsl_Error(Buff *bf);
+
+status Tls_ToSInit(MemCh *m, Lookup *lk);
