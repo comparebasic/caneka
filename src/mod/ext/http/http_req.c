@@ -61,16 +61,23 @@ static void HttpReq_writeBody(MemCh *m, HttpReq *req){
 status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
-    if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
-            (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
-        Roebling_Run(req->rbl);
-        if(req->type.state & DEBUG){
-            void *ar[] = {
-                req->in->v,
-                req->headersIt.p,
-                NULL
-            };
-            Out("^p.  Read So Far: ^c.@ -> @^0\n", ar);
+    if((req->rbl->type.state & (SUCCESS|ERROR))){
+        if(req->cap != NULL){
+            req->cap->read(cap);
+        }else{
+            Buff_ReadAmount(req->in, SERVE_READ_SIZE);
+        }
+
+        if((req->in->type.state & NOOP) == 0){
+            Roebling_Run(req->rbl);
+            if(1 || req->type.state & DEBUG){
+                void *ar[] = {
+                    req->in->v,
+                    req->headersIt.p,
+                    NULL
+                };
+                Out("^p.  Read So Far: ^c.@ -> @^0\n", ar);
+            }
         }
     }
     

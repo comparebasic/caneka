@@ -84,7 +84,13 @@ static status Tls_WriteTo(Capsule *cap){
 }
 
 static status Tls_ReadTo(Capsule *cap){
-    return ZERO;
+    Str *s = Str_Make(m, STR_DEFAULT);
+    i32 read = SSL_read(cap->info->tls, s->bytes, s->length);
+    if(read > 0){
+        Buff_Add(cap->in, s);
+        return SUCCESS;
+    }
+    return NOOP;
 }
 
 TlsCtx *TlsCtx_Make(MemCh *m, StrVec *cert, StrVec *key){
