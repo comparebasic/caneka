@@ -126,26 +126,7 @@ status Table_SetInTable(Table *orig, void *tblKey, void *key, void *value){
         return ERROR;
     }
 
-    /*
-    void *ar[] = {tbl, key, NULL};
-    Out("^p.Table @ key:@^0\n", ar);
-    */
     return Table_Set(tbl, key, value);
-
-    /*
-    Abstract *a = Table_Get(tbl, key);
-    if(a != NULL && key != NULL){
-        if(a->type.of == TYPE_SPAN){
-            return Span_Add((Span *)a, value);
-        }else{
-            Span *p = Span_Make(orig->m);
-            Span_Add(p, a);
-            return Span_Add(p, value);
-        }
-    }else{
-        return Table_Set(tbl, key, value);
-    }
-    */
 }
 
 status Table_Merge(Table *dest, Table *src){

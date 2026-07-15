@@ -34,15 +34,21 @@ static status Tls_ReadTo(Capsule *cap){
 TlsCtx *TlsCtx_Make(MemCh *m, StrVec *cert, StrVec *key){
     TlsCtx *ctx = MemCh_AllocOf(m, sizeof(TlsCtx), TYPE_TLS_CTX);
     ctx->type.of = TYPE_TLS_CTX;
+    printf("Making TLS^0\n");
+    fflush(stdout);
 
     const SSL_METHOD *method = TLS_server_method();
     SSL_CTX *tlsCtx = SSL_CTX_new(method);
+    printf("Making TLS I^0\n");
+    fflush(stdout);
     if (!tlsCtx) {
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to create OpenSSL SSL Ctx", NULL); 
         ERR_print_errors_fp(stderr);
         return NULL;
     }
+    printf("Making TLS II^0\n");
+    fflush(stdout);
     if (SSL_CTX_use_certificate_file(tlsCtx, Ifc(m, cert, TYPE_CSTR), SSL_FILETYPE_PEM) <= 0) {
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Unable to open cert for OpenSSL SSL Ctx", NULL); 
@@ -50,6 +56,8 @@ TlsCtx *TlsCtx_Make(MemCh *m, StrVec *cert, StrVec *key){
         SSL_CTX_free(tlsCtx);
         return NULL;
     }
+    printf("Making TLS III^0\n");
+    fflush(stdout);
     if (SSL_CTX_use_PrivateKey_file(tlsCtx,
             Ifc(m, key, TYPE_CSTR), SSL_FILETYPE_PEM) <= 0) {
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -60,6 +68,7 @@ TlsCtx *TlsCtx_Make(MemCh *m, StrVec *cert, StrVec *key){
 
     SSL_CTX_set_min_proto_version(tlsCtx, TLS1_2_VERSION);
     ctx->tlsCtx = tlsCtx;
+    printf("Making TLS IV end^0\n");
 
     return ctx;
 }

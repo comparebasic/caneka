@@ -136,6 +136,17 @@ char *runWebServer[] = {
     "./build/bin/serveneka",
     "--dir",
     "fixtures/serveneka",
+    "--tls-cert",
+    "/var/fixtures/server.crt",
+    "--tls-key",
+    "/var/fixtures/server.key",
+    NULL
+};
+
+char *runWebServerNoCrypto[] = {
+    "./build/bin/serveneka",
+    "--dir",
+    "fixtures/serveneka",
     NULL
 };
 

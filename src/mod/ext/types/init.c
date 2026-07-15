@@ -19,6 +19,7 @@ status Caneka_Init(MemCh *m){
     Format_Init(m);
     BinSeg_Init(m);
     Navigate_ToSInit(m, ToStreamLookup);
+    Capsule_Init(m);
     Serve_TosInit(m);
     Serve_Init(m);
     Http_TosInit(m);

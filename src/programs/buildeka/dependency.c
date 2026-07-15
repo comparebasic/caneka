@@ -167,6 +167,9 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
                 }else{
                     continue;
                 }
+            }else if(Equals(tag, K(m, "link"))){
+                Table_SetInTable(sel->meta, S(m, "link"), value, value);
+                continue;
             } else if(Equals(tag, K(m, "dep"))){
                 dep = Span_Get(declare, BUILD_MOD_DECLARE_VALUE);
             } else if(Equals(tag, K(m, "type"))){
