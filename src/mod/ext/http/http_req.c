@@ -19,17 +19,21 @@ static void HttpReq_setLength(MemCh *m, HttpReq *req){
 }
 
 static void HttpReq_writeStatus(MemCh *m, HttpReq *req){
+    char *st = NULL;
     if(req->type.state & NOOP){
         if(req->type.state & ERROR){
-            Buff_Add(req->out, K(m, "HTTP/1.1 404 Not Found\r\n"));
+            st = "HTTP/1.1 404 Not Found\r\n";
         }else{
-            Buff_Add(req->out, K(m, "HTTP/1.1 304 Not Modified\r\n"));
+            st = "HTTP/1.1 304 Not Modified\r\n";
         }
     }else if(req->type.state & ERROR){
-        Buff_Add(req->out, K(m, "HTTP/1.1 500 Server Error\r\n"));
+        st = "HTTP/1.1 500 Server Error\r\n";
     }else{
-        Buff_Add(req->out, K(m, "HTTP/1.1 200 Ok\r\n"));
+        st = "HTTP/1.1 200 Ok\r\n";
     }
+
+    Str *s = K(m, st);
+    Buff_Add(req->out, s);
 }
 
 static void HttpReq_writeHeaders(MemCh *m, HttpReq *req){
@@ -61,9 +65,9 @@ static void HttpReq_writeBody(MemCh *m, HttpReq *req){
 status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
-    if((req->rbl->type.state & (SUCCESS|ERROR))){
+    if((req->rbl->type.state & (SUCCESS|ERROR)) == 0){
         if(req->cap != NULL){
-            req->cap->read(cap);
+            srv->capsule->readTo(req->cap);
         }else{
             Buff_ReadAmount(req->in, SERVE_READ_SIZE);
         }
@@ -150,12 +154,18 @@ status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
     HttpReq_SetHeader(req, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
-    Buff_SetSocket(req->out, req->crit->pfd.fd);
+    if(req->out->type.state & BUFF_UNBUFFERED){
+        Buff_SetSocket(req->out, req->crit->pfd.fd);
+    }
 
     HttpReq_writeStatus(m, req);
     HttpReq_setLength(m, req);
     HttpReq_writeHeaders(m, req);
     HttpReq_writeBody(m, req);
+
+    if(req->cap != NULL){
+        srv->capsule->writeTo(req->cap);
+    }
 
     req->type.state |= (SUCCESS|END);
     Return(m, req->type.state);
@@ -219,25 +229,15 @@ Req *HttpReq_Mk(MemCh *m, Serve *srv){
 }
 
 status HttpReq_Accept(MemCh *m, Req *_req, Serve *srv){
-    printf("HttpReq_Accept...\n");
-    fflush(stdout);
     HttpReq *req = (HttpReq *)_req;
     if(srv->tls != NULL && srv->capsule != NULL){
         if(req->cap == NULL){
             TlsInfo *info = TlsInfo_Make(m, req->crit->pfd.fd, srv->tls);
             req->cap = Capsule_Make(m, TYPE_TLS_CAPSULE, req->in, req->out, info); 
-            printf("Make Capsule\n");
-            fflush(stdout);
-        }else{
-            printf("Capsule Exists\n");
-            fflush(stdout);
         }
         if(srv->capsule->open(req->cap) & SUCCESS){;
             req->type.state |= SUCCESS;
             printf("      >>>>>>> Woohoo SSL Open!!!! >>>>>>>>\n");
-            fflush(stdout);
-        }else{
-            printf("Opened tried and did not yet succeed\n");
             fflush(stdout);
         }
     }else{

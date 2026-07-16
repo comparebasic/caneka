@@ -32,7 +32,7 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
 }
 
 static void HttpStatic_Finalize(MemCh *m, HttpReq *req, Serve *srv){
-    HttpReq_Close(m, req, srv);
+    HttpReq_Close(m, (Req *)req, srv);
 
     Time_Now(&req->metrics.end);
     duration d = Time_Duration(m, &req->metrics.end, &req->metrics.start);
