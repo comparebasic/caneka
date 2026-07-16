@@ -38,6 +38,7 @@ or by building and running the [Test](./src/programs/test) program.
 - [Buildeka](./src/programs/buildeka/): This is the build program which builds the rest of the sources.
 - [Clineka](./src/programs/clineka/): This is command-line-interface with a few quick tools to do useful things.
 - [Test](./src/programs/test/): This is the test suite for testing various parts of the system.
+- [Serveneka](./src/programs/serveneka/): This is the static webserver example with TLS support.
 
 
 ### Components
@@ -92,14 +93,20 @@ example python cli session:
 
 #### OpenSSL Bindings
 
-The OpenSSL bindings are in place to do simpler crypto operations such as
-evaluate signatures from key pairs and create cryptographic hashes. 
+The OpenSSL bindings are in place to do simpler crypto operations such as run
+TLS tunnels for the network server or evaluate signatures from key pairs and
+create cryptographic hashes. 
+
+It is the first example of linking an external C library and you can see the
+way it uses an include file as an API [here](./src/api/include/crypto_api.h)]
+and the actual Caneka bridge code for or other common crypto functions
+such as Sha256 in the [third/openssl](./src/mod/third/openssl) module.
 
 ## Build Instructions
 
 To build and test Caneka run using the helper script using *clang*:
 
-    ./build.sh
+    $ ./build.sh
 
 and eventually, this will be support gcc and other compilers as well. Note:
 there is a bug when compling with gcc related to the order of static libs.
@@ -107,10 +114,38 @@ there is a bug when compling with gcc related to the order of static libs.
 This will compile and run the bootstrap program which will present a menu
 to guide you through the rest of the build process.
 
+### Manual Clean Step (for now)
+
 note: while the build program is working, it may need to be cleaned on
 each build for stability reasons (at present).
 
-    ./dist/bin/bootstrap --clean
+    $ ./dist/bin/bootstrap --clean
+
+### Run the WebServer with TLS
+
+To build and run the static webserver with TLS install the openssl-dev 3.0
+package for your operating system
+
+    $ apt install libssl-dev
+
+Then choose the build option by running `build.sh`
+
+    $ ./build.sh
+    ...
+    9 Webserver - build with TLS
+    ...
+
+Create a self signed x509 certificate
+
+    $ openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 -nodes
+
+The launch the server with the paths to the cert and key files that were just
+created
+
+    ./build/bin/serveneka --dir fixtures/serveneka --tls-cert <path/server.crt> --tls-key <path/server.key>
+
+The default port is 8000 and a few example files should load (after you get
+a browser to accept your self-signed cert).
 
 
 ### CnkBuild - source builder
