@@ -11,6 +11,7 @@ void Serveneka_Serve(MemCh *m, i32 port, StrVec *dir, Node *config){
     Seel_AddTo(config, K(m, "addrs"), NULL, ent);
     Seel_Set(config, K(m, "dir"), dir);
 
+#ifdef CNKOPT_CRYPTO
     Str *tlsCert = Inst_Att(config, K(m, "tls-cert"));
     Str *tlsKey = Inst_Att(config, K(m, "tls-key"));
 
@@ -28,6 +29,7 @@ void Serveneka_Serve(MemCh *m, i32 port, StrVec *dir, Node *config){
         args[3] = NULL;
         Out("^b.Tls cert:@ key:@ -> @^0\n", args);
     }
+#endif
 
     Serve *srv = Serve_MakeTcp(m, def, ent);
     srv->config = config;

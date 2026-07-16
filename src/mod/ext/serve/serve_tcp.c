@@ -43,9 +43,6 @@ static i32 openPortToFd(i32 port){
 		return -1;
     };
 
-    printf("opened socket fd %d\n", fd);
-    fflush(stdout);
-
     return fd;
 }
 
@@ -128,7 +125,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                 srv->def->setup(req->m, req, srv);
                 req->idx = Queue_Add(srv->q, req, req->crit);
 
-                if(1 || srv->type.state & DEBUG){
+                if(srv->type.state & DEBUG){
                     Buff_SetTemp(OutStream); 
                     void *ar[] = {
                        I32_Wrapped(OutStream->m, new_fd), 
@@ -188,10 +185,12 @@ Serve *Serve_MakeTcp(MemCh *m, HandlerDef *def, HostEnt *ent){
     srv->def = def;
     srv->address.ent = ent;
 
+#ifdef CNKOPT_CRYPTO
     if(ent->ctx != NULL){
         srv->capsule = Lookup_Get(CapsuleDefLookup, TYPE_TLS_CAPSULE);
         srv->tls = ent->ctx;
     }
+#endif
 
     return srv;
 }

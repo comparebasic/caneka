@@ -136,10 +136,6 @@ char *runWebServer[] = {
     "./build/bin/serveneka",
     "--dir",
     "fixtures/serveneka",
-    "--tls-cert",
-    "/var/fixtures/server.crt",
-    "--tls-key",
-    "/var/fixtures/server.key",
     NULL
 };
 
@@ -157,9 +153,9 @@ char *menuKeys[] = {
     "clean",
     "clean-doc",
     "build-cli",
-    "build-webserver",
     "build-webserver-no-crypto",
     "build-run-webserver",
+    "build-webserver",
     "build-pyneka",
     "read-documentation",
     "all",
@@ -175,8 +171,8 @@ char *menuOptions[] = {
     "Clean Docs (the docs ./dist/doc/html/ directory)",
     "Clineka - build the command line tool",
     "Webserver - build",
-    "Webserver - build without TLS",
     "WebServer - build and RUN",
+    "Webserver - build with TLS",
     "Pyneka - build the python module",
     "Documentation - show website url",
     "All - build Tests/Clineka/Webserver",
@@ -485,7 +481,7 @@ int main(int argc, char *argv[]){
         runcmd[0] = buildWebServerNoCrypto;
         runcmd[1] = NULL;
     }else if(compareCstr("build-run-webserver", choice)){
-        runcmd[0] = buildWebServer;
+        runcmd[0] = buildWebServerNoCrypto;
         runcmd[1] = runWebServer;
         runcmd[2] = NULL;
     }else if(compareCstr("read-documentation", choice)){
@@ -586,7 +582,7 @@ int main(int argc, char *argv[]){
         printf("The Cli has been built at ./build/bin/clineka\n");
         fflush(stdout);
     }else if(compareCstr("build-webserver", choice)){
-        printf("The WebServer has been built at ./build/bin/webserver\n");
+        printf("The WebServer has been built, run with: ./build/bin/serveneka --dir fixtures/serveneka\n");
         fflush(stdout);
     }else if(compareCstr("all", choice)){
         printf("The Test,WebServer and Cli are in the ./build/bin folder\n");

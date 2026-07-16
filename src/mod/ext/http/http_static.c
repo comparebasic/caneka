@@ -25,7 +25,7 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
     Single *sg = Iter_Get(&req->routeIt);
     ReqFunc func = (ReqFunc)sg->val.ptr;
 
-    req->type.state = req->type.state & (DEBUG|END|ERROR);
+    req->type.state = req->type.state & (DEBUG|END|ERROR|NOOP);
     func(m, (Req *)req, srv);
 
     return;

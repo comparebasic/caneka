@@ -74,7 +74,7 @@ status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
 
         if((req->in->type.state & NOOP) == 0){
             Roebling_Run(req->rbl);
-            if(1 || req->type.state & DEBUG){
+            if(req->type.state & DEBUG){
                 void *ar[] = {
                     req->in->v,
                     req->headersIt.p,
@@ -154,7 +154,7 @@ status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
     Debug_Push(m, req);
 
     HttpReq_SetHeader(req, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
-    if(req->out->type.state & BUFF_UNBUFFERED){
+    if(req->cap == NULL){
         Buff_SetSocket(req->out, req->crit->pfd.fd);
     }
 
@@ -231,14 +231,14 @@ Req *HttpReq_Mk(MemCh *m, Serve *srv){
 status HttpReq_Accept(MemCh *m, Req *_req, Serve *srv){
     HttpReq *req = (HttpReq *)_req;
     if(srv->tls != NULL && srv->capsule != NULL){
+#ifdef CNKOPT_CRYPTO
         if(req->cap == NULL){
             TlsInfo *info = TlsInfo_Make(m, req->crit->pfd.fd, srv->tls);
             req->cap = Capsule_Make(m, TYPE_TLS_CAPSULE, req->in, req->out, info); 
         }
+#endif
         if(srv->capsule->open(req->cap) & SUCCESS){;
             req->type.state |= SUCCESS;
-            printf("      >>>>>>> Woohoo SSL Open!!!! >>>>>>>>\n");
-            fflush(stdout);
         }
     }else{
         Buff_SetSocket(req->in, req->crit->pfd.fd);

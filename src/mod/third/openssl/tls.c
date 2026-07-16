@@ -90,7 +90,6 @@ static status Tls_ReadTo(Capsule *cap){
 
     TlsInfo *info = (TlsInfo *)cap->source;
     i32 read = SSL_read(info->tls, s.bytes, s.length);
-    printf("Read %d\n", read);
     if(read > 0){
         s.length = (i16) read;
         Buff_Add(cap->in, &s);

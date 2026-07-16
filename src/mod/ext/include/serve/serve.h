@@ -22,7 +22,7 @@ typedef struct serve {
         util total;
     } metrics;
     CapsuleDef *capsule;
-    TlsCtx *tls;
+    struct crypto_tls_ctx *tls;
     Inst *config;
     void *source;
 } Serve;
