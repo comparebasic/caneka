@@ -27,6 +27,8 @@ i32 main(int argc, char **argv){
     Str *dirKey = K(m, "dir");
     Str *tlsCertKey = K(m, "tls-cert");
     Str *tlsKeyKey = K(m, "tls-key");
+    Str *cmdFileKey = K(m, "cmd-file");
+    Str *logFileKey = K(m, "log-file");
 
     Args_Add(cli, helpKey, NULL, ARG_OPTIONAL,
         Sv(m, "Show this help message."));
@@ -40,6 +42,10 @@ i32 main(int argc, char **argv){
         Sv(m, "Tls certificate."));
     Args_Add(cli, tlsKeyKey, NULL, ARG_OPTIONAL,
         Sv(m, "Tls key."));
+    Args_Add(cli, cmdFileKey, NULL, ARG_OPTIONAL,
+        Sv(m, "File to write commands to, such as log rotation."));
+    Args_Add(cli, logFileKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Log file, stdout if not specified."));
 
     CliArgs_Parse(cli);
 
@@ -59,6 +65,11 @@ i32 main(int argc, char **argv){
     if(tlsCertStr != NULL && tlsKeyKey != NULL){
        Inst_SetAtt(config, S(m, "tls-cert"), tlsCertStr); 
        Inst_SetAtt(config, S(m, "tls-key"), tlsKeyStr); 
+    }
+
+    Str *cmdFileStr = CliArgs_Get(cli, cmdFileKey);
+    if(cmdFileStr != NULL){
+       Inst_SetAtt(config, S(m, "cmd-file"), cmdFileStr); 
     }
 
     Serveneka_Serve(m, port, dir, config);

@@ -14,6 +14,8 @@ void Serveneka_Serve(MemCh *m, i32 port, StrVec *dir, Node *config){
 #ifdef CNKOPT_CRYPTO
     Str *tlsCert = Inst_Att(config, K(m, "tls-cert"));
     Str *tlsKey = Inst_Att(config, K(m, "tls-key"));
+    Str *cmdFile = Inst_Att(config, K(m, "cmd-file"));
+
 
     if(tlsCert != NULL && tlsKey != NULL){
         Tls_Init(m);
@@ -33,6 +35,13 @@ void Serveneka_Serve(MemCh *m, i32 port, StrVec *dir, Node *config){
 
     Serve *srv = Serve_MakeTcp(m, def, ent);
     srv->config = config;
+
+    if(cmdFile != NULL && tlsKey != NULL){
+        Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+        if(File_Open(bf, IoUtil_GetAbsPath(m, cmdFile), O_RDONLY|O_CREAT) & SUCCESS){
+            HttpStatic_SetCmdFile(m, srv, file);
+        }
+    }
 
     args[0] = config->m;
     args[1] = NULL;

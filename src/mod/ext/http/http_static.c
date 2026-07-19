@@ -1,6 +1,17 @@
 #include <external.h>
 #include <caneka.h>
 
+static void HttpStatic_Cmd(MemCh *m, Req *req, Serve *srv){
+    Buff_ReadAmount(req->in, SERVE_READ_SIZE);
+    Buff *bf = Buff_Make(m, ZERO);
+
+    Buff_Pipe(bf, req->in);
+    void *ar[] = {
+        bf->v,
+        NULL
+    };
+    Out("^p.Cmd: @^0\n", ar);
+}
 
 static void HttpStatic_Setup(MemCh *m, Req *req, Serve *srv){
     HttpReq_Setup(m, req, srv);
@@ -12,6 +23,9 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
         Single *sg = Iter_GetByIdx(&req->routeIt, req->routeIt.p->max_idx);
     }else{
         Str *key = K(m, "static");
+        if(req->key == NULL){
+            key = req->key;
+        }
         Hashed *h = Table_GetHashedByIter(&srv->def->routeIt, key);
         Span *chain = Ifc(m, h->value, TYPE_SPAN);
         if((req->routeIt.type.state & PROCESSING) == 0){
@@ -25,7 +39,7 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
     Single *sg = Iter_Get(&req->routeIt);
     ReqFunc func = (ReqFunc)sg->val.ptr;
 
-    req->type.state = req->type.state & (DEBUG|END|ERROR|NOOP);
+    req->type.state = req->type.state & (DEBUG|END|ERROR|NOOP|PROCESSING);
     func(m, (Req *)req, srv);
 
     return;
@@ -34,26 +48,48 @@ static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
 static void HttpStatic_Finalize(MemCh *m, HttpReq *req, Serve *srv){
     HttpReq_Close(m, (Req *)req, srv);
 
-    Time_Now(&req->metrics.end);
-    duration d = Time_Duration(m, &req->metrics.end, &req->metrics.start);
-    void *ar[] = {
-        req->path, 
-        Duration_Str(m, d),
-        req->addr,
-        NULL
-    };
-
-    if((req->type.state & (ERROR|NOOP)) == (ERROR|NOOP)){
-        Out("^y.Request 404 $ $ from:$^0\n", ar);
-    }else if(req->type.state & ERROR){
-        Out("^r.Request 500 $ $ from:$^0\n", ar);
-    }else if(req->type.state & NOOP){
-        Out("^g.Request 304 $ $ from:$^0\n", ar);
+    Buff *bf = NULL;
+    if(req->type.state & ERROR && srv->log.err != NULL){
+        bf = srv->log.err;
     }else{
-        Out("^g.Request 200 $ $ from:$^0\n", ar);
+        bf = srv->log.out;
     }
 
-    return;
+    Table *tbl = Table_Make(m);
+
+    Single *st = NULL;
+    Str *format = NULL;
+
+    if((req->type.state & (ERROR|NOOP)) == (ERROR|NOOP)){
+        st = I32_Wrapped(m, 404);
+        if(bf->type.state & BUFF_COLOR){
+            format = AnsiYellow;
+        }
+    }else if(req->type.state & ERROR){
+        st = I32_Wrapped(m, 500);
+        if(bf->type.state & BUFF_COLOR){
+            format = AnsiRed;
+        }
+    }else if(req->type.state & NOOP){
+        st = I32_Wrapped(m, 304);
+        if(bf->type.state & BUFF_COLOR){
+            format = AnsiCyan;
+        }
+    }else{
+        st = I32_Wrapped(m, 200);
+        if(bf->type.state & BUFF_COLOR){
+            format = AnsiCyan;
+        }
+    }
+
+    Time_Now(&req->metrics.end);
+    duration d = Time_Duration(m, &req->metrics.end, &req->metrics.start);
+    Table_Set(tbl, K(m, "path"), req->path);
+    Table_Set(tbl, K(m, "status"), st);
+    Table_Set(tbl, K(m, "duration"), Duration_Str(m, d));
+    Table_Set(tbl, K(m, "from"), req->addr);
+
+    Log_Flat(m, bf, K(m, "Request "), Table_Ordered(m, tbl), format);
 }
 
 static void HttpStatic_logOpen(MemCh *m, HttpReq *req, Serve *srv){
@@ -152,14 +188,17 @@ HandlerDef *HttpStatic_DefMake(MemCh *m){
     Table *tbl = Table_Make(m);
 
     Span *p = Span_Make(m);
+    Span_Add(p, Func_Wrapped(m, HttpStatic_Cmd));
+    Table_Set(tbl, S(m, "cmd"), p);
+
+    p = Span_Make(m);
     Span_Add(p, Func_Wrapped(m, HttpReq_Accept));
     Span_Add(p, Func_Wrapped(m, HttpReq_RespToRbl));
     Span_Add(p, Func_Wrapped(m, HttpStatic_RetrieveFile));
     Span_Add(p, Func_Wrapped(m, HttpReq_Write));
+    Table_Set(tbl, S(m, "static"), p);
 
-    Hashed *h = Table_SetHashed(tbl, S(m, "static"), p);
     Iter_Init(&def->routeIt, tbl);
-    def->routeIt.metrics.selected = h->idx;
 
     return def;
 }
@@ -179,6 +218,20 @@ status HttpStatic_Error(MemCh *m, HttpReq *req, ErrorMsg *msg){
 
     Span_Add(req->sections, bf);
     return ZERO;
+}
+
+void HttpStatic_SetCmdFile(MemCh *m, Serve *srv, Buff *file){
+    MemCh *rm = MemCh_Make();
+
+    Req *req = rm->owner = srv->def->mk(rm, srv);
+    req->key = S(m, "cmd");
+    Time_Now(&req->metrics.start);
+
+    req->crit = ReqCrit_Make(m);
+    req->crit->pfd.fd = file->fd;
+    req->idx = Queue_Add(srv->q, req, req->crit);
+    HttpReq_ExpectRecv(req);
+
 }
 
 void HttpStatic_Init(MemCh *m){

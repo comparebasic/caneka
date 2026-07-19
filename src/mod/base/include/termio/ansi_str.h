@@ -1,11 +1,20 @@
-extern Str *ansi_black;
-extern Str *ansi_red;
-extern Str *ansi_yellow;
-extern Str *ansi_green;
-extern Str *ansi_purple;
-extern Str *ansi_blue;
-extern Str *ansi_cyan;
-extern Str *ansi_dark;
+extern Str *FmtBlack;
+extern Str *FmtRed;
+extern Str *FmtYellow;
+extern Str *FmtGreen;
+extern Str *FmtPurple;
+extern Str *FmtBlue;
+extern Str *FmtCyan;
+extern Str *FmtDark;
+
+extern Str *AnsiBlack;
+extern Str *AnsiRed;
+extern Str *AnsiYellow;
+extern Str *AnsiGreen;
+extern Str *AnsiPurple;
+extern Str *AnsiBlue;
+extern Str *AnsiCyan;
+extern Str *AnsiDark;
 
 Str *Str_FromAnsi(Buff *bf, char **_ptr, char *end);
 Str *Str_AnsiCstr(Buff *bf, char *cstr);

@@ -184,6 +184,7 @@ Serve *Serve_MakeTcp(MemCh *m, HandlerDef *def, HostEnt *ent){
     srv->source = TcpSource_Make(m);
     srv->def = def;
     srv->address.ent = ent;
+    srv->log.out = OutStream;
 
 #ifdef CNKOPT_CRYPTO
     if(ent->ctx != NULL){

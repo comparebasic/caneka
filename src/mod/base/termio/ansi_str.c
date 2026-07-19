@@ -1,14 +1,23 @@
 #include <external.h>
 #include "base_module.h"
 
-Str *ansi_black = NULL;
-Str *ansi_red = NULL;
-Str *ansi_yellow = NULL;
-Str *ansi_green = NULL;
-Str *ansi_purple = NULL;
-Str *ansi_blue = NULL;
-Str *ansi_cyan = NULL;
-Str *ansi_dark = NULL;
+Str *FmtBlack = NULL;
+Str *FmtRed = NULL;
+Str *FmtYellow = NULL;
+Str *FmtGreen = NULL;
+Str *FmtPurple = NULL;
+Str *FmtBlue = NULL;
+Str *FmtCyan = NULL;
+Str *FmtDark = NULL;
+
+Str *AnsiBlack = NULL;
+Str *AnsiRed = NULL;
+Str *AnsiYellow = NULL;
+Str *AnsiGreen = NULL;
+Str *AnsiPurple = NULL;
+Str *AnsiBlue = NULL;
+Str *AnsiCyan = NULL;
+Str *AnsiDark = NULL;
 
 void Ansi_SetColor(Buff *bf, boolean yn){
     if(yn) {
@@ -224,15 +233,25 @@ Str *Str_AnsiCstr(Buff *bf, char *cstr){
 }
 
 status AnsiStr_Init(MemCh *m){
-    if(ansi_black == NULL){
-        ansi_black = Str_Ref(m, (byte *)"x", 1, 2, STRING_FMT_ANSI);
-        ansi_red = Str_Ref(m, (byte *)"r", 1, 2, STRING_FMT_ANSI);
-        ansi_yellow = Str_Ref(m, (byte *)"y", 1, 2, STRING_FMT_ANSI);
-        ansi_green = Str_Ref(m, (byte *)"g", 1, 2, STRING_FMT_ANSI);
-        ansi_purple = Str_Ref(m, (byte *)"p", 1, 2, STRING_FMT_ANSI);
-        ansi_blue = Str_Ref(m, (byte *)"b", 1, 2, STRING_FMT_ANSI);
-        ansi_cyan = Str_Ref(m, (byte *)"c", 1, 2, STRING_FMT_ANSI);
-        ansi_dark = Str_Ref(m, (byte *)"k", 1, 2, STRING_FMT_ANSI);
+    if(FmtBlack == NULL){
+        FmtBlack = Str_Ref(m, (byte *)"^x.", 3, 4, STRING_FMT_ANSI|STRING_CONST);
+        FmtRed = Str_Ref(m, (byte *)"^r.", 3, 4, STRING_FMT_ANSI|STRING_CONST);
+        FmtYellow = Str_Ref(m, (byte *)"^y.", 3, 4, STRING_FMT_ANSI|STRING_CONST);
+        FmtGreen = Str_Ref(m, (byte *)"^g.", 3, 4, STRING_FMT_ANSI|STRING_CONST);
+        FmtPurple = Str_Ref(m, (byte *)"^p.", 3, 4, STRING_FMT_ANSI|STRING_CONST);
+        FmtBlue = Str_Ref(m, (byte *)"^b.", 3, 4, STRING_FMT_ANSI|STRING_CONST);
+        FmtCyan = Str_Ref(m, (byte *)"^c.", 3, 4, STRING_FMT_ANSI|STRING_CONST);
+        FmtDark = Str_Ref(m, (byte *)"^k.", 3, 4, STRING_FMT_ANSI|STRING_CONST);
+
+        AnsiBlack = Str_Ref(m, (byte *)"\x1b[30m", 5, 6, STRING_CONST);
+        AnsiRed = Str_Ref(m, (byte *)"\x1b[31m", 5, 6, STRING_CONST);
+        AnsiYellow = Str_Ref(m, (byte *)"\x1b[32m", 5, 6, STRING_CONST);
+        AnsiGreen = Str_Ref(m, (byte *)"\x1b[33m", 5, 6, STRING_CONST);
+        AnsiPurple = Str_Ref(m, (byte *)"\x1b[34m", 5, 6, STRING_CONST);
+        AnsiBlue = Str_Ref(m, (byte *)"\x1b[35m", 5, 6, STRING_CONST);
+        AnsiCyan = Str_Ref(m, (byte *)"\x1b[36m", 5, 6, STRING_CONST);
+        AnsiDark = Str_Ref(m, (byte *)"\x1b[37m", 5, 6, STRING_CONST);
+
         return SUCCESS;
     }
     return NOOP;

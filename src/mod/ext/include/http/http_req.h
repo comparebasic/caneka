@@ -14,6 +14,7 @@ typedef struct http_req {
     } metrics;
     /* req end */
     NetAddr *addr;
+    Str *key;
     struct {
         i16 method;
         i16 proto;
