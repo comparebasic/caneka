@@ -28,6 +28,7 @@ status Http_Tests(MemCh *m);
 status HttpQuery_Tests(MemCh *m);
 status Inet_Tests(MemCh *gm);
 status Host_Tests(MemCh *m);
+status Silt_Tests(MemCh *m);
 #ifdef CNKOPT_FREEBSD
 status SysQuery_Tests(MemCh *m);
 #endif
@@ -151,6 +152,12 @@ static TestSet ExtTests[] = {
         "Node Tests",
         Node_Tests,
         "Node Object nested path tests.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Silt Tests",
+        Silt_Tests,
+        "Generating simple silt key for an instance.",
         FEATURE_COMPLETE,
     },
     {

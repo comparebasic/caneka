@@ -1,3 +1,5 @@
+typedef Span Inst;
+
 enum nodeobj_prop_idx {
     INST_PROPIDX_NAME = 0,
     INST_PROPIDX_ATTS = 1,

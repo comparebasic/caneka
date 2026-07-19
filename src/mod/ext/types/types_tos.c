@@ -3,39 +3,6 @@
 
 static boolean _init = FALSE;
 
-static i64 Hashed_Print(Buff *bf, void *a, cls type, word flags){
-    Hashed *h = (Hashed *)Ifc(bf->m, a, TYPE_HASHED);
-    if(flags & DEBUG){
-        Single *wid = I64_Wrapped(bf->m, h->id);
-        wid->type.state |= FMT_TYPE_BITS;
-        Single *val = Ptr_Wrapped(bf->m, h->value, 0);
-        word typeOf = TYPE_UNKNOWN;
-        if(h->value != NULL){
-            typeOf = ((Abstract *)h->value)->type.of;
-        }
-        void *args[] = {
-            I32_Wrapped(bf->m, h->orderIdx), 
-            I32_Wrapped(bf->m, h->idx), 
-            wid, 
-            h->key, 
-            val, 
-            Type_ToStr(bf->m, typeOf),
-            NULL
-        };
-        return Fmt(bf, "H<$,$ $/@ -> $/$>", args);
-    }else if(flags & MORE){
-        void *args[] = {
-            I32_Wrapped(bf->m, h->idx), 
-            h->key, 
-            h->value, 
-            NULL
-        };
-        return Fmt(bf, "H<$ @ -> @>", args);
-    }else{
-        return ToStream_NotImpl(bf, a, type, flags);
-    }
-}
-
 static boolean FetchTarget_Exact(FetchTarget  *a, FetchTarget *b){
     if((a->type.state & UPPER_FLAGS) != (b->type.state & UPPER_FLAGS) ||
             a->idx != b->idx || a->offsetType != b->offsetType || 
@@ -118,6 +85,66 @@ static status FetchTarget_Print(Buff *bf, void *a, cls type, word flags){
     }
     return Buff_AddBytes(bf, (byte *)">", 1);
 }
+
+status Silt_Print(Buff *bf, void *a, cls type, word flags){
+    MemCh *m = bf->m;
+    Str *s = (Str *)a;
+    void *ar[2];
+    ar[1] = NULL;
+
+    status r = ZERO;
+    r |= Fmt(bf, "Silt<", NULL);
+
+    cls *typeOf = (cls *)s->bytes;
+    i32 i;
+    for(i = 0; i < s->length / 2; i++){
+        ar[0] = Type_ToStr(m, *typeOf);
+        if(i == 0){
+            r |= Fmt(bf, "$", ar);
+        }else{
+            r |= Fmt(bf, ", $", ar);
+        }
+        typeOf++;
+    }
+    r |= Buff_AddBytes(bf, (byte *)">", 1);
+
+    return r;
+}
+
+static status Hashed_Print(Buff *bf, void *a, cls type, word flags){
+    Hashed *h = (Hashed *)Ifc(bf->m, a, TYPE_HASHED);
+    if(flags & DEBUG){
+        Single *wid = I64_Wrapped(bf->m, h->id);
+        wid->type.state |= FMT_TYPE_BITS;
+        Single *val = Ptr_Wrapped(bf->m, h->value, 0);
+        word typeOf = TYPE_UNKNOWN;
+        if(h->value != NULL){
+            typeOf = ((Abstract *)h->value)->type.of;
+        }
+        void *args[] = {
+            I32_Wrapped(bf->m, h->orderIdx), 
+            I32_Wrapped(bf->m, h->idx), 
+            wid, 
+            h->key, 
+            val, 
+            Type_ToStr(bf->m, typeOf),
+            NULL
+        };
+        return Fmt(bf, "H<$,$ $/@ -> $/$>", args);
+    }else if(flags & MORE){
+        void *args[] = {
+            I32_Wrapped(bf->m, h->idx), 
+            h->key, 
+            h->value, 
+            NULL
+        };
+        return Fmt(bf, "H<$ @ -> @>", args);
+    }else{
+        return ToStream_NotImpl(bf, a, type, flags);
+    }
+}
+
+
 
 status Inst_Print(Buff *bf, void *a, cls type, word flags){
     static i32 _objIndent = 0;
@@ -224,6 +251,7 @@ status ExtTypes_ToSInit(MemCh *m){
     r |= Lookup_Add(m, lk, TYPE_FETCHER, (void *)Fetcher_Print);
     r |= Lookup_Add(m, lk, TYPE_FETCH_TARGET, (void *)FetchTarget_Print);
     r |= Lookup_Add(m, lk, TYPE_FETCH_FUNC, (void *)FetchTargetFunc_Print);
+    r |= Lookup_Add(m, lk, TYPE_INST_SILT, (void *)Silt_Print);
 
     /* overide hashed print */
     r |= Lookup_Add(m, ToStreamLookup, TYPE_HASHED, (void *)Hashed_Print); 

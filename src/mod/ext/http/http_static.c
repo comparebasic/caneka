@@ -1,7 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-static void HttpStatic_Cmd(MemCh *m, Req *req, Serve *srv){
+static void HttpStatic_Cmd(MemCh *m, Req *_req, Serve *srv){
+    HttpReq *req = (HttpReq *)_req;
     Buff_ReadAmount(req->in, SERVE_READ_SIZE);
     Buff *bf = Buff_Make(m, ZERO);
 
@@ -223,7 +224,7 @@ status HttpStatic_Error(MemCh *m, HttpReq *req, ErrorMsg *msg){
 void HttpStatic_SetCmdFile(MemCh *m, Serve *srv, Buff *file){
     MemCh *rm = MemCh_Make();
 
-    Req *req = rm->owner = srv->def->mk(rm, srv);
+    HttpReq *req = rm->owner = (HttpReq *)srv->def->mk(rm, srv);
     req->key = S(m, "cmd");
     Time_Now(&req->metrics.start);
 

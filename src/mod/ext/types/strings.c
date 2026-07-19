@@ -3,9 +3,10 @@
 
 static char *extTypeStrings[] = {
     "_TYPE_EXT_START",
-    "TYPE_SEAL",
+    "TYPE_SEEL",
     "TYPE_NEST_SEL",
     "TYPE_INST_ITER",
+    "TYPE_INST_SILT",
     "TYPE_ITER2D",
     "TYPE_ITER_API",
     "TYPE_ITER_UPPER",
