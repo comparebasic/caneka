@@ -2,19 +2,9 @@ enum req_flags {
     HTTP_REQ_RESPONSE = 1 << 8,
 };
 
-typedef struct http_req {
+typedef struct req_http {
     Type type;
-    MemCh *m;
-    i32 idx;
-    ReqCrit *crit;
-    Iter routeIt;
-    struct {
-        struct timespec start;
-        struct timespec end;
-    } metrics;
-    /* req end */
     NetAddr *addr;
-    Str *key;
     struct {
         i16 method;
         i16 proto;
@@ -22,7 +12,6 @@ typedef struct http_req {
     StrVec *path;
     Buff *in;
     Buff *out;
-    Capsule *cap;
     Iter headersIt;
     Table *headersOut;
     Iter queryIt;
@@ -30,23 +19,23 @@ typedef struct http_req {
     Roebling *rbl;
     void *body;
     Span *sections;
-} HttpReq;
+} ReqHttp;
 
-status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv);
-status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv);
-status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv);
-status HttpReq_Accept(MemCh *m, Req *_req, Serve *srv);
-status HttpReq_Close(MemCh *m, Req *_req, Serve *srv);
+status ReqHttp_ReadToRbl(MemCh *m, ReqHttp *req, Serve *srv);
+status ReqHttp_RespToRbl(MemCh *m, ReqHttp *req, Serve *srv);
+status ReqHttp_Write(MemCh *m, ReqHttp *req, Serve *srv);
+status ReqHttp_Accept(MemCh *m, Req *_req, Serve *srv);
+status ReqHttp_Close(MemCh *m, Req *_req, Serve *srv);
 
-void HttpReq_ExpectRecv(HttpReq *req);
-void HttpReq_ExpectSend(HttpReq *req);
-void HttpReq_ExpectInternal(HttpReq *req);
-void HttpReq_ParseBody(HttpReq *req);
-void HttpReq_SetFd(HttpReq *req, i32 fd);
-Req *HttpReq_Mk(MemCh *m, Serve *srv);
-void HttpReq_Setup(MemCh *m, Req *req, Serve *srv);
-void HttpReq_Serve(MemCh *m, HttpReq *req, Serve *srv);
-void HttpReq_SetToRecv(HttpReq *req);
-void HttpReq_SetToResponse(HttpReq *req, i32 fd);
-void HttpReq_SetHeader(HttpReq *req, Str *key, void *value);
-void HttpReq_RemoveHeader(HttpReq *req, Str *key);
+void ReqHttp_ExpectRecv(ReqHttp *req);
+void ReqHttp_ExpectSend(ReqHttp *req);
+void ReqHttp_ExpectInternal(ReqHttp *req);
+void ReqHttp_ParseBody(ReqHttp *req);
+void ReqHttp_SetFd(ReqHttp *req, i32 fd);
+Req *ReqHttp_Mk(MemCh *m, Serve *srv);
+void ReqHttp_Setup(MemCh *m, Req *req, Serve *srv);
+void ReqHttp_Serve(MemCh *m, ReqHttp *req, Serve *srv);
+void ReqHttp_SetToRecv(ReqHttp *req);
+void ReqHttp_SetToResponse(ReqHttp *req, i32 fd);
+void ReqHttp_SetHeader(ReqHttp *req, Str *key, void *value);
+void ReqHttp_RemoveHeader(ReqHttp *req, Str *key);

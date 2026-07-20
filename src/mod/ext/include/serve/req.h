@@ -1,6 +1,5 @@
-typedef struct req {
+typedef struct task_core {
     Type type;
-    MemCh *m;
     i32 idx;
     ReqCrit *crit;
     Iter routeIt;
@@ -8,6 +7,6 @@ typedef struct req {
         struct timespec start;
         struct timespec end;
     } metrics;
-} Req;
+} TaskCore;
 
 Req *Make_Req(MemCh *m);

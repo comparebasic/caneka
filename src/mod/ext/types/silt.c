@@ -17,8 +17,6 @@ Str *Inst_GetSilt(MemCh *m, Inst *inst){
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = (Abstract *)Iter_Get(&it);
         Str_Add(s, (byte *)&a->type.of, (i16)sizeof(word));
-        printf("Adding prop %d/%d\n", (i32)s->length, (i32)s->alloc);
-        fflush(stdout);
     }
 
     return s;
