@@ -16,7 +16,12 @@ Str *Inst_GetSilt(MemCh *m, Inst *inst){
     Str_Add(s, (byte *)&inst->type.of, sizeof(word));
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = (Abstract *)Iter_Get(&it);
-        Str_Add(s, (byte *)&a->type.of, (i16)sizeof(word));
+        word v = a->type.of;
+        if(v == TYPE_WRAPPED_WORD){
+            Single *sg = (Single *)a;
+            v = sg->val.w;
+        }
+        Str_Add(s, (byte *)&v, (i16)sizeof(word));
     }
 
     return s;

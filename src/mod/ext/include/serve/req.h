@@ -9,4 +9,4 @@ typedef struct task_core {
     } metrics;
 } TaskCore;
 
-Req *Make_Req(MemCh *m);
+TaskCore *TaskCore_Make(MemCh *m);

@@ -22,6 +22,7 @@ status Caneka_Init(MemCh *m){
     Capsule_Init(m);
     Serve_TosInit(m);
     Serve_Init(m);
+    Task_ClsInit(m);
     Http_TosInit(m);
     Uri_ToSInit(m, ToStreamLookup);
     Node_ClsInit(m);
