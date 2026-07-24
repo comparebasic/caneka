@@ -40,6 +40,12 @@ quad *HostEnt_AddrIp4(HostEnt *h){
     return &sg->val.i;
 }
 
+util HostEnt_Hash(void *a){
+    HostEnt *ent = (HostEnt *)a;
+    Single *sg = Span_Get(h->addrs, 0);
+    return (util)sg->val.i;
+}
+
 util *HostEnt_AddrIp6(HostEnt *h){
     return NULL;
 }

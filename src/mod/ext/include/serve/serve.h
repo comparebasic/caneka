@@ -3,17 +3,15 @@
 typedef struct serve {
     Type type;
     MemCh *m;
-    util u;
     Queue *q;
-    HandlerDef *def;
+    Table *routes /* <HostEnt, HandlerDef> */;
+    Inst *config;
+    void *source;
     struct {
         Buff *out;
         Buff *err;
+        Buff *cmd;
     } log;
-    union {
-        HostEnt *ent;
-        StrVec *path;
-    } address;
     struct {
         struct timespec start; 
         util open;
@@ -21,13 +19,9 @@ typedef struct serve {
         util error;
         util total;
     } metrics;
-    CapsuleDef *capsule;
-    struct crypto_tls_ctx *tls;
-    Inst *config;
-    void *source;
 } Serve;
 
-void Serve_LogOpen(Serve *srv, Req *req);
-void Serve_LogFinalized(Serve *srv, Req *req);
+void Serve_LogOpen(Serve *srv, Inst *tsk);
+void Serve_LogFinalized(Serve *srv, Inst *tsk);
 
-Serve *Serve_Make(MemCh *m);
+Serve *Serve_Make(MemCh *m, Table *routes, Span *addrs, void *source);

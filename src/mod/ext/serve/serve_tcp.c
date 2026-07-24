@@ -178,20 +178,3 @@ void Serve_ServeTcp(Serve *srv){
 
     return;
 }
-
-Serve *Serve_MakeTcp(MemCh *m, HandlerDef *def, HostEnt *ent){
-    Serve *srv = Serve_Make(m);
-    srv->source = TcpSource_Make(m);
-    srv->def = def;
-    srv->address.ent = ent;
-    srv->log.out = OutStream;
-
-#ifdef CNKOPT_CRYPTO
-    if(ent->ctx != NULL){
-        srv->capsule = Lookup_Get(CapsuleDefLookup, TYPE_TLS_CAPSULE);
-        srv->tls = ent->ctx;
-    }
-#endif
-
-    return srv;
-}

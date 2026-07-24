@@ -262,7 +262,7 @@ void ReqHttp_Setup(MemCh *m, Req *_req, Serve *srv){
 
     TcpSource *ts = (TcpSource *)srv->source;
     req->addr = ts->addr;
-    req->crit = ReqCrit_Make(m);
+    req->crit = TaskCrit_Make(m);
     req->crit->pfd.fd = ts->new_fd;
 
     ReqHttp_SetFd(req, ts->new_fd);

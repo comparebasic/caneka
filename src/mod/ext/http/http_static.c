@@ -228,7 +228,7 @@ void HttpStatic_SetCmdFile(MemCh *m, Serve *srv, Buff *file){
     req->key = S(m, "cmd");
     Time_Now(&req->metrics.start);
 
-    req->crit = ReqCrit_Make(m);
+    req->crit = TaskCrit_Make(m);
     req->crit->pfd.fd = file->fd;
     req->idx = Queue_Add(srv->q, req, req->crit);
     HttpReq_ExpectRecv(req);

@@ -16,7 +16,6 @@ void Serveneka_Serve(MemCh *m, i32 port, StrVec *dir, Node *config){
     Str *tlsKey = Inst_Att(config, K(m, "tls-key"));
     Str *cmdFile = Inst_Att(config, K(m, "cmd-file"));
 
-
     if(tlsCert != NULL && tlsKey != NULL){
         Tls_Init(m);
 
@@ -33,7 +32,12 @@ void Serveneka_Serve(MemCh *m, i32 port, StrVec *dir, Node *config){
     }
 #endif
 
-    Serve *srv = Serve_MakeTcp(m, def, ent);
+    Table *routes = Table_Make(m);
+    HandlerDef *def = HttpStatic_DefMake(m);
+    Table_Set(routes, ent, def);
+    TcpSource *source = TcpSource_Make(m);
+
+    Serve *srv = Serve_Make(m, Table_Ordered(m, routes), source);
     srv->config = config;
 
     if(cmdFile != NULL && tlsKey != NULL){
