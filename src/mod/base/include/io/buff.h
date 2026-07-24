@@ -13,8 +13,9 @@ enum send_recv_flags {
 
 typedef struct buff {
     Type type;
-    i32 fd;
+    struct pollfd *pfd;
     MemCh *m;
+    Str *path;
     StrVec *v;
     struct {
         Str *s;

@@ -1,5 +1,5 @@
-typedef void (*TaskFunc)(MemCh *m, Inst *tsk, struct serve *srv);
-typedef Inst *(*TaskMaker)(MemCh *m, struct serve *srv);
+typedef void (*ReqFunc)(MemCh *m, struct req *req, struct serve *srv);
+typedef struct req *(*ReqMaker)(MemCh *m, struct serve *srv);
 
 typedef struct req_handler_def {
     Type type;

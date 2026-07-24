@@ -16,21 +16,21 @@ status File_Rename(MemCh *m, Str *to, Str *from){
 status File_Open(Buff *bf, void *_fpath, word ioFlags){
     Str *fpath = NULL;
     if(((Abstract *)_fpath)->type.of == TYPE_STR){
-        fpath = (Str *)_fpath;
+        bf->path = (Str *)_fpath;
     }else if(((Abstract *)_fpath)->type.of == TYPE_STRVEC){
-        fpath = (Str *)StrVec_Str(bf->m, (StrVec *)_fpath);
+        buff->path = (Str *)StrVec_Str(bf->m, (StrVec *)_fpath);
     }
 
-    if(fpath == NULL){
+    if(buff->path == NULL){
         return ERROR;
     }
 
     void *args[3];
-    char *cstr = Str_Cstr(bf->m, fpath);
+    char *cstr = Str_Cstr(bf->m, buff->path);
     if((ioFlags & (O_TRUNC)) || ioFlags == O_RDONLY || (ioFlags & O_CREAT) == 0){
         i32 ri = stat(cstr, &bf->st); 
         args[0] = bf;
-        args[1] = fpath;
+        args[1] = buff->path;
         args[2] = NULL;
         if(ri != -1 && (ioFlags & O_TRUNC) && (bf->type.state & BUFF_CLOBBER) == 0){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -54,7 +54,7 @@ status File_Open(Buff *bf, void *_fpath, word ioFlags){
     }
     if(fd <= 0){
         if((bf->type.state & NOOP) == 0){
-            args[0] = fpath;
+            args[0] = buff->path;
             args[1] = Str_CstrRef(bf->m, strerror(errno));
             args[2] = NULL;
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,

@@ -161,7 +161,7 @@ static status Buff_posFrom(Buff *bf, i64 offset, i64 whence){
         return Buff_vecPosFrom(bf, offset, whence);
     }
 
-    i64 pos = lseek(bf->fd, offset, whence);
+    i64 pos = lseek(bf->pfd->fd, offset, whence);
     if(pos < 0){
         Buff_Stat(bf);
         bf->type.state |= (ERROR|END);
@@ -282,7 +282,10 @@ status Buff_Rinse(Buff *bf){
 }
 
 status Buff_SetFd(Buff *bf, i32 fd){
-    bf->fd = fd;
+    if(bf->pfd == NULL){
+        bf->pfd = MemCh_Alloc(bf->m, sizeof(struct pollfd), TYPE_POLLFD_PTR);
+    }
+    bf->pfd->fd = fd;
     bf->type.state |= BUFF_FD;
     if(bf->type.state & BUFF_ASYNC){
         if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
@@ -296,19 +299,19 @@ status Buff_SetFd(Buff *bf, i32 fd){
 }
 
 status Buff_SetSocket(Buff *bf, i32 fd){
-    bf->fd = fd;
+    bf->pfd->fd = fd;
     bf->type.state |= BUFF_SOCKET;
     return SUCCESS;
 }
 
 status Buff_UnsetFd(Buff *bf){
-    bf->fd = -1;
+    bf->pfd->fd = -1;
     bf->type.state &= ~BUFF_SOCKET;
     return SUCCESS;
 }
 
 status Buff_UnsetSocket(Buff *bf){
-    bf->fd = -1;
+    bf->pfd->fd = -1;
     bf->type.state &= ~BUFF_SOCKET;
     return SUCCESS;
 }
@@ -328,9 +331,9 @@ boolean Buff_IsEmpty(Buff *bf){
 status Buff_Stat(Buff *bf){
     memset(&bf->st, 0, sizeof(struct stat));
     if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
-        if(fstat(bf->fd, &bf->st)){
+        if(fstat(bf->pfd->fd, &bf->st)){
             bf->type.state |= ERROR;
-        }else if(lseek(bf->fd, 0, SEEK_CUR) == bf->st.st_size){
+        }else if(lseek(bf->pfd->fd, 0, SEEK_CUR) == bf->st.st_size){
             bf->type.state |= END;
         }
     } else{
@@ -485,7 +488,7 @@ status Buff_AddBytes(Buff *bf, byte *bytes, i64 length){
         while((bf->type.state & (SUCCESS|ERROR|MORE)) == 0){
             Guard_Incr(bf->m, &guard, BUFF_CYCLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
             Buff_bytesToFd(bf,
-                bf->fd, bytes+offset, length-offset, &offset);
+                bf->pfd->fd, bytes+offset, length-offset, &offset);
         }
 
         return bf->type.state;
@@ -532,7 +535,7 @@ status Buff_Flush(Buff *bf){
         Out("^pFlushing @\n", args);
     }
     if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
-        while((Buff_sendToFd(bf, bf->fd) & (SUCCESS|ERROR|NOOP|END)) == 0){
+        while((Buff_sendToFd(bf, bf->pfd->fd) & (SUCCESS|ERROR|NOOP|END)) == 0){
             if(bf->type.state & DEBUG){
                 void *args[2];
                 args[0] = bf;
@@ -605,9 +608,9 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
         ssize_t recieved = 0;
         Str *s = Str_Make(bf->m, min(amount, IO_BLOCK_SIZE));
         if(bf->type.state & BUFF_SOCKET){
-            recieved = recv(bf->fd, s->bytes, s->alloc, 0);
+            recieved = recv(bf->pfd->fd, s->bytes, s->alloc, 0);
         }else if(bf->type.state & BUFF_FD){
-            recieved = read(bf->fd, s->bytes, s->alloc);
+            recieved = read(bf->pfd->fd, s->bytes, s->alloc);
         }else{
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
@@ -618,7 +621,7 @@ status Buff_ReadAmount(Buff *bf, i64 amount){
         if(recieved < 0){
             if((bf->type.state & (BUFF_FD|BUFF_ASYNC)) == BUFF_FD){
                 void *args[] = {
-                    I32_Wrapped(bf->m, bf->fd),
+                    I32_Wrapped(bf->m, bf->pfd->fd),
                     Str_CstrRef(bf->m, strerror(errno)),
                     NULL
                 };
@@ -657,9 +660,9 @@ status Buff_ReadToStr(Buff *bf, Str *s){
     while(amount > 0){
         ssize_t recieved = 0;
         if(bf->type.state & BUFF_SOCKET){
-            recieved = recv(bf->fd, bytes, amount, 0);
+            recieved = recv(bf->pfd->fd, bytes, amount, 0);
         }else if(bf->type.state & BUFF_FD){
-            recieved = read(bf->fd, bytes, amount);
+            recieved = read(bf->pfd->fd, bytes, amount);
         }else{
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER, 
                 "Buff Send requires the BUFF_SOCKET or BUFF_FD flag", NULL);
@@ -669,7 +672,7 @@ status Buff_ReadToStr(Buff *bf, Str *s){
 
         if(recieved < 0){
             void *args[] = {
-                I32_Wrapped(bf->m, bf->fd),
+                I32_Wrapped(bf->m, bf->pfd->fd),
                 Str_CstrRef(bf->m, strerror(errno)),
                 NULL
             };
@@ -725,7 +728,7 @@ Buff *Buff_From(MemCh *m, StrVec *v){
     Buff *bf = (Buff *)MemCh_AllocOf(m, sizeof(Buff), TYPE_BUFF);
     bf->type.of = TYPE_BUFF;
     bf->m = m;
-    bf->fd = -1;
+    bf->pfd->fd = -1;
     bf->v = v;
     bf->tail.idx = -1;
     bf->unsent.idx = 0;

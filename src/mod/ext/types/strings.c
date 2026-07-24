@@ -54,6 +54,7 @@ static char *extTypeStrings[] = {
     "TYPE_SSID_CTX",
     "TYPE_HTTP_PROTO",
     "TYPE_HANDLER_DEF",
+    "TYPE_POLLFD_PTR",
     "TYPE_REQ",
     "TYPE_REQ_CRIT",
     "TYPE_HTTP_REQ",
@@ -238,7 +239,6 @@ static char *extTypeStrings[] = {
 static char *extTypeInstectStrings[] = {
     "TYPE_INSTANCE",
     "TYPE_NODE",
-    "TYPE_TASK",
     "TYPE_HTTP_CONFIG",
     "_EXT_OBJECT_END",
     NULL

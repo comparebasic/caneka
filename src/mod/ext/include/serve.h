@@ -10,7 +10,7 @@ enum serve_types {
 
 #include "serve/handlerdef.h"
 #include "serve/req_crit.h"
-#include "serve/task_core.h"
+#include "serve/req.h"
 #include "serve/inet.h"
 #include "serve/mime.h"
 #include "serve/etag.h"
@@ -19,7 +19,6 @@ enum serve_types {
 #include "serve/netaddr.h"
 #include "serve/serve.h"
 #include "serve/log.h"
-#include "serve/serve_tcp.h"
 #include "serve/tcp_source.h"
 #include "serve/serve_init.h"
 #include "serve/serve_tos.h"

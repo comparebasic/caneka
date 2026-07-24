@@ -1,4 +1,4 @@
-typedef struct task_core {
+typedef struct req {
     Type type;
     i32 idx;
     ReqCrit *crit;
@@ -7,6 +7,7 @@ typedef struct task_core {
         struct timespec start;
         struct timespec end;
     } metrics;
-} TaskCore;
+    void *source;
+} Req;
 
-TaskCore *TaskCore_Make(MemCh *m);
+Req *Req_Make(MemCh *m);
