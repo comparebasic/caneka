@@ -57,7 +57,7 @@ status Buff_Print(Buff *bf, void *a, cls type, word flags){
 
     void *args[9];
     args[0] = Type_StateVec(bf->m, bfObj->type.of, bfObj->type.state);
-    args[1] = I32_Wrapped(bf->m, bfObj->fd);
+    args[1] = I32_Wrapped(bf->m, bfObj->pfd->fd);
     args[2] = I64_Wrapped(bf->m, bfObj->unsent.total);
     args[3] = I64_Wrapped(bf->m, bfObj->v->total);
     args[4] = NULL;
@@ -67,7 +67,7 @@ status Buff_Print(Buff *bf, void *a, cls type, word flags){
         args[5] = args[3];
 
         args[2] = I32_Wrapped(bf->m, bfObj->st.st_size);
-        args[3] = I32_Wrapped(bf->m, lseek(bfObj->fd, 0, SEEK_CUR));
+        args[3] = I32_Wrapped(bf->m, lseek(bfObj->pfd->fd, 0, SEEK_CUR));
 
         args[6] = I32_Wrapped(bf->m, bfObj->tail.idx);
         args[7] = (bf->unsent.s == NULL ? (void *)bfObj->v : (void *)bfObj->unsent.s);

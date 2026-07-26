@@ -14,8 +14,8 @@ static void sigH(i32 sig, siginfo_t *info, void *ptr){
         _fuse = FALSE;
         Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Sig Seg Fault", NULL);
     }else{
-        if(ErrStream->fd > 0){
-            write(ErrStream->fd, "Double SigH\n", strlen("Double SigH\n"));
+        if(ErrStream->pfd->fd > 0){
+            write(ErrStream->pfd->fd, "Double SigH\n", strlen("Double SigH\n"));
         }
     }
     exit(1);
@@ -27,8 +27,8 @@ static void sigQuit(i32 sig, siginfo_t *info, void *ptr){
         _fuse = FALSE;
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Quit", NULL);
     }else{
-        if(ErrStream->fd > 0){
-            write(ErrStream->fd, "Double SigH\n", strlen("Double SigH\n"));
+        if(ErrStream->pfd->fd > 0){
+            write(ErrStream->pfd->fd, "Double SigH\n", strlen("Double SigH\n"));
         }
     }
     exit(1);
@@ -39,8 +39,8 @@ static void sigPipe(i32 sig, siginfo_t *info, void *ptr){
         _fuse = FALSE;
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Pipe", NULL);
     }else{
-        if(ErrStream->fd > 0){
-            write(ErrStream->fd, "Double SigH\n", strlen("Double SigH\n"));
+        if(ErrStream->pfd->fd > 0){
+            write(ErrStream->pfd->fd, "Double SigH\n", strlen("Double SigH\n"));
         }
     }
     exit(1);
@@ -52,8 +52,8 @@ static void sigHup(i32 sig, siginfo_t *info, void *ptr){
         _fuse = FALSE;
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Hup", NULL);
     }else{
-        if(ErrStream->fd > 0){
-            write(ErrStream->fd, "Double SigH\n", strlen("Double SigH\n"));
+        if(ErrStream->pfd->fd > 0){
+            write(ErrStream->pfd->fd, "Double SigH\n", strlen("Double SigH\n"));
         }
     }
     exit(1);
@@ -68,8 +68,8 @@ static void sigI(i32 sig, siginfo_t *info, void *ptr){
         }
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, "Sig Int", NULL);
     }else{
-        if(ErrStream->fd > 0){
-            write(ErrStream->fd, "Double SigH\n", strlen("Double SigH\n"));
+        if(ErrStream->pfd->fd > 0){
+            write(ErrStream->pfd->fd, "Double SigH\n", strlen("Double SigH\n"));
         }
     }
     exit(1);

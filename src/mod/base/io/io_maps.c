@@ -15,9 +15,9 @@ static Map *Buff_Map(MemCh *m){
     (atts+1)->of = TYPE_MEMCTX;
     (atts+1)->range = (word)((void *)&bf.m - (void *)&bf);
 
-    keys[2] = Str_CstrRef(m, "fd");
-    (atts+2)->of = TYPE_I32;
-    (atts+2)->range = (word)((void *)&bf.fd - (void *)&bf);
+    keys[2] = Str_CstrRef(m, "pfd");
+    (atts+2)->of = TYPE_POLLFD_PTR;
+    (atts+2)->range = (word)((void *)&bf.pfd - (void *)&bf);
 
     keys[3] = Str_CstrRef(m, "v");
     (atts+3)->of = TYPE_STRVEC;

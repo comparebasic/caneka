@@ -18,19 +18,19 @@ status File_Open(Buff *bf, void *_fpath, word ioFlags){
     if(((Abstract *)_fpath)->type.of == TYPE_STR){
         bf->path = (Str *)_fpath;
     }else if(((Abstract *)_fpath)->type.of == TYPE_STRVEC){
-        buff->path = (Str *)StrVec_Str(bf->m, (StrVec *)_fpath);
+        bf->path = (Str *)StrVec_Str(bf->m, (StrVec *)_fpath);
     }
 
-    if(buff->path == NULL){
+    if(bf->path == NULL){
         return ERROR;
     }
 
     void *args[3];
-    char *cstr = Str_Cstr(bf->m, buff->path);
+    char *cstr = Str_Cstr(bf->m, bf->path);
     if((ioFlags & (O_TRUNC)) || ioFlags == O_RDONLY || (ioFlags & O_CREAT) == 0){
         i32 ri = stat(cstr, &bf->st); 
         args[0] = bf;
-        args[1] = buff->path;
+        args[1] = bf->path;
         args[2] = NULL;
         if(ri != -1 && (ioFlags & O_TRUNC) && (bf->type.state & BUFF_CLOBBER) == 0){
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -54,7 +54,7 @@ status File_Open(Buff *bf, void *_fpath, word ioFlags){
     }
     if(fd <= 0){
         if((bf->type.state & NOOP) == 0){
-            args[0] = buff->path;
+            args[0] = bf->path;
             args[1] = Str_CstrRef(bf->m, strerror(errno));
             args[2] = NULL;
             Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -69,7 +69,7 @@ status File_Open(Buff *bf, void *_fpath, word ioFlags){
 status File_Close(Buff *bf){
     if(bf->type.state & (BUFF_FD|BUFF_SOCKET)){
         if(bf->type.state & BUFF_DATASYNC){
-            fdatasync(bf->fd);    
+            fdatasync(bf->pfd->fd);    
         }
         bf->type.state &= ~(BUFF_FD|BUFF_SOCKET|BUFF_DATASYNC);
     }else{
@@ -82,7 +82,7 @@ status File_Close(Buff *bf){
         return ERROR;
     }
 
-    if(close(bf->fd)){
+    if(close(bf->pfd->fd)){
         bf->type.state |= ERROR;
         return bf->type.state;
     }

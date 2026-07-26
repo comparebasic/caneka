@@ -28,7 +28,7 @@ void Ansi_SetColor(Buff *bf, boolean yn){
 }
 
 boolean Ansi_HasColor(Buff *bf){
-    return bf->type.state & BUFF_COLOR;
+    return (bf->type.state & BUFF_COLOR) != 0;
 }
 
 Str *Str_ConsumeAnsi(Buff *bf, char **_ptr, char *end, boolean consume){

@@ -51,7 +51,6 @@ enum ext_types {
     TYPE_SSID_CTX,
     TYPE_HTTP_PROTO,
     TYPE_HANDLER_DEF,
-    TYPE_POLLFD_PTR,
     TYPE_REQ,
     TYPE_REQ_CRIT,
     TYPE_HTTP_REQ,

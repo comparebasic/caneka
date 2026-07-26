@@ -283,7 +283,7 @@ status Buff_Rinse(Buff *bf){
 
 status Buff_SetFd(Buff *bf, i32 fd){
     if(bf->pfd == NULL){
-        bf->pfd = MemCh_Alloc(bf->m, sizeof(struct pollfd), TYPE_POLLFD_PTR);
+        bf->pfd = MemCh_AllocOf(bf->m, sizeof(struct pollfd), TYPE_POLLFD_PTR);
     }
     bf->pfd->fd = fd;
     bf->type.state |= BUFF_FD;
@@ -728,7 +728,6 @@ Buff *Buff_From(MemCh *m, StrVec *v){
     Buff *bf = (Buff *)MemCh_AllocOf(m, sizeof(Buff), TYPE_BUFF);
     bf->type.of = TYPE_BUFF;
     bf->m = m;
-    bf->pfd->fd = -1;
     bf->v = v;
     bf->tail.idx = -1;
     bf->unsent.idx = 0;
