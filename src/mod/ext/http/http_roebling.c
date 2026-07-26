@@ -286,7 +286,7 @@ static status headerValue(MemCh *m, Roebling *rbl){
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
     void *args[3];
-    HttpReq *req = (HttpReq *)Ifc(rbl->m, rbl->source, TYPE_HTTP_REQ);
+    HttpReq *hreq = (HttpReq *)Ifc(rbl->m, rbl->source, TYPE_HTTP_REQ);
     if(rbl->curs->type.state & DEBUG){
         args[0] = Type_ToStr(OutStream->m, captureKey);
         args[1] = v;
@@ -294,39 +294,39 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Out("^y.Token: $/@^0\n", args);
     }
     if(captureKey == METHOD_HTTP_GET){
-        req->address.method = METHOD_HTTP_GET; 
+        hreq->address.method = METHOD_HTTP_GET; 
     }else if(captureKey == METHOD_HTTP_POST){
-        req->address.method = METHOD_HTTP_POST;
+        hreq->address.method = METHOD_HTTP_POST;
     }else if(captureKey == HTTP_PATH){
-        req->path = v;
+        hreq->path = v;
     }else if(captureKey == HTTP_VERSION){
-        req->address.proto = Bytes_ToHttpProto(m, v);
+        hreq->address.proto = Bytes_ToHttpProto(m, v);
     }else if(captureKey == HTTP_HEADER_NAME){
-        Table_SetKey(&req->headersIt, v);
+        Table_SetKey(&hreq->headersIt, v);
     }else if(captureKey == HTTP_HEADER_VALUE){
-        i32 selected = req->headersIt.metrics.selected;
-        Table_SetValue(&req->headersIt, v);
-        req->headersIt.metrics.selected = selected;
+        i32 selected = hreq->headersIt.metrics.selected;
+        Table_SetValue(&hreq->headersIt, v);
+        hreq->headersIt.metrics.selected = selected;
     }else if(captureKey == HTTP_HEADER_INT_VALUE){
-        i32 selected = req->headersIt.metrics.selected;
-        Table_SetValue(&req->headersIt, I64_Wrapped(m, I64_FromStr(StrVec_Str(m, v))));
-        req->headersIt.metrics.selected = selected;
+        i32 selected = hreq->headersIt.metrics.selected;
+        Table_SetValue(&hreq->headersIt, I64_Wrapped(m, I64_FromStr(StrVec_Str(m, v))));
+        hreq->headersIt.metrics.selected = selected;
     }else if(captureKey == HTTP_QUERY_START){
         if(rbl->shelf == NULL){
             rbl->shelf = StrVec_Make(m);
         }
     }else if(captureKey == HTTP_QUERY_NEXT){
         if(rbl->shelf != NULL && rbl->shelf->total > 0){
-            Table_SetValue(&req->queryIt, rbl->shelf);
+            Table_SetValue(&hreq->queryIt, rbl->shelf);
             rbl->shelf = StrVec_Make(m);
         }
     }else if(captureKey == HTTP_QUERY_NEXT_VALUE || captureKey == HTTP_QUERY_END){
         if(rbl->shelf != NULL && rbl->shelf->total){
-            if(req->queryIt.metrics.selected == -1){
-                Table_SetKey(&req->queryIt, rbl->shelf);
+            if(hreq->queryIt.metrics.selected == -1){
+                Table_SetKey(&hreq->queryIt, rbl->shelf);
                 rbl->shelf = StrVec_Make(m);
             }else{
-                Table_SetValue(&req->queryIt, rbl->shelf);
+                Table_SetValue(&hreq->queryIt, rbl->shelf);
                 rbl->shelf = StrVec_Make(m);
             }
         }
@@ -337,8 +337,8 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     }else if(captureKey == HTTP_QUERY_SEG_KEY || captureKey == HTTP_QUERY_SEG_VALUE){
         StrVec_AddVec(rbl->shelf, v);
     }else if(captureKey == HTTP_HEADER_CONTINUED){
-        if(req->headersIt.metrics.selected >= 0){
-            Hashed *h = Span_Get(req->headersIt.p, req->headersIt.metrics.selected);
+        if(hreq->headersIt.metrics.selected >= 0){
+            Hashed *h = Span_Get(hreq->headersIt.p, hreq->headersIt.metrics.selected);
             StrVec *hdr = h->value;
             StrVec_AddVec(hdr, v);
         }

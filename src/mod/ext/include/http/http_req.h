@@ -4,6 +4,7 @@ enum req_flags {
 
 typedef struct http_req {
     Type type;
+    MemCh *m;
     NetAddr *addr;
     Str *key;
     struct {
@@ -23,21 +24,18 @@ typedef struct http_req {
     Span *sections;
 } HttpReq;
 
-status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv);
-status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv);
-status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv);
-status HttpReq_Accept(MemCh *m, Req *_req, Serve *srv);
-status HttpReq_Close(MemCh *m, Req *_req, Serve *srv);
+status HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv);
+status HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv);
+status HttpReq_Write(MemCh *m, Req *req, Serve *srv);
+status HttpReq_Accept(MemCh *m, Req *req, Serve *srv);
+status HttpReq_Close(MemCh *m, Req *req, Serve *srv);
 
-void HttpReq_ExpectRecv(HttpReq *req);
-void HttpReq_ExpectSend(HttpReq *req);
-void HttpReq_ExpectInternal(HttpReq *req);
 void HttpReq_ParseBody(HttpReq *req);
 void HttpReq_SetFd(HttpReq *req, i32 fd);
 Req *HttpReq_Mk(MemCh *m, Serve *srv);
 void HttpReq_Setup(MemCh *m, Req *req, Serve *srv);
 void HttpReq_Serve(MemCh *m, HttpReq *req, Serve *srv);
-void HttpReq_SetToRecv(HttpReq *req);
-void HttpReq_SetToResponse(HttpReq *req, i32 fd);
+void HttpReq_SetToRecv(HttpReq *hreq, Req *req);
+void HttpReq_SetToResponse(HttpReq *hreq, Req *req, i32 fd);
 void HttpReq_SetHeader(HttpReq *req, Str *key, void *value);
 void HttpReq_RemoveHeader(HttpReq *req, Str *key);

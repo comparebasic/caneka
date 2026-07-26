@@ -7,11 +7,12 @@ typedef struct req_handler_def {
     ReqFunc setup;
     ReqFunc handle;
     ReqFunc finalize;
-    Iter routeIt; /*<Table>*/
+    Iter routeIt;
     struct {
         ReqFunc open;
         ReqFunc final;
     } log;
+    CapsuleDef *capsule;
     void *source;
 } HandlerDef;
 

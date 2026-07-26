@@ -1,11 +1,11 @@
 #include <external.h>
 #include <caneka.h>
 
-static void HttpReq_setLength(MemCh *m, HttpReq *req){
+static void HttpReq_setLength(MemCh *m, HttpReq *hreq){
     i64 length = 0;
     Iter it;
-    if(req->sections->nvalues > 0){
-        Iter_Init(&it, req->sections);
+    if(hreq->sections->nvalues > 0){
+        Iter_Init(&it, hreq->sections);
         while((Iter_Next(&it) & END) == 0){
             Buff *bf = Iter_Get(&it);
             Buff_Stat(bf);
@@ -13,12 +13,12 @@ static void HttpReq_setLength(MemCh *m, HttpReq *req){
         }
     }
     if(length > 0){
-        HttpReq_SetHeader(req,
+        HttpReq_SetHeader(hreq,
             S(m, "Content-Length"), I32_Wrapped(m, length));
     }
 }
 
-static void HttpReq_writeStatus(MemCh *m, HttpReq *req){
+static void HttpReq_writeStatus(MemCh *m, HttpReq *hreq, Req *req){
     char *st = NULL;
     if(req->type.state & NOOP){
         if(req->type.state & ERROR){
@@ -33,51 +33,52 @@ static void HttpReq_writeStatus(MemCh *m, HttpReq *req){
     }
 
     Str *s = K(m, st);
-    Buff_Add(req->out, s);
+    Buff_Add(hreq->out, s);
 }
 
-static void HttpReq_writeHeaders(MemCh *m, HttpReq *req){
+static void HttpReq_writeHeaders(MemCh *m, HttpReq *hreq){
     Iter it;
-    Iter_Init(&it, Table_Ordered(m, req->headersOut));
+    Iter_Init(&it, Table_Ordered(m, hreq->headersOut));
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
         void *ar[] = {h->key, h->value, NULL};
-        Fmt(req->out, "$: $\r\n", ar);
+        Fmt(hreq->out, "$: $\r\n", ar);
     }
-    Buff_Add(req->out, K(m, "\r\n"));
+    Buff_Add(hreq->out, K(m, "\r\n"));
 }
 
-static void HttpReq_writeBody(MemCh *m, HttpReq *req){
+static void HttpReq_writeBody(MemCh *m, HttpReq *hreq){
     Iter it;
-    if(req->sections->nvalues > 0){
-        Iter_Init(&it, req->sections);
+    if(hreq->sections->nvalues > 0){
+        Iter_Init(&it, hreq->sections);
         while((Iter_Next(&it) & END) == 0){
             Buff *bf = Iter_Get(&it);
-            Buff_Pipe(req->out, bf);
+            Buff_Pipe(hreq->out, bf);
             if(bf->type.state & (BUFF_SOCKET|BUFF_FD)){
-                close(bf->fd);
+                close(bf->pfd->fd);
                 Buff_UnsetFd(bf);
             }
         }
     }
 }
 
-status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
+status HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
+    HttpReq *hreq = (HttpReq *)req->source;
 
-    if((req->rbl->type.state & (SUCCESS|ERROR)) == 0){
-        if(req->cap != NULL){
-            srv->capsule->readTo(req->cap);
+    if((hreq->rbl->type.state & (SUCCESS|ERROR)) == 0){
+        if(req->def->capsule != NULL){
+            req->def->capsule->readTo(hreq->cap);
         }else{
-            Buff_ReadAmount(req->in, SERVE_READ_SIZE);
+            Buff_ReadAmount(hreq->in, SERVE_READ_SIZE);
         }
 
-        if((req->in->type.state & NOOP) == 0){
-            Roebling_Run(req->rbl);
+        if((hreq->in->type.state & NOOP) == 0){
+            Roebling_Run(hreq->rbl);
             if(req->type.state & DEBUG){
                 void *ar[] = {
-                    req->in->v,
-                    req->headersIt.p,
+                    hreq->in->v,
+                    hreq->headersIt.p,
                     NULL
                 };
                 Out("^p.  Read So Far: ^c.@ -> @^0\n", ar);
@@ -85,10 +86,10 @@ status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
         }
     }
     
-    req->type.state |= req->rbl->type.state & (SUCCESS|ERROR);
+    req->type.state |= hreq->rbl->type.state & (SUCCESS|ERROR);
 
-    if(req->type.state & SUCCESS){
-        HttpReq_ParseBody(req);            
+    if(hreq->type.state & SUCCESS){
+        HttpReq_ParseBody(hreq);            
         if(req->type.state & DEBUG){
             void *args[] = {
                 req,
@@ -106,16 +107,16 @@ status HttpReq_RespToRbl(MemCh *m, HttpReq *req, Serve *srv){
         }
     }
 
-    HttpReq_ExpectInternal(req);
+    Req_ExpectInternal(req);
 
     Return(m, req->type.state);
 }
 
-void HttpReq_SetHeader(HttpReq *req, Str *key, void *value){
-    if(req->headersOut == NULL){
-        req->headersOut = Table_Make(req->m);
+void HttpReq_SetHeader(HttpReq *hreq, Str *key, void *value){
+    if(hreq->headersOut == NULL){
+        hreq->headersOut = Table_Make(hreq->m);
     }
-    Table_Set(req->headersOut, key, value);
+    Table_Set(hreq->headersOut, key, value);
 }
 
 void HttpReq_RemoveHeader(HttpReq *req, Str *key){
@@ -125,19 +126,20 @@ void HttpReq_RemoveHeader(HttpReq *req, Str *key){
     }
 }
 
-status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv){
+status HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
+    HttpReq *hreq = (HttpReq *)req->source;
 
-    Buff_SetSocket(req->in, req->crit->pfd.fd);
-    if((req->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
-            (Buff_ReadAmount(req->in, SERVE_READ_SIZE) & NOOP) == 0){
-        Roebling_Run(req->rbl);
+    Buff_SetSocket(hreq->in, req->crit->pfd.fd);
+    if((hreq->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
+            (Buff_ReadAmount(hreq->in, SERVE_READ_SIZE) & NOOP) == 0){
+        Roebling_Run(hreq->rbl);
     }
     
-    req->type.state |= req->rbl->type.state & (SUCCESS|ERROR);
+    req->type.state |= hreq->rbl->type.state & (SUCCESS|ERROR);
 
     if(req->type.state & SUCCESS){
-        HttpReq_ParseBody(req);            
+        HttpReq_ParseBody(hreq);            
         if(req->type.state & DEBUG){
             void *args[] = {
                 req,
@@ -150,135 +152,125 @@ status HttpReq_ReadToRbl(MemCh *m, HttpReq *req, Serve *srv){
     Return(m, req->type.state);
 }
 
-status HttpReq_Write(MemCh *m, HttpReq *req, Serve *srv){
+status HttpReq_Write(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
+    HttpReq *hreq = (HttpReq *)req->source;
 
-    HttpReq_SetHeader(req, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
-    if(req->cap == NULL){
-        Buff_SetSocket(req->out, req->crit->pfd.fd);
+    HttpReq_SetHeader(hreq, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
+    if(hreq->cap == NULL){
+        Buff_SetSocket(hreq->out, req->crit->pfd.fd);
     }
 
-    HttpReq_writeStatus(m, req);
-    HttpReq_setLength(m, req);
-    HttpReq_writeHeaders(m, req);
-    HttpReq_writeBody(m, req);
+    HttpReq_writeStatus(m, hreq, req);
+    HttpReq_setLength(m, hreq);
+    HttpReq_writeHeaders(m, hreq);
+    HttpReq_writeBody(m, hreq);
 
-    if(req->cap != NULL){
-        srv->capsule->writeTo(req->cap);
+    if(hreq->cap != NULL){
+        req->def->capsule->writeTo(hreq->cap);
     }
 
     req->type.state |= (SUCCESS|END);
     Return(m, req->type.state);
 }
 
-void HttpReq_ParseBody(HttpReq *req){
-    MemCh *m = req->m;
-    Debug_Push(m, req);
-    Abstract *value = Table_Get(req->headersIt.p, K(m, "Content-Length"));
+void HttpReq_ParseBody(HttpReq *hreq){
+    MemCh *m = hreq->m;
+    Debug_Push(m, hreq);
+    Abstract *value = Table_Get(hreq->headersIt.p, K(m, "Content-Length"));
     if(value != NULL){
 
         i64 length = (i64)((Single *)value)->val.value;
-        Cursor *curs = req->rbl->curs;
+        Cursor *curs = hreq->rbl->curs;
         Cursor_Incr(curs, 1); /* TODO: remove */
 
         i32 remaining = length - (curs->v->total - curs->pos);
-        while(remaining > 0 && (req->in->type.state & ERROR) == 0){
-            Buff_ReadAmount(req->in, remaining);
+        while(remaining > 0 && (hreq->in->type.state & ERROR) == 0){
+            Buff_ReadAmount(hreq->in, remaining);
             remaining = length - (curs->v->total - curs->pos);
         }
 
-        Hashed *typeH = Table_Get(req->headersIt.p, K(m, "Content-Type"));
+        Hashed *typeH = Table_Get(hreq->headersIt.p, K(m, "Content-Type"));
         if(typeH != NULL){
             /* parse stuff here such as json or form data */
         }
         Buff *bf = Buff_Make(m, ZERO);
         Cursor_Remaining(curs, bf);
-        req->body = (void *)bf;
+        hreq->body = (void *)bf;
     }
 
     ReturnVoid(m);
 }
 
-void HttpReq_SetFd(HttpReq *req, i32 fd){
-    req->crit->pfd.fd = fd;
-}
 
-void HttpReq_ExpectRecv(HttpReq *req){
-    req->crit->pfd.events = POLLIN|POLLNVAL|POLLHUP|POLLERR;
-}
-
-void HttpReq_ExpectInternal(HttpReq *req){
-    req->crit->pfd.events = POLLNVAL|POLLHUP|POLLERR;
-}
-
-void HttpReq_ExpectSend(HttpReq *req){
-    req->crit->pfd.events = POLLOUT|POLLNVAL|POLLHUP|POLLERR;
-}
-
-Req *HttpReq_Mk(MemCh *m, Serve *srv){
-    HttpReq *req = MemCh_AllocOf(m, sizeof(HttpReq), TYPE_HTTP_REQ);
-    req->type.of = TYPE_HTTP_REQ;
-    req->m = m;
-    Iter_Init(&req->headersIt, Table_Make(m));
-    Iter_Init(&req->queryIt, Table_Make(m));
-    req->meta = Table_Make(m);
-    req->in = Buff_Make(m, ZERO);
-    req->out = Buff_Make(m, srv->capsule == NULL ? BUFF_UNBUFFERED : ZERO);
-    req->sections = Span_Make(m);
-    return (Req *)req;
-}
-
-status HttpReq_Accept(MemCh *m, Req *_req, Serve *srv){
-    HttpReq *req = (HttpReq *)_req;
-    if(srv->tls != NULL && srv->capsule != NULL){
+status HttpReq_Accept(MemCh *m, Req *req, Serve *srv){
+    HttpReq *hreq = (HttpReq *)req->source;
+    if(req->def->capsule != NULL){
 #ifdef CNKOPT_CRYPTO
-        if(req->cap == NULL){
-            TlsInfo *info = TlsInfo_Make(m, req->crit->pfd.fd, srv->tls);
-            req->cap = Capsule_Make(m, TYPE_TLS_CAPSULE, req->in, req->out, info); 
+        if(hreq->cap == NULL){
+            TlsInfo *info = TlsInfo_Make(m, req->crit->pfd.fd, req->conn.ent->ctx);
+            hreq->cap = Capsule_Make(m, TYPE_TLS_CAPSULE, hreq->in, hreq->out, info); 
         }
 #endif
-        if(srv->capsule->open(req->cap) & SUCCESS){;
+        if(req->def->capsule->open(hreq->cap) & SUCCESS){;
             req->type.state |= SUCCESS;
         }
     }else{
-        Buff_SetSocket(req->in, req->crit->pfd.fd);
+        Buff_SetSocket(hreq->in, req->crit->pfd.fd);
     }
 
     Return(m, req->type.state);
 }
 
-status HttpReq_Close(MemCh *m, Req *_req, Serve *srv){
-    HttpReq *req = (HttpReq *)_req;
-    if(srv->tls != NULL && srv->capsule != NULL){
-        srv->capsule->close(req->cap);
+status HttpReq_Close(MemCh *m, Req *req, Serve *srv){
+    HttpReq *hreq = (HttpReq *)req->source;
+    if(req->def->capsule != NULL){
+        req->def->capsule->close(hreq->cap);
     }
     close(req->crit->pfd.fd);
     Return(m, req->type.state);
 }
 
-void HttpReq_Setup(MemCh *m, Req *_req, Serve *srv){
-    HttpReq *req = (HttpReq *)_req;
+void HttpReq_Setup(MemCh *m, Req *req, Serve *srv){
+    HttpReq *hreq = (HttpReq *)req->source;
     srv->metrics.open++;
 
     TcpSource *ts = (TcpSource *)srv->source;
-    req->addr = ts->addr;
+    hreq->addr = ts->addr;
     req->crit = ReqCrit_Make(m);
     req->crit->pfd.fd = ts->new_fd;
-
-    HttpReq_SetFd(req, ts->new_fd);
-    HttpReq_ExpectRecv(req);
-}
-
-void HttpReq_SetToRecv(HttpReq *req){
-    MemCh *m = req->m;
-    req->rbl = HttpRbl_Make(m, Cursor_Make(m, req->in->v), req);
-}
-
-void HttpReq_SetToResponse(HttpReq *req, i32 fd){
-    MemCh *m = req->m;
-    if(fd >= 0){
-        HttpReq_SetFd(req, fd);
+    if(req->def->capsule != NULL){
+        hreq->out->type.state &= ~BUFF_UNBUFFERED;
     }
-    req->rbl = HttpRespRbl_Make(m, Cursor_Make(m, req->in->v), req);
+
+    Req_SetFd(req, ts->new_fd);
+    Req_ExpectRecv(req);
+}
+
+void HttpReq_SetToRecv(HttpReq *hreq, Req *req){
+    MemCh *m = hreq->m;
+    hreq->rbl = HttpRbl_Make(m, Cursor_Make(m, hreq->in->v), hreq);
+}
+
+void HttpReq_SetToResponse(HttpReq *hreq, Req *req, i32 fd){
+    MemCh *m = hreq->m;
+    if(fd >= 0){
+        Req_SetFd(req, fd);
+    }
+    hreq->rbl = HttpRespRbl_Make(m, Cursor_Make(m, hreq->in->v), hreq);
     req->type.state |= HTTP_REQ_RESPONSE;
+}
+
+Req *HttpReq_Mk(MemCh *m, Serve *srv){
+    HttpReq *hreq = MemCh_AllocOf(m, sizeof(HttpReq), TYPE_HTTP_REQ);
+    hreq->type.of = TYPE_HTTP_REQ;
+    hreq->m = m;
+    Iter_Init(&hreq->headersIt, Table_Make(m));
+    Iter_Init(&hreq->queryIt, Table_Make(m));
+    hreq->meta = Table_Make(m);
+    hreq->in = Buff_Make(m, ZERO);
+    hreq->out = Buff_Make(m, BUFF_UNBUFFERED);
+    hreq->sections = Span_Make(m);
+
+    return Req_Make(m, hreq);
 }

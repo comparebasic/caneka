@@ -2,7 +2,12 @@ typedef struct req {
     Type type;
     i32 idx;
     ReqCrit *crit;
-    Iter routeIt;
+    HandlerDef *def;
+    union {
+        struct host_ent_wr *ent;
+        Buff *bf;
+    } conn;
+    Iter chain;
     struct {
         struct timespec start;
         struct timespec end;
@@ -10,4 +15,8 @@ typedef struct req {
     void *source;
 } Req;
 
+void Req_ExpectRecv(Req *req);
+void Req_ExpectSend(Req *req);
+void Req_ExpectInternal(Req *req);
+void Req_SetFd(Req *req, i32 fd);
 Req *Req_Make(MemCh *m, void *source);

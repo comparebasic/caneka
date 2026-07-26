@@ -1,12 +1,17 @@
 #!/bin/sh
+
 echo "= Caneka build script - see README.md for details"
-if [ $(which clang) ]; then
-    CC="clang"
-    echo "clang found using that for compilation"
-elif [ $(which gcc) ]; then
-    CC="gcc"
-    echo "gcc found using that for compilation"
-fi    
+if [ ! "$CC" ]; then
+    if [ $(which clang) ]; then
+        CC="clang"
+        echo "clang found using that for compilation"
+    elif [ $(which gcc) ]; then
+        CC="gcc"
+        echo "gcc found using that for compilation"
+    fi
+else
+    echo "Using environment variable for CC of ${CC}"
+fi
 
 if [ -e ./dist/bootstrap ]; then
     echo "dist/bootstrap found running clean"
@@ -17,7 +22,7 @@ cmd="mkdir -p ./dist/bin"
 echo "making dir $cmd"
 $cmd;
 
-cmd="$CC -o ./dist/bin/bootstrap -I src/programs/buildeka/include/ src/programs/buildeka/bootstrap.c"
+cmd="$CC -o ./dist/bin/bootstrap -DCC=${CC} -I src/programs/buildeka/include/ src/programs/buildeka/bootstrap.c"
 echo "building bootstrap: $cmd"
 $cmd
 
