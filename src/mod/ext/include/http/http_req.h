@@ -31,7 +31,6 @@ status HttpReq_Accept(MemCh *m, Req *req, Serve *srv);
 status HttpReq_Close(MemCh *m, Req *req, Serve *srv);
 
 void HttpReq_ParseBody(HttpReq *req);
-void HttpReq_SetFd(HttpReq *req, i32 fd);
 Req *HttpReq_Mk(MemCh *m, Serve *srv);
 void HttpReq_Setup(MemCh *m, Req *req, Serve *srv);
 void HttpReq_Serve(MemCh *m, HttpReq *req, Serve *srv);
