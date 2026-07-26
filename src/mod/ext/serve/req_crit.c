@@ -3,8 +3,12 @@
 
 
 boolean ReqCrit_Func(Queue *q, Req *req, ReqCrit *crit){
-    return crit->pfd.fd != -1 && 
-        ((crit->pfd.events & (POLLIN|POLLOUT)) == 0 || poll(&crit->pfd, 1, 0) == 1);
+    if(crit->until.tv_sec > 0 && Time_IsPast(&q->time.now, &crit->until)){
+        return TRUE; 
+    }else{
+        return q-> crit->pfd.fd != -1 && 
+            ((crit->pfd.events & (POLLIN|POLLOUT)) == 0 || poll(&crit->pfd, 1, 0) == 1);
+    }
 }
 
 ReqCrit *ReqCrit_Make(MemCh *m){

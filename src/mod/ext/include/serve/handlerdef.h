@@ -1,13 +1,11 @@
 typedef void (*ReqFunc)(MemCh *m, struct req *req, struct serve *srv);
-typedef struct req *(*ReqMaker)(MemCh *m, struct serve *srv);
 
 typedef struct req_handler_def {
     Type type;
-    ReqMaker mk;
-    ReqFunc setup;
-    ReqFunc handle;
+    SourceMakerFunc extra;
     ReqFunc finalize;
-    Iter routeIt;
+    Span *route;
+    Node *tbl;
     struct {
         ReqFunc open;
         ReqFunc final;

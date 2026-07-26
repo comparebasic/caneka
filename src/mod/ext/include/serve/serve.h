@@ -6,7 +6,7 @@ typedef struct serve {
     Type type;
     MemCh *m;
     Queue *q;
-    Iter *routeIt /* Hashed<HostEnt/Str, HandlerDef> */;
+    Iter *endPointIt /* Hashed<HostEnt/Str, HandlerDef> */;
     struct pollfd *pfds;
     Inst *config;
     void *source;

@@ -131,6 +131,12 @@ boolean Time_Greater(struct timespec *ts, struct timespec *add){
     return FALSE;
 }
 
+boolean Time_IsPast(struct timespec *ts, struct timespec *compare){
+    return ts->tv_sec < compare->tv_sec || (ts->tv_sec == compare->tv_sec && 
+        ts->tv_nsec < compare->tv_nsec
+    );
+}
+
 boolean Time_Beyond(struct timespec *ts, struct timespec *add, struct timespec*amount){
     struct timespec _ts;
     _ts.tv_sec = ts->tv_sec;

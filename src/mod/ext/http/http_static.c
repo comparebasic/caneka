@@ -16,34 +16,7 @@ static void HttpStatic_Cmd(MemCh *m, Req *_req, Serve *srv){
 
 static void HttpStatic_Setup(MemCh *m, Req *req, Serve *srv){
     HttpReq_Setup(m, req, srv);
-    HttpReq_SetToRecv((HttpReq *)req);
-}
-
-static void HttpStatic_Handle(MemCh *m, HttpReq *req, Serve *srv){
-    if(req->type.state & ERROR){
-        Single *sg = Iter_GetByIdx(&req->routeIt, req->routeIt.p->max_idx);
-    }else{
-        Str *key = K(m, "static");
-        if(req->key == NULL){
-            key = req->key;
-        }
-        Hashed *h = Table_GetHashedByIter(&srv->def->routeIt, key);
-        Span *chain = Ifc(m, h->value, TYPE_SPAN);
-        if((req->routeIt.type.state & PROCESSING) == 0){
-            Iter_Init(&req->routeIt, chain);
-            Iter_Next(&req->routeIt);
-        }else if(req->type.state & SUCCESS){
-            Iter_Next(&req->routeIt);
-        }
-    }
-
-    Single *sg = Iter_Get(&req->routeIt);
-    ReqFunc func = (ReqFunc)sg->val.ptr;
-
-    req->type.state = req->type.state & (DEBUG|END|ERROR|NOOP|PROCESSING);
-    func(m, (Req *)req, srv);
-
-    return;
+    HttpReq_SetToRecv((HttpReq *)req->source, req);
 }
 
 static void HttpStatic_Finalize(MemCh *m, HttpReq *req, Serve *srv){
@@ -177,64 +150,4 @@ status HttpStatic_RetrieveFile(MemCh *m, HttpReq *req, Serve *srv){
     Return(m, req->type.state);
 }
 
-HandlerDef *HttpStatic_DefMake(MemCh *m){
-    HandlerDef *def = HandlerDef_Make(m);
-    def->mk = HttpReq_Mk;
-    def->setup = HttpStatic_Setup;
-    def->handle = (ReqFunc) HttpStatic_Handle;
-    def->finalize = (ReqFunc) HttpStatic_Finalize;
-    def->log.open = (ReqFunc) HttpStatic_logOpen;
-    def->log.final = (ReqFunc) HttpStatic_logFinalized;
 
-    Table *tbl = Table_Make(m);
-
-    Span *p = Span_Make(m);
-    Span_Add(p, Func_Wrapped(m, HttpStatic_Cmd));
-    Table_Set(tbl, S(m, "cmd"), p);
-
-    p = Span_Make(m);
-    Span_Add(p, Func_Wrapped(m, HttpReq_Accept));
-    Span_Add(p, Func_Wrapped(m, HttpReq_RespToRbl));
-    Span_Add(p, Func_Wrapped(m, HttpStatic_RetrieveFile));
-    Span_Add(p, Func_Wrapped(m, HttpReq_Write));
-    Table_Set(tbl, S(m, "static"), p);
-
-    Iter_Init(&def->routeIt, tbl);
-
-    return def;
-}
-
-status HttpStatic_Error(MemCh *m, HttpReq *req, ErrorMsg *msg){
-    req->type.state |= ERROR;
-    req->type.state &= ~NOOP;
-    HttpReq_RemoveHeader(req, S(m, "Etag"));
-    HttpReq_RemoveHeader(req, S(m, "Last-Modified"));
-
-    Span_Wipe(req->sections);
-
-    Buff *bf = Buff_Make(m, ZERO);
-    Buff_Add(bf, S(m, "<h1>Error</h1><p>"));
-    ErrorMsg_Fmt(bf, msg);
-    Buff_Add(bf, S(m, "</p>"));
-
-    Span_Add(req->sections, bf);
-    return ZERO;
-}
-
-void HttpStatic_SetCmdFile(MemCh *m, Serve *srv, Buff *file){
-    MemCh *rm = MemCh_Make();
-
-    HttpReq *req = rm->owner = (HttpReq *)srv->def->mk(rm, srv);
-    req->key = S(m, "cmd");
-    Time_Now(&req->metrics.start);
-
-    req->crit = ReqCrit_Make(m);
-    req->crit->pfd.fd = file->fd;
-    req->idx = Queue_Add(srv->q, req, req->crit);
-    HttpReq_ExpectRecv(req);
-
-}
-
-void HttpStatic_Init(MemCh *m){
-    Lookup_Add(m, ErrorHandlers, TYPE_HTTP_REQ, (void *)HttpStatic_Error);
-}

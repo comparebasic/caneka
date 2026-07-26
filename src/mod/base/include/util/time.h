@@ -23,6 +23,7 @@ Str *Time_ToRStr(MemCh *m, struct timespec *ts);
 
 boolean Time_Greater(struct timespec *ts, struct timespec *add);
 boolean Time_Beyond(struct timespec *ts, struct timespec *add, struct timespec *amount);
+boolean Time_IsPast(struct timespec *ts, struct timespec *compare);
 
 Str *Time_Today(MemCh *m);
 Str *Time_ToDayStr(MemCh *m, struct timespec *ts);
