@@ -134,8 +134,8 @@ char *runTests[] = {
 
 char *runWebServer[] = {
     "./build/bin/serveneka",
-    "--dir",
-    "fixtures/serveneka",
+    "--config",
+    "fixtures/serveneka/config.json",
     NULL
 };
 
@@ -154,8 +154,8 @@ char *menuKeys[] = {
     "clean-doc",
     "build-cli",
     "build-webserver-no-crypto",
-    "build-run-webserver",
     "build-webserver",
+    "build-run-webserver",
     "build-pyneka",
     "read-documentation",
     "all",
@@ -170,9 +170,9 @@ char *menuOptions[] = {
     "Clean (the ./build directory)",
     "Clean Docs (the docs ./dist/doc/html/ directory)",
     "Clineka - build the command line tool",
-    "Webserver - build",
+    "Webserver - build only - without TLS",
+    "Webserver - build only",
     "WebServer - build and RUN",
-    "Webserver - build with TLS",
     "Pyneka - build the python module",
     "Documentation - show website url",
     "All - build Tests/Clineka/Webserver",
@@ -476,7 +476,8 @@ int main(int argc, char *argv[]){
         runcmd[2] = NULL;
     }else if(compareCstr("build-webserver", choice)){
         runcmd[0] = buildWebServer;
-        runcmd[1] = NULL;
+        runcmd[1] = runWebServer;
+        runcmd[2] = NULL;
     }else if(compareCstr("build-webserver-no-crypto", choice)){
         runcmd[0] = buildWebServerNoCrypto;
         runcmd[1] = NULL;

@@ -3,6 +3,8 @@
 
 static PatCharDef leadDef[] = {
     {PAT_MANY, '\t', '\t'},
+    {PAT_MANY, '\r', '\r'},
+    {PAT_MANY, '\n', '\n'},
     {PAT_MANY|PAT_TERM, ' ', ' '},
     {PAT_END, 0, 0}
 };
@@ -169,7 +171,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         args[2] = it->p;
         args[3] = p;
         args[4] = NULL;
-        Out("^c.Json Capture ^E0.$^ec. -> ^0y.@\n    it: @\n    @\n", args);
+        Out("^y.Json Capture ^E0.$^ec. -> ^0y.@\n    it: @\n    @\n", args);
     }
 
     if(captureKey == JSON_INDENT){
@@ -239,6 +241,37 @@ void *JsonParser_GetRoot(Roebling *rbl){
         return nodeIt->p;
     }
     return NULL;
+}
+
+void *Json_FromPath(MemCh *m, void *path){
+    Debug_Push(m, path);
+    Buff *bf = Buff_Make(m, ZERO);
+    File_Open(bf, path, O_RDONLY);
+    if(bf->type.state & ERROR){
+        Return(m, NULL);
+    }
+
+    Buff_Read(bf);
+    File_Close(bf);
+
+    Roebling *rbl = JsonParser_Make(m, Cursor_Make(m, bf->v), TYPE_NODE);
+    Debug_SetRef(m, rbl);
+
+    Abstract *a = (Abstract *)rbl->dest;
+    a->type.state |= DEBUG;
+    rbl->type.state |= DEBUG;
+
+    Roebling_Run(rbl);
+    if(rbl->type.state & SUCCESS){
+        Return(m, JsonParser_GetRoot(rbl));
+    }else{
+        void *ar[] = {
+            path,
+            NULL
+        };
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, "Error parsing json: $", ar);
+        Return(m, NULL);
+    }
 }
 
 Roebling *JsonParser_Make(MemCh *m, Cursor *curs, cls instTypeOf){

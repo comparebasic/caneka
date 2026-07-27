@@ -157,7 +157,7 @@ status SignPair_Make(MemCh *m, Single *public, Single *secret){
 status SignPair_PublicFromPem(Buff *bf, Single *public){
     MemCh *m = bf->m;
 
-    FILE *f = fdopen(bf->fd, "rb");
+    FILE *f = fdopen(bf->pfd->fd, "rb");
     if(f == NULL){
         OpenSsl_Error(ErrStream);
         Error(bf->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -267,7 +267,7 @@ status SignPair_PrivateToPem(Buff *bf, Single *secret){
         return ERROR;
     }
     EVP_PKEY *key = secret->val.ptr;
-    FILE *f = fdopen(bf->fd, "wb");
+    FILE *f = fdopen(bf->pfd->fd, "wb");
 
     if(f == NULL){
         ErrNoError(ErrStream);
@@ -311,7 +311,7 @@ status SignPair_PublicToPem(Buff *bf, Single *public){
     }
 
     EVP_PKEY *key = pubKey_FromOctetSingle(m, public);
-    FILE *f = fdopen(bf->fd, "wb");
+    FILE *f = fdopen(bf->pfd->fd, "wb");
 
     if(f == NULL){
         ErrNoError(ErrStream);

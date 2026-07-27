@@ -23,29 +23,14 @@ i32 main(int argc, char **argv){
 
     Str *helpKey = K(m, "help");
     Str *noColorKey = K(m, "no-color");
-    Str *portKey = K(m, "port");
-    Str *dirKey = K(m, "dir");
-    Str *tlsCertKey = K(m, "tls-cert");
-    Str *tlsKeyKey = K(m, "tls-key");
-    Str *cmdFileKey = K(m, "cmd-file");
-    Str *logFileKey = K(m, "log-file");
+    Str *configKey = K(m, "config");
 
     Args_Add(cli, helpKey, NULL, ARG_OPTIONAL,
         Sv(m, "Show this help message."));
     Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL,
         Sv(m, "Skip ansi color sequences in output."));
-    Args_Add(cli, portKey, S(m, "8000"), ARG_DEFAULT,
-        Sv(m, "Port to use."));
-    Args_Add(cli, dirKey, NULL, ZERO,
-        Sv(m, "Directory to serve files from."));
-    Args_Add(cli, tlsCertKey, NULL, ARG_OPTIONAL,
-        Sv(m, "Tls certificate."));
-    Args_Add(cli, tlsKeyKey, NULL, ARG_OPTIONAL,
-        Sv(m, "Tls key."));
-    Args_Add(cli, cmdFileKey, NULL, ARG_OPTIONAL,
-        Sv(m, "File to write commands to, such as log rotation."));
-    Args_Add(cli, logFileKey, NULL, ARG_OPTIONAL,
-        Sv(m, "Log file, stdout if not specified."));
+    Args_Add(cli, configKey, NULL, ZERO, 
+        Sv(m, "Path to config file."));
 
     CliArgs_Parse(cli);
 
@@ -53,26 +38,11 @@ i32 main(int argc, char **argv){
         Ansi_SetColor(OutStream, FALSE);
     }
 
-    Str *portStr = CliArgs_Get(cli, portKey);
-    i32 port = Int_FromStr(portStr); 
+    StrVec *configPath = IoUtil_GetAbsVec(m, CliArgs_Get(cli, configKey));
+    IoUtil_TrimDir(m, configPath);
+    Node *config = Json_FromPath(m, configPath);
 
-    StrVec *dir = IoUtil_GetAbsVec(m, CliArgs_Get(cli, dirKey));
-    IoUtil_TrimDir(m, dir);
-    Node *config = Inst_Make(m, TYPE_HTTP_CONFIG);
-
-    Str *tlsCertStr = CliArgs_Get(cli, tlsCertKey);
-    Str *tlsKeyStr = CliArgs_Get(cli, tlsKeyKey);
-    if(tlsCertStr != NULL && tlsKeyKey != NULL){
-       Inst_SetAtt(config, S(m, "tls-cert"), tlsCertStr); 
-       Inst_SetAtt(config, S(m, "tls-key"), tlsKeyStr); 
-    }
-
-    Str *cmdFileStr = CliArgs_Get(cli, cmdFileKey);
-    if(cmdFileStr != NULL){
-       Inst_SetAtt(config, S(m, "cmd-file"), cmdFileStr); 
-    }
-
-    Serveneka_Serve(m, port, dir, config);
+    Serveneka_Serve(m, config);
 
     return (r & ERROR) == 0 ? 0 : 1;
 }
