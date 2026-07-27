@@ -63,14 +63,9 @@ static status HostEnt_Print(Buff *bf, void *a, cls type, word flags){
     };
     Fmt(bf, "HostEnt<@ $ ", ar);
 
-    Iter it;
-    Iter_Init(&it, h->addrs);
-    while((Iter_Next(&it) & END) == 0){
-        Single *sg = Iter_Get(&it);
+    if(h->addr != NULL && h->addr->type.of == TYPE_WRAPPED_U32){
+        Single *sg = (Single *)h->addr;
         Str *s = Ip4_ToStr(m, sg->val.i);
-        if(it.idx > 0){
-            Buff_AddBytes(bf, (byte *)", ", 2);
-        }
         Buff_AddBytes(bf, s->bytes, s->length);
     }
 

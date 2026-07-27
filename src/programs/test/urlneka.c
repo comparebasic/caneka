@@ -72,8 +72,10 @@ i32 main(int argc, char **argv){
     Conn_InetConnect(bf, h, port);
     Buff_Add(bf, text); 
 
-    HttpReq *req = (HttpReq *)HttpReq_Mk(MemCh_Make(), NULL);
-    HttpReq_SetToResponse(req, bf->fd);
+    MemCh *rm = MemCh_Make();
+    HttpReq *hreq = (HttpReq *)HttpReq_SourceMake(rm, NULL, NULL);
+    Req *req = Req_Make(rm, NULL, hreq);
+    HttpReq_SetToResponse(hreq, req, bf->pfd->fd);
     while((req->type.state & (SUCCESS|ERROR)) == 0){
         HttpReq_ReadToRbl(req->m, req, NULL);
     }

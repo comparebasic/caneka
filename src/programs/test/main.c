@@ -78,8 +78,8 @@ i32 main(int argc, char **argv){
         bf->type.state |= BUFF_CLOBBER;
         File_Open(bf, path, O_WRONLY|O_CREAT|O_TRUNC);
         i32 outFd = 1;
-        if(bf->fd > 0){
-            outFd = bf->fd;
+        if(bf->pfd->fd > 0){
+            outFd = bf->pfd->fd;
         }
         Core_Direct(m, outFd, 2);
     }

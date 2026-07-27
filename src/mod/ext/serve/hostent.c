@@ -1,10 +1,11 @@
 #include <external.h>
 #include <caneka.h>
 
-static i32 openPortToFd(HostEnt *ent){
+static i32 openAddrToFd(HostEnt *ent){
     i32 port = ent->port;
     i32 fd = 0;
 	struct sockaddr_in serv_addr;
+    NetAddr *addr = (NetAddr *)ent->addr;
 
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 	memset(&serv_addr, '0', sizeof(serv_addr));
@@ -14,7 +15,7 @@ static i32 openPortToFd(HostEnt *ent){
         serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     }else if(ent->addr->type.of == TYPE_NET_ADDR4){
         NetAddr *net = (NetAddr *)ent->addr;
-        serv_addr.sin_addr.s_addr = net.ip4addr.s_addr;
+        serv_addr.sin_addr.s_addr = addr->net.ip4addr.sin_addr.s_addr;
     }else{
         void *ar[] = {ent->addr, NULL};
         Error(ent->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -59,7 +60,7 @@ static i32 openPortToFd(HostEnt *ent){
 
 
 void HostEnt_OpenTcp(HostEnt *ent){
-    i32 fd = openPortToFd(ent->port);
+    i32 fd = openAddrToFd(ent);
     if(fd > 0){
         ent->pfd->fd = fd;
         ent->pfd->events = POLLIN;
@@ -70,41 +71,30 @@ void HostEnt_OpenTcp(HostEnt *ent){
 }
 
 HostEnt *HostEnt_FromName(MemCh *m, Str *name, Str *service){
-    HostEnt *h = HostEnt_Make(m);
-    h->name = name;
-    h->addrs = Span_Make(m);
-    if(getaddrinfo(Str_Cstr(m, name), Str_Cstr(m, service), NULL, &h->info) != 0){
+    HostEnt *ent = HostEnt_Make(m);
+    ent->name = name;
+    if(getaddrinfo(Str_Cstr(m, name), Str_Cstr(m, service), NULL, &ent->info) != 0){
         void *ar[] = {
             name, service, NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER, 
             "Error getting network address info for $/$", ar);
-        h->type.state |= ERROR;
-    }else{
-        struct addrinfo *info = h->info;
-        while(info != NULL){
-            if(info->ai_family == AF_INET){
-                struct sockaddr_in *addr = (struct sockaddr_in *)info->ai_addr;
-                quad ip4 = addr->sin_addr.s_addr;
-                Span_Add(h->addrs, U32_Wrapped(m, ip4));
-            }
-            info = info->ai_next;
-        }
+        ent->type.state |= ERROR;
     }
-    return h;
+    return ent;
 }
 
 quad *HostEnt_AddrIp4(HostEnt *h){
     if(h->type.state & ERROR){
         return 0;
     }
-    Single *sg = Span_Get(h->addrs, 0);
+    Single *sg = (Single *)h->addr;
     return &sg->val.i;
 }
 
 util HostEnt_Hash(void *a){
     HostEnt *ent = (HostEnt *)a;
-    Single *sg = Span_Get(h->addrs, 0);
+    Single *sg = (Single *)ent->addr;
     return (util)sg->val.i;
 }
 

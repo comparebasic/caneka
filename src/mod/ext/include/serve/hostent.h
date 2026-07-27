@@ -14,4 +14,5 @@ HostEnt *HostEnt_Make(MemCh *m);
 HostEnt *HostEnt_FromName(MemCh *m, Str *name, Str *service);
 quad *HostEnt_AddrIp4(HostEnt *h);
 util *HostEnt_AddrIp6(HostEnt *h);
+util HostEnt_Hash(void *a);
 void HostEnt_OpenTcp(HostEnt *ent);

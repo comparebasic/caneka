@@ -1,5 +1,6 @@
 typedef struct req {
     Type type;
+    MemCh *m;
     i32 idx;
     ReqCrit *crit;
     HandlerDef *def;

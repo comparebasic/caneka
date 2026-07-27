@@ -6,8 +6,8 @@ typedef struct serve {
     Type type;
     MemCh *m;
     Queue *q;
-    Iter *endPointIt /* Hashed<HostEnt/Str, HandlerDef> */;
-    struct pollfd *pfds;
+    Iter endPointIt /* Hashed<HostEnt/Str, HandlerDef> */;
+    PfdArr *endPointPfds;
     Inst *config;
     void *source;
     struct {
@@ -29,4 +29,4 @@ void Serve_LogFinalized(Serve *srv, Req *req);
 struct pollfd *Serve_TcpGetPollFd(Req *req);
 void Serve_ServeTcp(Serve *srv);
 
-Serve *Serve_Make(MemCh *m, Table *routes, Span *addrs, void *source);
+Serve *Serve_Make(MemCh *m, Table *routes, void *source);

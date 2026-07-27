@@ -16,7 +16,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         timeout = TCP_ZERO_REQ_DELAY;
     }
 
-    i32 available = poll(ent->pfd, srv->endPointIt.p->nvalues, timeout);
+    i32 available = poll(srv->endPointPfds->pfds, srv->endPointPfds->length, timeout);
     if(available == -1){
         args[0] = Str_CstrRef(ErrStream->m, strerror(errno));
         args[1] = NULL;
@@ -82,9 +82,10 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         srv->type.state &= ~(NOOP|PROCESSING);
         Req *req = (Req *)Queue_Get(srv->q);
 
-        srv->def->handle(req->m, req, srv);
+        Req_Handle(req->m, req, srv);
+
         if(req->type.state & END){
-            srv->def->finalize(req->m, req, srv);
+            req->def->finalize(req->m, req, srv);
             Queue_Remove(srv->q, req->idx);
             MemCh_Free(req->m);
         }
@@ -98,20 +99,20 @@ struct pollfd *Serve_TcpGetPollFd(Req *req){
 }
 
 void Serve_Serve(Serve *srv){
-    srv->pfds = MemCh_Alloc(srv->m,
-        sizeof(struct pollfd)*srv->routIt.p->nvalues, TYPE_POLLFD_PTR); 
+    srv->endPointPfds = PfdArr_Make(srv->m, srv->endPointIt.p->nvalues);
     while((Iter_Next(&srv->endPointIt) & END) == 0){
         Abstract *a = Iter_Get(&srv->endPointIt);
         if(a->type.of == TYPE_HOST_ENT){
             HostEnt *ent = (HostEnt *)a;
-            ent->pfd = &srv->pfds[srv->endPointIt.idx];
+            ent->pfd = &srv->endPointPfds->pfds[srv->endPointIt.idx];
             HostEnt_OpenTcp(ent);
         }else if(a->type.of == TYPE_BUFF){
             Buff *bf = (Buff *)a;
             if(bf->pfd != NULL){
-                memcpy(srv->pfds+srv->endPointIt.idx, bf->pfd, sizeof(struct pollfd));
+                memcpy(srv->endPointPfds->pfds+srv->endPointIt.idx,
+                    bf->pfd, sizeof(struct pollfd));
             }
-            bf->pfd = &srv->pfds[srv->endPointIt.idx];
+            bf->pfd = &srv->endPointPfds->pfds[srv->endPointIt.idx];
             /* setup request for file in Q */
         }
     }
@@ -125,11 +126,15 @@ void Serve_Serve(Serve *srv){
 
 
 void Serve_LogOpen(Serve *srv, Req *req){
+    /*
     srv->def->log.open(srv->m, req, srv);
+    */
 }
 
 void Serve_LogFinalized(Serve *srv, Req *req){
+    /*
     srv->def->log.final(srv->m, req, srv);
+    */
 }
 
 Serve *Serve_Make(MemCh *m, Table *routes /* <HostEnt, HandlerDef> */, void *source){

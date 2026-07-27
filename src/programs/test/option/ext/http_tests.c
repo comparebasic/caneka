@@ -8,7 +8,7 @@ status Http_Tests(MemCh *m){
     void *args[5];
     status r = READY;
 
-    HttpReq *req = (HttpReq *)HttpReq_Mk(MemCh_Make(), NULL);
+    HttpReq *req = (HttpReq *)HttpReq_SourceMake(MemCh_Make(), NULL, NULL);
 
     StrVec *v = Sv(m, 
         "GET /fancy.html HTTP/1.1\r\n"
@@ -51,16 +51,17 @@ status HttpQuery_Tests(MemCh *m){
     void *args[5];
     status r = READY;
 
-    HttpReq *req = (HttpReq *)HttpReq_Mk(MemCh_Make(), NULL);
-    HttpReq_SetToRecv(req);
+    HttpReq *hreq = (HttpReq *)HttpReq_SourceMake(MemCh_Make(), NULL, NULL);
+    Req *req = Req_Make(m, NULL, hreq);
+    HttpReq_SetToRecv(hreq, req);
 
-    Str *content = S(req->in->m, 
+    Str *content = S(hreq->in->m, 
         "{\"email\": \"fancy.pantsy@example.com\", \"first-name\": \"Fantsy\"}");
-    args[0] = Str_FromI64(req->in->m, content->length);
+    args[0] = Str_FromI64(hreq->in->m, content->length);
     args[1] = content;
     args[2] = NULL;
 
-    Fmt(req->in, 
+    Fmt(hreq->in, 
         "POST /forms/signup?action=add HTTP/1.1\r\n"
         "User-Agent: Firefudge/Aluminum\r\n"
         "Content-Type: application/json\r\n"
@@ -69,41 +70,41 @@ status HttpQuery_Tests(MemCh *m){
         "\r\n"
         "$", args);
     
-    Roebling_Run(req->rbl);
+    Roebling_Run(hreq->rbl);
 
-    r |= Test(req->rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
+    r |= Test(hreq->rbl->type.state & SUCCESS, "Roebling finished with state SUCCESS", NULL);
 
     Node *config = Inst_Make(m, TYPE_NODE);
     Buff *bf = Buff_Make(m, ZERO);
 
-    HttpReq_ParseBody(req);
+    HttpReq_ParseBody(hreq);
 
     args[0] = K(m, "POST");
     args[0] = NULL;
-    r |= Test(req->address.method == METHOD_HTTP_POST,
+    r |= Test(hreq->address.method == METHOD_HTTP_POST,
         "HttpReq method is expected @", args); 
 
     args[0] = K(m, "/forms/signup");
-    args[1] = req->path;
+    args[1] = hreq->path;
     args[2] = NULL;
     r |= Test(Equals(args[0],args[1]), 
         "HttpReq path is expected @, have @", args); 
 
     args[0] = K(m, "Firefudge/Aluminum");
-    args[1] = Table_Get(req->headersIt.p, K(m, "User-Agent"));
+    args[1] = Table_Get(hreq->headersIt.p, K(m, "User-Agent"));
     args[2] = NULL;
     r |= Test(Equals(args[0],args[1]), 
         "HttpReq User-Agent header is expected @, have @", args); 
 
     args[0] = K(m, "text/html");
-    args[1] = Table_Get(req->headersIt.p, K(m, "Accept"));
+    args[1] = Table_Get(hreq->headersIt.p, K(m, "Accept"));
     args[2] = NULL;
     r |= Test(Equals(args[0],args[1]), 
         "HttpReq User-Agent header is expected @, have @", args); 
 
     args[0] = K(m, "{\"email\": \"fancy.pantsy@example.com\","
         " \"first-name\": \"Fantsy\"}");
-    args[1] = req->body;
+    args[1] = hreq->body;
     args[2] = NULL;
     r |= Test(Equals(args[0],args[1]), 
         "HttpReq body is expected @, have &", args); 

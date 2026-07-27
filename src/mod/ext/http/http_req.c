@@ -1,6 +1,14 @@
 #include <external.h>
 #include <caneka.h>
 
+static void HttpReq_logOpen(MemCh *m, HttpReq *req, Serve *srv){
+    return;
+}
+
+static void HttpReq_logFinalized(MemCh *m, HttpReq *req, Serve *srv){
+    return;
+}
+
 static void HttpReq_setLength(MemCh *m, HttpReq *hreq){
     i64 length = 0;
     Iter it;
@@ -60,6 +68,54 @@ static void HttpReq_writeBody(MemCh *m, HttpReq *hreq){
             }
         }
     }
+}
+
+static void HttpReq_Finalize(MemCh *m, Req *req, Serve *srv){
+    HttpReq *hreq = (HttpReq *)req->source;
+    HttpReq_Close(m, req, srv);
+
+    Buff *bf = NULL;
+    if(req->type.state & ERROR && srv->log.err != NULL){
+        bf = srv->log.err;
+    }else{
+        bf = srv->log.out;
+    }
+
+    Table *tbl = Table_Make(m);
+
+    Single *st = NULL;
+    Str *format = NULL;
+
+    if((req->type.state & (ERROR|NOOP)) == (ERROR|NOOP)){
+        st = I32_Wrapped(m, 404);
+        if(bf->type.state & BUFF_COLOR){
+            format = AnsiYellow;
+        }
+    }else if(req->type.state & ERROR){
+        st = I32_Wrapped(m, 500);
+        if(bf->type.state & BUFF_COLOR){
+            format = AnsiRed;
+        }
+    }else if(req->type.state & NOOP){
+        st = I32_Wrapped(m, 304);
+        if(bf->type.state & BUFF_COLOR){
+            format = AnsiCyan;
+        }
+    }else{
+        st = I32_Wrapped(m, 200);
+        if(bf->type.state & BUFF_COLOR){
+            format = AnsiCyan;
+        }
+    }
+
+    Time_Now(&req->metrics.end);
+    duration d = Time_Duration(m, &req->metrics.end, &req->metrics.start);
+    Table_Set(tbl, K(m, "path"), hreq->path);
+    Table_Set(tbl, K(m, "status"), st);
+    Table_Set(tbl, K(m, "duration"), Duration_Str(m, d));
+    Table_Set(tbl, K(m, "from"), hreq->addr);
+
+    Log_Flat(m, bf, K(m, "Request "), Table_Ordered(m, tbl), format);
 }
 
 status HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv){
@@ -124,6 +180,31 @@ void HttpReq_RemoveHeader(HttpReq *req, Str *key){
         req->headersOut = Table_Make(req->m);
         Table_UnSet(req->headersOut, key);
     }
+}
+
+status HttpReq_ReadToRblTls(MemCh *m, Req *req, Serve *srv){
+    Debug_Push(m, req);
+    HttpReq *hreq = (HttpReq *)req->source;
+
+    if((hreq->rbl->type.state & (SUCCESS|ERROR)) == 0){
+        req->def->capsule->readTo(hreq->cap);
+        Roebling_Run(hreq->rbl);
+    }
+    
+    req->type.state |= hreq->rbl->type.state & (SUCCESS|ERROR);
+
+    if(req->type.state & SUCCESS){
+        HttpReq_ParseBody(hreq);            
+        if(req->type.state & DEBUG){
+            void *args[] = {
+                req,
+                NULL,
+            };
+            Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
+        }
+    }
+
+    Return(m, req->type.state);
 }
 
 status HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv){
@@ -291,28 +372,12 @@ status HttpStatic_Error(MemCh *m, HttpReq *req, ErrorMsg *msg){
     return ZERO;
 }
 
-void HttpStatic_SetCmdFile(MemCh *m, Serve *srv, Buff *file){
-    MemCh *rm = MemCh_Make();
-
-    HttpReq *req = rm->owner = (HttpReq *)srv->def->mk(rm, srv);
-    req->key = S(m, "cmd");
-    Time_Now(&req->metrics.start);
-
-    req->crit = ReqCrit_Make(m);
-    req->crit->pfd.fd = file->fd;
-    req->idx = Queue_Add(srv->q, req, req->crit);
-    HttpReq_ExpectRecv(req);
-
-}
-
 HandlerDef *HttpReq_DefMake(MemCh *m){
     HandlerDef *def = HandlerDef_Make(m);
-    def->mk = HttpReq_Mk;
-    def->setup = HttpStatic_Setup;
-    def->handle = (ReqFunc) HttpStatic_Handle;
-    def->finalize = (ReqFunc) HttpStatic_Finalize;
-    def->log.open = (ReqFunc) HttpStatic_logOpen;
-    def->log.final = (ReqFunc) HttpStatic_logFinalized;
+    def->extra = (SourceMakerFunc)HttpReq_SourceMake;
+    def->finalize = (ReqFunc) HttpReq_Finalize;
+    def->log.open = (ReqFunc) HttpReq_logOpen;
+    def->log.final = (ReqFunc) HttpReq_logFinalized;
     def->route = Span_Make(m);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_RespToRbl));
     Span_Add(def->route, Func_Wrapped(m, HttpStatic_RetrieveFile));
@@ -323,15 +388,13 @@ HandlerDef *HttpReq_DefMake(MemCh *m){
 
 HandlerDef *HttpTlsReq_DefMake(MemCh *m){
     HandlerDef *def = HandlerDef_Make(m);
-    def->mk = HttpReq_Mk;
-    def->setup = HttpStatic_Setup;
-    def->handle = (ReqFunc) HttpStatic_Handle;
-    def->finalize = (ReqFunc) HttpStatic_Finalize;
-    def->log.open = (ReqFunc) HttpStatic_logOpen;
-    def->log.final = (ReqFunc) HttpStatic_logFinalized;
+    def->extra = (SourceMakerFunc)HttpReq_SourceMake;
+    def->finalize = (ReqFunc) HttpReq_Finalize;
+    def->log.open = (ReqFunc) HttpReq_logOpen;
+    def->log.final = (ReqFunc) HttpReq_logFinalized;
     def->route = Span_Make(m);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_Accept));
-    Span_Add(def->route, Func_Wrapped(m, HttpReq_RespToRbl));
+    Span_Add(def->route, Func_Wrapped(m, HttpReq_ReadToRblTls));
     Span_Add(def->route, Func_Wrapped(m, HttpStatic_RetrieveFile));
     Span_Add(def->route, Func_Wrapped(m, HttpReq_Write));
 
