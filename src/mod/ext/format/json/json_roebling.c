@@ -153,27 +153,18 @@ static status arrSep(MemCh *m, Roebling *rbl){
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
 
-    Iter *seelIt = (Iter *)Ifc(rbl->m, rbl->source, TYPE_ITER);
-    Single *seelSg = Iter_Get(seelIt);
-    cls instTypeOf = seelSg->val.w;
+    Iter *it = (Iter *)Ifc(rbl->m, rbl->source, TYPE_ITER);
+    Iter *destIt = (Iter *)Ifc(rbl->m, rbl->dest, TYPE_ITER);
 
-    Iter *it = (Iter *)Ifc(rbl->m, rbl->dest, TYPE_ITER);
-    Iter *nodeIt = Iter_Get(it);
-    Span *p = NULL;
-    if(nodeIt != NULL){
-        p = nodeIt->p;
-    }
-
-    if(it->type.state & DEBUG){
+    if(destIt->type.state & DEBUG){
         void *args[7];
         args[0] = Type_ToStr(OutStream->m, captureKey);
         args[1] = v,
-        args[2] = it->p;
-        args[3] = p;
-        args[4] = NULL;
-        Out("^y.Json Capture ^E0.$^ec. -> ^0y.@\n    it: @\n    @\n", args);
+        args[2] = NULL;
+        Out("^y.Json Capture ^E0.$^ec. -> ^0y.@\n", args);
     }
 
+    /*
     if(captureKey == JSON_INDENT){
         Span *node = NULL;
         if(instTypeOf == TYPE_SPAN){
@@ -231,6 +222,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             Iter_Prev(it);
         }
     }
+    */
 
     return ZERO;
 }
@@ -243,38 +235,7 @@ void *JsonParser_GetRoot(Roebling *rbl){
     return NULL;
 }
 
-void *Json_FromPath(MemCh *m, void *path){
-    Debug_Push(m, path);
-    Buff *bf = Buff_Make(m, ZERO);
-    File_Open(bf, path, O_RDONLY);
-    if(bf->type.state & ERROR){
-        Return(m, NULL);
-    }
-
-    Buff_Read(bf);
-    File_Close(bf);
-
-    Roebling *rbl = JsonParser_Make(m, Cursor_Make(m, bf->v), TYPE_NODE);
-    Debug_SetRef(m, rbl);
-
-    Abstract *a = (Abstract *)rbl->dest;
-    a->type.state |= DEBUG;
-    rbl->type.state |= DEBUG;
-
-    Roebling_Run(rbl);
-    if(rbl->type.state & SUCCESS){
-        Return(m, JsonParser_GetRoot(rbl));
-    }else{
-        void *ar[] = {
-            path,
-            NULL
-        };
-        Error(m, FUNCNAME, FILENAME, LINENUMBER, "Error parsing json: $", ar);
-        Return(m, NULL);
-    }
-}
-
-Roebling *JsonParser_Make(MemCh *m, Cursor *curs, cls instTypeOf){
+Roebling *JsonParser_Make(MemCh *m, Cursor *curs){
     Debug_Push(m, curs);
 
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
@@ -297,7 +258,6 @@ Roebling *JsonParser_Make(MemCh *m, Cursor *curs, cls instTypeOf){
 
     rbl->capture = Capture;
     rbl->source = (Abstract *)Iter_Make(m, Span_Make(m));
-    Iter_Add((Iter *)rbl->source, I16_Wrapped(m, instTypeOf));
     rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
 
     Return(m, rbl);

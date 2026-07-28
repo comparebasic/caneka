@@ -23,7 +23,7 @@ status Silt_Tests(MemCh *m){
     Buff *bf = Buff_Make(m, ZERO);
     Silt_Print(bf, silt, TYPE_INST_SILT, ZERO);
 
-    Str *expected = S(m, "Silt<TYPE_NODE, TYPE_STR, TYPE_TABLE>");
+    Str *expected = S(m, "Silt<TYPE_NODE, TYPE_STRVEC, TYPE_TABLE>");
 
     args[0] = expected;
     args[1] = bf->v;

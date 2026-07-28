@@ -70,6 +70,9 @@ status Cursor_End(Cursor *curs){
 }
 
 status Cursor_Decr(Cursor *curs, i32 length){
+    printf("Decr\n");
+    fflush(stdout);
+
     MemCh *m = curs->v->p->m;
     Debug_Push(m, curs);
     i32 orig = length;

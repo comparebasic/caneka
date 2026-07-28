@@ -323,6 +323,40 @@ status Roebling_Start(Roebling *rbl){
     return SUCCESS;
 }
 
+status Roebling_Last(Roebling *rbl){
+    Debug_Push(rbl->m, rbl);
+    Iter_Reset(&rbl->matchIt);
+    while((Iter_Next(&rbl->matchIt) & END) == 0){
+        Match *mt = Iter_Get(&rbl->matchIt);
+        if(mt->type.state & PROCESSING){
+            byte c = '\0';
+            if(rbl->type.state & DEBUG){
+                void *args[] = {
+                    Str_Ref(rbl->m, &c, 1, 1, DEBUG),
+                    NULL
+                };
+                Out("^pE. $ ^0.\n", args);
+            }
+
+            status r = Match_Feed(rbl->m, mt, c);
+            if(rbl->type.state & DEBUG){
+                void *args[] = {
+                    Str_Ref(rbl->m, &c, 1, 1, DEBUG),
+                    mt,
+                    NULL
+                };
+                Out("^p.$ - &^0.\n", args);
+            }
+
+            if(r & SUCCESS){
+                Return(rbl->m, Roebling_Dispatch(rbl, mt));
+            }
+        }
+    }
+
+    Return(rbl->m, ZERO);
+}
+
 Roebling *Roebling_Make(MemCh *m, Cursor *curs, RblCaptureFunc capture, void *source){
 
     Roebling *rbl = (Roebling *)MemCh_Alloc(m, sizeof(Roebling));

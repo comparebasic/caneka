@@ -18,6 +18,7 @@ typedef struct roebling {
     Type type;
     i16 _;
     i16 guard;
+    i32 nest;
     MemCh *m;
     StrVec *shelf;
     Cursor *curs;
@@ -46,3 +47,4 @@ status Roebling_Reset(MemCh *m, Roebling *rbl, StrVec *v);
 status Roebling_AddStep(Roebling *rbl, void *step);
 status Roebling_Finalize(Roebling *rbl, Match *mt, i64 total);
 status Roebling_Dispatch(Roebling *rbl, Match *mt);
+status Roebling_Last(Roebling *rbl);
