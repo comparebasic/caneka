@@ -68,6 +68,12 @@ static status start(MemCh *m, Roebling *rbl){
         quotedStringDef, JSON_STRING, JSON_COMMA_SEP);
     r |= Roebling_SetPattern(rbl,
         numberDef, JSON_NUMBER, JSON_END);
+    r |= Roebling_SetPattern(rbl,
+        commaSepDef, JSON_COMMA_SEP, JSON_KEY);
+    r |= Roebling_SetPattern(rbl,
+        outdentDef, JSON_OUTDENT, JSON_START);
+    r |= Roebling_SetPattern(rbl,
+        outdentArrDef, JSON_ARR_OUTDENT, JSON_START);
 
     return r;
 }
@@ -78,11 +84,15 @@ static status keyValue(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         leadDef, JSON_LEAD, JSON_KEY_VALUE);
     r |= Roebling_SetPattern(rbl,
-        indentDef, JSON_INDENT, JSON_START);
+        indentDef, JSON_INDENT, JSON_KEY);
     r |= Roebling_SetPattern(rbl,
         indentArrDef, JSON_ARR_INDENT, JSON_ARR);
     r |= Roebling_SetPattern(rbl,
         quotedStringDef, JSON_KEY_VALUE, JSON_KEY_VALUE_SEP);
+    r |= Roebling_SetPattern(rbl,
+        numberDef, JSON_NUMBER, JSON_KEY_VALUE_SEP);
+    r |= Roebling_SetPattern(rbl,
+        outdentDef, JSON_OUTDENT, JSON_START);
 
     return r;
 }
@@ -118,6 +128,10 @@ static status arr(MemCh *m, Roebling *rbl){
         quotedStringDef, JSON_VALUE, JSON_KEY_SEP);
     r |= Roebling_SetPattern(rbl,
         numberDef, JSON_NUMBER, JSON_KEY_SEP);
+    r |= Roebling_SetPattern(rbl,
+        indentDef, JSON_INDENT, JSON_KEY);
+    r |= Roebling_SetPattern(rbl,
+        indentArrDef, JSON_ARR_INDENT, JSON_ARR);
 
     return r;
 }
@@ -161,7 +175,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         args[0] = Type_ToStr(OutStream->m, captureKey);
         args[1] = v,
         args[2] = NULL;
-        Out("^y.Json Capture ^E0.$^ec. -> ^0y.@\n", args);
+        Out("^y.Json Capture ^E0.$^ec. -> ^0y.@^0\n", args);
     }
 
     if(captureKey == JSON_INDENT){

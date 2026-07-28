@@ -114,10 +114,11 @@ status Roebling_Dispatch(Roebling *rbl, Match *mt){
 
     if(mt->type.state & DEBUG){
         void *args[] = {
+            Type_ToStr(rbl->m, mt->captureKey),
             mt,
             NULL
         };
-        Out("^y.Match successful &^0.\n", args);
+        Out("^y.Match successful ^D.$^d./&^0.\n", args);
     }
 
     if((mt->type.state & MATCH_SEARCH)){
@@ -133,13 +134,12 @@ status Roebling_Dispatch(Roebling *rbl, Match *mt){
         byte c = *(rbl->curs->ptr);
         void *args[] = {
             Str_Ref(rbl->m, &c, 1, 1, DEBUG),
-            Type_ToStr(rbl->m,
-                mt->captureKey),
+            Type_ToStr(rbl->m, mt->captureKey),
             v,
             mt,
             NULL
         };
-        Out("^c.RblCapture on (^D.$^d.) (^D.$^d.): &\n&^0.\n", args);
+        Out("^c.Found from ^D.$^d. of ^D.$^d./\"$\"\n  &^0.\n", args);
     }
 
     rbl->capture(rbl, mt->captureKey, v);
@@ -166,7 +166,6 @@ status Roebling_RunCycle(Roebling *rbl){
         if(mt != NULL && (mt->type.state & MATCH_JUMP)){
             rbl->parseIt.idx = mt->jump;
         }else{
-            printf("no jump just proceed\n");
             rbl->parseIt.idx++;
         }
         rbl->type.state &= ~ROEBLING_NEXT;
@@ -182,8 +181,18 @@ status Roebling_RunCycle(Roebling *rbl){
     }else{
         if((rbl->type.state & PROCESSING) == 0){
             wdof = (Single *)Ifc(rbl->m, wdof, TYPE_WRAPPED_DO);
-            ((RblFunc)(wdof->val.dof))(rbl->m, rbl);
+            RblFunc func = (RblFunc)wdof->val.dof;
+            func(rbl->m, rbl);
             rbl->type.state |= PROCESSING;
+            if(rbl->type.state & DEBUG){
+                Single *labelWord = Lookup_Get(rbl->markLabels, rbl->parseIt.idx); 
+                void *ar[] = {
+                    Type_ToStr(rbl->m, labelWord->val.w),
+                    I32_Wrapped(rbl->m, rbl->parseIt.idx),
+                    NULL
+                };
+                Out(">>> ^g.Jump To: $/^D.$^0\n", ar);
+            }
         }
         Roebling_RunMatches(rbl);
     }
@@ -276,8 +285,10 @@ status Roebling_Reset(MemCh *m, Roebling *rbl, StrVec *v){
 }
 
 status Roebling_AddMark(Roebling *rbl, Single *sg){
-    i64 mark = sg->val.w;
-    sg->val.w = rbl->parseIt.idx;
+    word mark = sg->val.w;
+    i32 idx = rbl->parseIt.idx;
+    sg->val.w = (word)idx;
+    Lookup_Add(rbl->m, rbl->markLabels, (word)idx, Word_Wrapped(rbl->m, mark));
     return Lookup_Add(rbl->m, rbl->marks, mark, sg);
 }
 
@@ -368,6 +379,7 @@ Roebling *Roebling_Make(MemCh *m, Cursor *curs, RblCaptureFunc capture, void *so
     Span *p = Span_Make(m);
     Iter_Init(&rbl->parseIt, p);
     rbl->marks = Lookup_Make(m, _TYPE_CORE_END); 
+    rbl->markLabels = Lookup_Make(m, ZERO); 
     if(curs != NULL && (curs->type.state & PROCESSING) == 0){
         Cursor_Setup(rbl->curs, curs->v);
     }
