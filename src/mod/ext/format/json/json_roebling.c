@@ -164,8 +164,9 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Out("^y.Json Capture ^E0.$^ec. -> ^0y.@\n", args);
     }
 
-    /*
     if(captureKey == JSON_INDENT){
+        rbl->nest++;
+    /*
         Span *node = NULL;
         if(instTypeOf == TYPE_SPAN){
             node = Span_Make(m);
@@ -181,8 +182,10 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         }
         Iter_Add(it, Iter_Make(m, (Span *)node));
         p = node;
+        */
     }
 
+    /*
     if(p == NULL){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Error unable to find current element to add to", NULL);
@@ -217,12 +220,16 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
             return rbl->type.state;
         }
     }else if(captureKey == JSON_OUTDENT){
+        */
+    if(captureKey == JSON_OUTDENT){
+        rbl->nest--;
+        /*
         if(it->idx > 0){
             Iter_Remove(it);
             Iter_Prev(it);
         }
+        */
     }
-    */
 
     return ZERO;
 }

@@ -10,11 +10,13 @@ void *Json_From(MemCh *m, void *sv){
 
     Abstract *a = (Abstract *)rbl->dest;
     a->type.state |= DEBUG;
+    /*
     rbl->type.state |= DEBUG;
+    */
 
     Roebling_Run(rbl);
     Roebling_Last(rbl);
-    if(rbl->type.state & SUCCESS){
+    if(rbl->nest == 0){
         Return(m, JsonParser_GetRoot(rbl));
     }else{
         void *ar[] = {
