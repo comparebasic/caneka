@@ -19,3 +19,4 @@ status Inst_SetAtt(Inst *nobj, void *key, void *value);
 void *Inst_GetChild(Inst *nobj, void *key);
 void *Inst_GetNthChild(Inst *inst, i32 nth);
 void Inst_ChAttsAdd(Inst *inst, void *att, Table *tbl);
+void Inst_IterInitChild(Iter *it, Inst *inst, StrVec *path);

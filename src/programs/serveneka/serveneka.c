@@ -8,6 +8,28 @@ void Serveneka_Serve(MemCh *m, Node *config){
     args[1] = NULL;
     Out("^p.Config: $^0\n", args);
 
+    Node *endpoints = Inst_GetByPath(config, Sv(m, "endpoints"));
+
+    Iter it;
+    Inst_IterInitChild(&it, config, Sv(m, "endpoints"));
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            Table *props = Span_Get(h->value, INST_PROPIDX_CHILDREN);
+            StrVec *type = Table_Get(props, K(m, "type"));
+            StrVec *handler = Table_Get(props, K(m, "handler"));
+            if(type != NULL && handler != NULL){
+                args[0] = h->key;
+                args[1] = type;
+                args[2] = handler;
+                args[3] = props;
+                args[4] = NULL;
+                Out("^y.Configuring Endpoint $ -> $/$ from $^0\n", args);
+            }
+        }
+    }
+
+
     /*
     HttpStatic_Init(m);
     HandlerDef *def = HttpStatic_DefMake(m);

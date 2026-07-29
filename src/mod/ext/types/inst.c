@@ -1,6 +1,14 @@
 #include <external.h>
 #include <caneka.h>
 
+void Inst_IterInitChild(Iter *it, Inst *inst, StrVec *path){
+    Node *child = Inst_GetByPath(inst, path);
+    void *ar[] = {
+        Span_Get(child, INST_PROPIDX_CHILDREN)
+    };
+    Out("^p.Chilren @^0\n", ar);
+    Iter_Init(it, Span_Get(child, INST_PROPIDX_CHILDREN));
+}
 
 void Inst_ChAttsAdd(Inst *inst, void *att, Table *tbl){
     Iter it;
