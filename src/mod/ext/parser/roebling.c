@@ -207,6 +207,7 @@ status Roebling_JumpTo(Roebling *rbl, i32 mark){
 }
 
 status Roebling_Run(Roebling *rbl){
+    Debug_Push(rbl->m, rbl);
     if(rbl->type.state & DEBUG){
         void *args[2] = {
             rbl,
@@ -222,7 +223,7 @@ status Roebling_Run(Roebling *rbl){
         r = Roebling_RunCycle(rbl);
     }
     rbl->type.state &= ~END;
-    return rbl->type.state;
+    Return(rbl->m, rbl->type.state);
 }
 
 Match *Roebling_GetMatch(Roebling *rbl){

@@ -15,6 +15,7 @@ void *Json_From(MemCh *m, void *sv){
     }else{
         void *ar[] = {
             v,
+            rbl->dest,
             NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER, "Error parsing json: $ -> @", ar);
@@ -34,14 +35,9 @@ void *Json_FromPath(MemCh *m, void *path){
     File_Close(bf);
 
     Roebling *rbl = JsonParser_Make(m, Cursor_Make(m, bf->v));
-    Debug_SetRef(m, rbl);
-
-    Abstract *a = (Abstract *)rbl->dest;
-    a->type.state |= DEBUG;
-    rbl->type.state |= DEBUG;
-
     Roebling_Run(rbl);
-    if(rbl->type.state & SUCCESS){
+    Roebling_Last(rbl);
+    if(rbl->nest == 0){
         Return(m, JsonParser_GetRoot(rbl));
     }else{
         void *ar[] = {

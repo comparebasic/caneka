@@ -134,43 +134,35 @@ status Lookup_Print(Buff *bf, void *a, cls type, word flags){
 
 status Table_Print(Buff *bf, void *a, cls type, word flags){
     Table *tbl = (Table *)a;
-    if((flags & (DEBUG|MORE)) == 0){
-        return ToStream_NotImpl(bf, a, type, flags);
+    if(flags & DEBUG){
+        void *args[] = {
+            Type_StateVec(bf->m, tbl->type.of, tbl->type.state),
+            I32_Wrapped(bf->m, tbl->nvalues),
+            NULL
+        };
+        Fmt(bf, "Tbl<$ ^D.$^d.nvalues ", args);
     }else{
-        if(flags & DEBUG){
-            void *args[] = {
-                Type_StateVec(bf->m, tbl->type.of, tbl->type.state),
-                I32_Wrapped(bf->m, tbl->nvalues),
-                NULL
-            };
-            Fmt(bf, "Tbl<$ ^D.$^d.nvalues ", args);
-        }else{
-            Buff_AddBytes(bf, (byte *)"{", 1);
-        }
-        Iter it;
-        Iter_Init(&it, tbl);
-        while((Iter_Next(&it) & END) == 0){
-            Hashed *h = (Hashed *)Iter_Get(&it);
-            if(h != NULL){
-                ToS(bf, h->key, 0, flags|MORE);
-                Buff_AddBytes(bf, (byte *)"=", 1);
-                ToS(bf, h->value, 0, flags|MORE);
-                if((it.type.state & LAST) == 0){
-                    if(flags & DEBUG){
-                        Buff_AddBytes(bf, (byte *)", ", 2);
-                    }else{
-                        Buff_AddBytes(bf, (byte *)",", 1);
-                    }
-                }
+        Buff_AddBytes(bf, (byte *)"{", 1);
+    }
+    Iter it;
+    Iter_Init(&it, tbl);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = (Hashed *)Iter_Get(&it);
+        if(h != NULL){
+            ToS(bf, h->key, 0, flags);
+            Buff_AddBytes(bf, (byte *)"=", 1);
+            ToS(bf, h->value, 0, flags);
+            if((it.type.state & LAST) == 0){
+                Buff_AddBytes(bf, (byte *)", ", 2);
             }
         }
-        if(flags & DEBUG){
-            Buff_AddBytes(bf, (byte *)">", 1);
-        }else{
-            Buff_AddBytes(bf, (byte *)"}", 1);
-        }
-        return SUCCESS;
     }
+    if(flags & DEBUG){
+        Buff_AddBytes(bf, (byte *)">", 1);
+    }else{
+        Buff_AddBytes(bf, (byte *)"}", 1);
+    }
+    return SUCCESS;
 }
 
 status Sequence_ToSInit(MemCh *m, Lookup *lk){
