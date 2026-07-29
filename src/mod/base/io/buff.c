@@ -257,6 +257,18 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
     return bf->type.state;
 }
 
+util Buff_Hash(void *_bf){
+    Buff *bf = (Buff *)_bf;
+    util parity = 0;
+    if(bf->path == NULL){
+        return _Hash_Bytes(&bf, sizeof(void *));
+    }else{
+        parity = Parity_PreVec(bf->path);
+        parity += bf->pfd != NULL ? bf->pfd->fd : 0;
+        return Parity_Finalize(parity, bf->path->total);
+    }
+}
+
 void Buff_SetTemp(Buff *bf){
     if((bf->type.state & BUFF_TEMP_MEM) == 0){
         bf->type.state |= BUFF_TEMP_MEM;

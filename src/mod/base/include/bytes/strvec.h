@@ -33,6 +33,7 @@ Str *StrVec_Str(MemCh *m, void *a);
 Str *StrVec_StrPrefixed(MemCh *m, void *prefix, StrVec *v);
 Str *StrVec_StrTo(MemCh *m, StrVec *v, i32 anchor);
 Str *StrVec_ToStr(MemCh *m, StrVec *v, word length);
+void StrVec_OnToStr(MemCh *m, StrVec *v, word length, Str *s, boolean filter);
 StrVec *StrVec_FromLongBytes(MemCh *m, byte *bytes, i32 length);
 StrVec *StrVec_Copy(MemCh *m, StrVec *v);
 StrVec *StrVec_CopyTo(MemCh *m, StrVec *_v, i32 anchor);

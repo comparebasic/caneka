@@ -63,3 +63,5 @@ status Buff_PosEnd(Buff *bf);
 
 Buff *Buff_From(MemCh *m, StrVec *v);
 Buff *Buff_Make(MemCh *m, word flags);
+
+util Buff_Hash(void *_bf);

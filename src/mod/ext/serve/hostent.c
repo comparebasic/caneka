@@ -84,22 +84,10 @@ HostEnt *HostEnt_FromName(MemCh *m, Str *name, Str *service){
     return ent;
 }
 
-quad *HostEnt_AddrIp4(HostEnt *h){
-    if(h->type.state & ERROR){
-        return 0;
-    }
-    Single *sg = (Single *)h->addr;
-    return &sg->val.i;
-}
-
 util HostEnt_Hash(void *a){
     HostEnt *ent = (HostEnt *)a;
     Single *sg = (Single *)ent->addr;
     return (util)sg->val.i;
-}
-
-util *HostEnt_AddrIp6(HostEnt *h){
-    return NULL;
 }
 
 HostEnt *HostEnt_Make(MemCh *m){

@@ -224,11 +224,23 @@ Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
         return NULL;
     }
     Str *s = Str_Make(m, length);
+    StrVec_OnToStr(m, v, length, s, TRUE);
+    return s;
+
+}
+
+void StrVec_OnToStr(MemCh *m, StrVec *v, word length, Str *s, boolean filter){
+    void *args[2];
+    if(s->alloc < length){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, 
+            "Error StrVec is longer than Str allocated length", args);
+        return;
+    }
     Iter it;
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
         Str *content = Iter_Get(&it);
-        if(TextCharFilter(content->bytes, content->length)){
+        if(!filter || TextCharFilter(content->bytes, content->length)){
             Str_Add(s, content->bytes, content->length);
         }else{
             args[0] = content;
@@ -238,7 +250,6 @@ Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
             return NULL;
         }
     }
-    return s;
 }
 
 Str *StrVec_Str(MemCh *m, void *_a){

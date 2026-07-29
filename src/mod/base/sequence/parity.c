@@ -187,6 +187,11 @@ util Parity_From(Str *s){
 }
 
 util Parity_FromVec(StrVec *v){
+    parity = Parity_PreVec(v);
+    return Parity_Finalize(parity, v->total);
+}
+
+util Parity_PreVec(StrVec *v){
     Iter it;
     Iter_Init(&it, v->p);
     util parity = 0;
@@ -232,8 +237,11 @@ util Parity_FromVec(StrVec *v){
         parity += slot;
     }
 
-    parity &= ~7;
-    parity |= (v->total & 7);
+    return parity;
+}
 
+util Parity_Finalize(util parity, i64 total){
+    parity &= ~7;
+    parity |= (total & 7);
     return parity;
 }

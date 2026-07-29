@@ -127,6 +127,7 @@ status Hash_Init(MemCh *m){
         r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Hash_Span);
         r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)Hash_WI16);
         r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)Hash_Util);
+        r |= Lookup_Add(m, lk, TYPE_BUFF, (void *)Hash_Buff);
         return r;
     }
     return NOOP;
