@@ -295,6 +295,12 @@ status Path_Around(MemCh *m, StrVec *path, word sep, Coord *cr){
     return r;
 }
 
+StrVec *Path_DotPath(MemCh *m, void *vs){
+    StrVec *v = Ifc(m, vs, TYPE_STRVEC);
+    Path_DotAnnotate(m, v);
+    return v;
+}
+
 status Path_DotAnnotate(MemCh *m, StrVec *v){
     return Path_Annotate(m, v, dotPathSeps);
 }

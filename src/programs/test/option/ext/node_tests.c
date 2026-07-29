@@ -10,8 +10,6 @@ status Node_Tests(MemCh *m){
     Node *root = Inst_Make(m, TYPE_NODE);
 
     Abstract *children = Seel_Get(root, S(m, "children"));
-    r |= Test(children->type.of == TYPE_TABLE, 
-        "Children table has been automatically populated", NULL); 
 
     Node *nobj = Inst_Make(m, TYPE_NODE);
     Seel_Set(nobj, S(m, "name"), Sv(m, "one"));

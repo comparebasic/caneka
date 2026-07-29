@@ -146,6 +146,19 @@ status Table_HKeyVal(HKey *hk){
 
 status Table_SetKey(Iter *it, void *_a){
     Abstract *a = (Abstract *)_a;
+    if(it->p->type.of == TYPE_SPAN){
+        if(it->p->nvalues == 0){
+            it->p->type.of = TYPE_TABLE;
+        }else{
+            void *ar[] = {
+                it->p, NULL
+            };
+            Error(it->p->m, FUNCNAME, FILENAME, LINENUMBER,
+                "Cannot change from span to table with existing values in the span: @",
+                ar);
+            return ERROR;
+        }
+    }
 
     Hashed *h = Table_GetSetHashed(it, SPAN_OP_SET, a, NULL);
     it->metrics.selected = h->idx;

@@ -1,6 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
+
 static PatCharDef leadDef[] = {
     {PAT_MANY, '\t', '\t'},
     {PAT_MANY, '\r', '\r'},
@@ -168,9 +169,9 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
 
     Iter *it = (Iter *)Ifc(rbl->m, rbl->source, TYPE_ITER);
-    Iter *destIt = (Iter *)Ifc(rbl->m, rbl->dest, TYPE_ITER);
+    void *value = NULL;
 
-    if(destIt->type.state & DEBUG){
+    if(rbl->dest->type.state & DEBUG){
         void *args[7];
         args[0] = Type_ToStr(OutStream->m, captureKey);
         args[1] = v,
@@ -178,82 +179,93 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Out("^y.Json Capture ^E0.$^ec. -> ^0y.@^0\n", args);
     }
 
+    Iter *prevIt = Iter_Latest(it, TYPE_ITER);
+    Node *node = Iter_Latest(it, TYPE_NODE);
+
     if(captureKey == JSON_INDENT){
         rbl->nest++;
-    /*
-        Span *node = NULL;
-        if(instTypeOf == TYPE_SPAN){
-            node = Span_Make(m);
-        }else if(instTypeOf == TYPE_TABLE){
-            node = Table_Make(m);
-        }else if(instTypeOf & TYPE_INSTANCE){
-            node = (Span*)Inst_Make(m, instTypeOf);
+        Node *n = NULL;
+        if(it->p->nvalues == 0){
+            n = (Inst *)rbl->dest;
         }else{
-            Error(m, FUNCNAME, FILENAME, LINENUMBER, 
-                "Unknown type to indent for JSON", NULL);
-            rbl->type.state |= ERROR;
-            return rbl->type.state;
+            n = Inst_Make(m, TYPE_NODE);
+            value = n;
         }
-        Iter_Add(it, Iter_Make(m, (Span *)node));
-        p = node;
-        */
+
+        Iter *oit = Iter_Make(m, Span_Get(n, INST_PROPIDX_CHILDREN));
+
+        Iter_Add(it, n);
+        Iter_Add(it, oit);
+    }else if(captureKey == JSON_ARR_INDENT){
+        rbl->nest++;
+        Inst *n = Inst_Make(m, TYPE_NODE);
+        value = n;
+        Iter *oit = Iter_Make(m, Span_Get(n, INST_PROPIDX_CHILDREN));
+
+        Iter_Add(it, n);
+        Iter_Add(it, oit);
     }
 
-    /*
-    if(p == NULL){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error unable to find current element to add to", NULL);
-        return ERROR;
-    }
-
-    if(captureKey == JSON_KEY){
-        if(instTypeOf == TYPE_TABLE){
-            Table_SetKey(nodeIt, v);
-        }else if(instTypeOf & TYPE_INSTANCE){
-            Table *seel = Lookup_Get(SeelLookup, nodeIt->p->type.of);
-            nodeIt->metrics.selected = Seel_GetIdx(seel, v);
-        }else{
-            Error(m, FUNCNAME, FILENAME, LINENUMBER, 
-                "Unknown type to indent for JSON", NULL);
-            rbl->type.state |= ERROR;
-            return rbl->type.state;
-        }
-    }else if(captureKey == JSON_VALUE){
-        Span_Add(p, v);
-    }else if(captureKey == JSON_KEY_VALUE){
-        if(instTypeOf == TYPE_TABLE){
-            Table_SetValue(nodeIt, v);
-        }else if(instTypeOf & TYPE_INSTANCE){
-            i32 idx = nodeIt->metrics.selected;
-            Iter_SetByIdx(nodeIt, idx, v);
-            nodeIt->metrics.selected = -1;
-        }else{
-            Error(m, FUNCNAME, FILENAME, LINENUMBER, 
-                "Unknown type to indent for JSON", NULL);
-            rbl->type.state |= ERROR;
-            return rbl->type.state;
-        }
-    }else if(captureKey == JSON_OUTDENT){
-        */
     if(captureKey == JSON_OUTDENT){
-        rbl->nest--;
-        /*
-        if(it->idx > 0){
-            Iter_Remove(it);
-            Iter_Prev(it);
+        if(prevIt == NULL || prevIt->p->type.of != TYPE_TABLE){
+            void *ar[] = {
+                prevIt != NULL ? prevIt->p : NULL,
+                NULL
+            };
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Closing } does not have corresponding open {", ar);
+                rbl->type.state |= ERROR;
+            
+            return rbl->type.state;
         }
-        */
+        rbl->nest--;
+        Iter_Remove(it);
+        Iter_Prev(it);
+        Iter_Remove(it);
+        Iter_Prev(it);
+    }else if(captureKey == JSON_ARR_OUTDENT){
+        if(prevIt == NULL || prevIt->p->type.of != TYPE_SPAN){
+            void *ar[] = {
+                prevIt != NULL ? prevIt->p : NULL,
+                NULL
+            };
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Closing ] does not have corresponding open [", ar);
+                rbl->type.state |= ERROR;
+            
+            return rbl->type.state;
+        }
+        rbl->nest--;
+        Iter_Remove(it);
+        Iter_Prev(it);
+        Iter_Remove(it);
+        Iter_Prev(it);
+    }else if(captureKey == JSON_KEY){
+        Table_SetKey(prevIt, v);
+    }else if(captureKey == JSON_VALUE){
+        value = v;
+    }else if(captureKey == JSON_NUMBER){
+        i64 n = I64_FromStr(Ifc(m, v, TYPE_STR));
+        value = I64_Wrapped(m, n);
+    }else if(captureKey == JSON_KEY_VALUE){
+        value = v;
+    }
+
+    if(value != NULL){
+        if(prevIt != NULL){
+            if(prevIt->metrics.selected != -1){
+                Table_SetValue(prevIt, value);
+            }else{
+                Iter_Add(prevIt, value);
+            }
+        }
     }
 
     return ZERO;
 }
 
 void *JsonParser_GetRoot(Roebling *rbl){
-    Iter *nodeIt = Iter_GetByIdx((Iter *)rbl->dest, 0);
-    if(nodeIt != NULL){
-        return nodeIt->p;
-    }
-    return NULL;
+    return rbl->dest;
 }
 
 Roebling *JsonParser_Make(MemCh *m, Cursor *curs){
@@ -279,7 +291,8 @@ Roebling *JsonParser_Make(MemCh *m, Cursor *curs){
 
     rbl->capture = Capture;
     rbl->source = (Abstract *)Iter_Make(m, Span_Make(m));
-    rbl->dest = (Abstract *)Iter_Make(m, Span_Make(m));
+    Node *n = Inst_Make(m, TYPE_NODE);
+    rbl->dest = (Abstract *)n;
 
     Return(m, rbl);
 }

@@ -10,4 +10,5 @@
 #include "types/seel.h"
 #include "types/inst.h"
 #include "types/silt.h"
+#include "types/latest.h"
 #include "types/types_tos.h"

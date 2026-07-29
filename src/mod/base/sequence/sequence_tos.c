@@ -150,7 +150,7 @@ status Table_Print(Buff *bf, void *a, cls type, word flags){
         Iter it;
         Iter_Init(&it, tbl);
         while((Iter_Next(&it) & END) == 0){
-            Hashed *h = (Hashed *)Iter_Get(&it);;
+            Hashed *h = (Hashed *)Iter_Get(&it);
             if(h != NULL){
                 ToS(bf, h->key, 0, flags|MORE);
                 Buff_AddBytes(bf, (byte *)"=", 1);

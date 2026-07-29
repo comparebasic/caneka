@@ -1,26 +1,24 @@
 {
-    "endpoints": [
-        {
-            "0.0.0.0": {
-                "type": "ip4",
-                "port": 8080,
-                "handler": "http-static",
-                "dir": "public"
-            },
-            "::": {
-                "type": "ip6",
-                "port": 8443,
-                "handler": "https-static",
-                "tls-cert": "/var/fixtures/server.crt",
-                "tls-key": "/var/fixtures/server.key",
-                "dir": "public"
-            },
-            "cmd.txt": {
-                "type": "file",
-                "handler": "file-commands"
-            }
+    "endpoints": {
+        "0.0.0.0": {
+            "type": "ip4",
+            "port": 8080,
+            "handler": "http-static",
+            "dir": "public"
+        },
+        "::": {
+            "type": "ip6",
+            "port": 8443,
+            "handler": "https-static",
+            "tls-cert": "/var/fixtures/server.crt",
+            "tls-key": "/var/fixtures/server.key",
+            "dir": "public"
+        },
+        "cmd.txt": {
+            "type": "file",
+            "handler": "file-commands"
         }
-    ],
+    },
     "logs": {
         "requests": "log/req",
         "error": "log/err",

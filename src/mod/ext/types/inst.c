@@ -1,6 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
+
 void Inst_ChAttsAdd(Inst *inst, void *att, Table *tbl){
     Iter it;
     Iter_Init(&it, Seel_Get(inst, K(inst->m, "children")));
@@ -65,6 +66,14 @@ void *Inst_GetChild(Inst *inst, void *key){
     }
     Table *children = (Table *)Span_Get(inst, INST_PROPIDX_CHILDREN);
     return Table_Get(children, key);
+}
+
+void *Inst_GetNthChild(Inst *inst, i32 nth){
+    if(inst == NULL){
+        return NULL;
+    }
+    Span *children = (Table *)Span_Get(inst, INST_PROPIDX_CHILDREN);
+    return Span_Get(children, nth);
 }
 
 void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
