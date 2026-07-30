@@ -7,6 +7,7 @@ void *Json_From(MemCh *m, void *sv){
 
     Roebling *rbl = JsonParser_Make(m, Cursor_Make(m, v));
     Debug_SetRef(m, rbl);
+    rbl->type.state |= DEBUG;
 
     Roebling_Run(rbl);
     Roebling_Last(rbl);
@@ -38,7 +39,6 @@ void *Json_FromPath(MemCh *m, void *path){
     Abstract *a = rbl->dest;
     rbl->type.state |= DEBUG;
     a->type.state |= DEBUG;
-
 
     Roebling_Run(rbl);
     Roebling_Last(rbl);

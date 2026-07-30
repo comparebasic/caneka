@@ -3,6 +3,7 @@
 
 status Conn_InetConnect(Buff *bf, HostEnt *h, i32 port){
     MemCh *m = bf->m;
+    /*
     struct sockaddr_in server;
     i32 fd = socket(AF_INET, SOCK_STREAM, 0);
     if(fd == -1){
@@ -32,4 +33,6 @@ status Conn_InetConnect(Buff *bf, HostEnt *h, i32 port){
 
     Buff_SetSocket(bf, fd);
     return SUCCESS;
+    */
+    return ZERO;
 }

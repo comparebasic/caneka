@@ -62,6 +62,14 @@ static void match_NextKoTerm(Match *mt){
 }
 
 static void addCount(MemCh *m, Match *mt, word flags, i32 length){
+    if(flags == SNIP_CONTENT){
+        printf("content %d\n", length);
+        fflush(stdout);
+    }else if(flags == SNIP_GAP){
+        printf("gap %d\n", length);
+        fflush(stdout);
+    }
+
     if(mt->snip.type.state == ZERO){
         mt->snip.type.state = flags;
     }else if(mt->snip.type.state == SNIP_NOTAIL){

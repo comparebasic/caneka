@@ -247,7 +247,7 @@ status Span_Print(Buff *bf, void *a, cls type, word flags){
             NULL
         };
         Fmt(bf, "Span<^D.$^d.values/0..$/$dims [", args);
-    }else if(flags & MORE){
+    }else{
         Buff_AddBytes(bf, (byte *)"[", 1);
     }
     Iter it;
@@ -273,15 +273,15 @@ status Span_Print(Buff *bf, void *a, cls type, word flags){
             }else{
                 ToS(bf, it.value, 0, flags);
             }
-            if((it.type.state & LAST) == 0 && (flags & MORE)){
-                Buff_AddBytes(bf, (byte *)",", 1);
+            if((it.type.state & LAST) == 0){
+                Buff_AddBytes(bf, (byte *)", ", 1);
             }
         }
     }
 
     if((flags & (MORE|DEBUG)) == (MORE|DEBUG)){
         Buff_AddBytes(bf, (byte *)"]>", 2);
-    }else if(flags & MORE){
+    }else{
         Buff_AddBytes(bf, (byte *)"]", 1);
     }
     

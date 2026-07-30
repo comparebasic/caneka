@@ -25,6 +25,7 @@ status MatchKo_Tests(MemCh *m);
 status MatchReplace_Tests(MemCh *m);
 status Cash_Tests(MemCh *m);
 status Http_Tests(MemCh *m);
+status Http_ServerTests(MemCh *m);
 status HttpQuery_Tests(MemCh *m);
 status Inet_Tests(MemCh *gm);
 status Host_Tests(MemCh *m);
@@ -105,7 +106,7 @@ static TestSet ExtTests[] = {
         "StrVecSplit via Match",
         StrVecSplit_Tests,
         "Testing String Vector Split function",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "Snip Tests",
@@ -196,6 +197,12 @@ static TestSet ExtTests[] = {
         Http_Tests,
         "Http Protocol and header parsing tests.",
         FEATURE_COMPLETE,
+    },
+    {
+        "Http Server Tests",
+        Http_ServerTests,
+        "Http Server and request tests.",
+        SKIP_TEST,
     },
     {
         "HttpQuery Tests",

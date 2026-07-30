@@ -9,35 +9,32 @@ char *jsonSimpleNlStr = "{\n\"hi\": \"there\"\n}"
     ;
 
 char *jsonComplexStr = ""
-  "{\n"
-  "    \"endpoints\": {\n"
-  "        \"0.0.0.0\": {\n"
-  "            \"type\": \"ip4\",\n"
-  "            \"port\": 8080,\n"
-  "            \"handler\": \"http-static\",\n"
-  "            \"dir\": \"public\"\n"
-  "        },\n"
-  "        \"::\": {\n"
-  "            \"type\": \"ip6\",\n"
-  "            \"port\": 8443,\n"
-  "            \"handler\": \"https-static\",\n"
-  "            \"tls-cert\": \"/var/fixtures/server.crt\",\n"
-  "            \"tls-key\": \"/var/fixtures/server.key\",\n"
-  "            \"dir\": \"public\"\n"
-  "        },\n"
-  "        \"cmd.txt\": {\n"
-  "            \"type\": \"file\",\n"
-  "            \"handler\": \"file-commands\"\n"
-  "        }\n"
-  "    },\n"
-  "    \"logs\": {\n"
-  "        \"requests\": \"log/req\",\n"
-  "        \"error\": \"log/err\",\n"
-  "        \"commands\": \"log/cmd\"\n"
-  "    }\n"
-  "}\n"
-  ;
-
+    "{\n"
+    "    \"endpoints\": [\n"
+    "        {\n"
+    "            \"interfaces\": [\n"
+    "                {\"ip4\":\"0.0.0.0\", \"port\": 8080, \"proto\":\"http\"},\n"
+    "                {\"ip4\":\"0.0.0.0\", \"port\": 8443, \"proto\":\"https\"},\n"
+    "                {\"ip6\":\"::\", \"port\": 8080, \"proto\":\"http\"},\n"
+    "                {\"ip6\":\"::\", \"port\": 8443, \"proto\":\"https\"}\n"
+    "            ],\n"
+    "            \"handler\": \"http-static\",\n"
+    "            \"dir\": \"public\"\n"
+    "        },\n"
+    "        {\n"
+    "            \"interfaces\": [\n"
+    "                {\"file\":\"cmd.txt\", \"proto\":\"cmd-file\"}\n"
+    "            ],\n"
+    "            \"handler\": \"file-command\"\n"
+    "        }\n"
+    "    ],\n"
+    "    \"logs\": {\n"
+    "        \"requests\": \"log/req\",\n"
+    "        \"error\": \"log/err\",\n"
+    "        \"commands\": \"log/cmd\"\n"
+    "    }\n"
+    "}\n"
+    ;
 
 status Json_Tests(MemCh *m){
     Debug_Push(m, NULL);
@@ -52,7 +49,7 @@ status Json_Tests(MemCh *m){
     args[0] = s;
     args[1] = n;
     args[2] = NULL;
-    r |= Test(n != NULL, "Json has been parsed: $ -> @^0", args);
+    r |= Test(n != NULL, "Json has been parsed: $ -> $^0", args);
     args[0] = K(m, "there");
     args[1] = Inst_GetChild(n, K(m, "hi"));
     args[2] = NULL;
@@ -64,7 +61,7 @@ status Json_Tests(MemCh *m){
     args[0] = s;
     args[1] = n;
     args[2] = NULL;
-    r |= Test(n != NULL, "Json has been parsed: $ -> @^0", args);
+    r |= Test(n != NULL, "Json has been parsed: $ -> $^0", args);
     args[0] = K(m, "there");
     args[1] = Inst_GetChild(n, K(m, "hi"));
     args[2] = NULL;
@@ -76,7 +73,7 @@ status Json_Tests(MemCh *m){
     args[0] = s;
     args[1] = n;
     args[2] = NULL;
-    r |= Test(n != NULL, "Json has been parsed: $ -> @^0", args);
+    r |= Test(n != NULL, "Json has been parsed: $ -> $^0", args);
 
     StrVec *path = Path_DotPath(m, S(m, "endpoints.::"));
     Node *value = Inst_GetByPath(n, path);

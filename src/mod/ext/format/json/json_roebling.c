@@ -1,7 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-
 static PatCharDef leadDef[] = {
     {PAT_MANY, '\t', '\t'},
     {PAT_MANY, '\r', '\r'},
@@ -32,10 +31,22 @@ static PatCharDef outdentArrDef[] = {
     {PAT_END, 0, 0}
 };
 
-static PatCharDef quotedStringDef[] = {
+static PatCharDef stringDef[] = {
     {PAT_TERM|PAT_INVERT_CAPTURE, '"', '"'},
     {PAT_MANY|PAT_KO|PAT_INVERT, '\\', '\\'},
     {PAT_MANY|PAT_KO, '"', '"'}, patText,
+    {PAT_KO|PAT_KO, ','}, {PAT_KO|PAT_KO, '{'},
+    {PAT_KO|PAT_KO, '['}, {PAT_KO|PAT_KO, '\r'},{PAT_KO|PAT_KO, '\n'},{PAT_KO|PAT_KO, '\t'},
+    {PAT_MANY|PAT_TERM|PAT_INVERT_CAPTURE, ' ', ' '},
+    {PAT_END, 0, 0}
+};
+
+static PatCharDef stringKeyDef[] = {
+    {PAT_TERM|PAT_INVERT_CAPTURE, '"', '"'},
+    {PAT_MANY|PAT_KO|PAT_INVERT, '\\', '\\'},
+    {PAT_MANY|PAT_KO, '"', '"'}, patText,
+    {PAT_MANY|PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, ' ', ' '},
+    {PAT_TERM|PAT_INVERT_CAPTURE|PAT_CONSUME, ':', ':'},
     {PAT_END, 0, 0}
 };
 
@@ -62,101 +73,17 @@ static status start(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         leadDef, JSON_LEAD, JSON_START);
     r |= Roebling_SetPattern(rbl,
-        indentDef, JSON_INDENT, JSON_KEY);
+        indentDef, JSON_INDENT, JSON_START);
     r |= Roebling_SetPattern(rbl,
-        indentArrDef, JSON_ARR_INDENT, JSON_ARR);
+        indentArrDef, JSON_ARR_INDENT, JSON_START);
     r |= Roebling_SetPattern(rbl,
-        quotedStringDef, JSON_STRING, JSON_COMMA_SEP);
+        stringKeyDef, JSON_KEY, JSON_START);
     r |= Roebling_SetPattern(rbl,
-        numberDef, JSON_NUMBER, JSON_END);
+        stringDef, JSON_STRING, JSON_START);
+    r |= Roebling_SetPattern(rbl,
+        numberDef, JSON_NUMBER, JSON_START);
     r |= Roebling_SetPattern(rbl,
         commaSepDef, JSON_COMMA_SEP, JSON_START);
-    r |= Roebling_SetPattern(rbl,
-        outdentDef, JSON_OUTDENT, JSON_START);
-    r |= Roebling_SetPattern(rbl,
-        outdentArrDef, JSON_ARR_OUTDENT, JSON_START);
-
-    return r;
-}
-
-static status keyValue(MemCh *m, Roebling *rbl){
-    status r = READY;
-    Roebling_ResetPatterns(rbl);
-    r |= Roebling_SetPattern(rbl,
-        leadDef, JSON_LEAD, JSON_KEY_VALUE);
-    r |= Roebling_SetPattern(rbl,
-        indentDef, JSON_INDENT, JSON_KEY);
-    r |= Roebling_SetPattern(rbl,
-        indentArrDef, JSON_ARR_INDENT, JSON_ARR);
-    r |= Roebling_SetPattern(rbl,
-        quotedStringDef, JSON_KEY_VALUE, JSON_KEY_VALUE_SEP);
-    r |= Roebling_SetPattern(rbl,
-        numberDef, JSON_NUMBER, JSON_KEY_VALUE_SEP);
-    r |= Roebling_SetPattern(rbl,
-        outdentDef, JSON_OUTDENT, JSON_START);
-
-    return r;
-}
-
-static status keySep(MemCh *m, Roebling *rbl){
-    status r = READY;
-    Roebling_ResetPatterns(rbl);
-    r |= Roebling_SetPattern(rbl,
-        leadDef, JSON_LEAD, JSON_KEY_SEP);
-    r |= Roebling_SetPattern(rbl,
-        keySepDef, JSON_KEY_SEP, JSON_KEY_VALUE);
-
-    return r;
-}
-
-static status key(MemCh *m, Roebling *rbl){
-    status r = READY;
-    Roebling_ResetPatterns(rbl);
-    r |= Roebling_SetPattern(rbl,
-        leadDef, JSON_LEAD, JSON_KEY);
-    r |= Roebling_SetPattern(rbl,
-        quotedStringDef, JSON_KEY, JSON_KEY_SEP);
-
-    return r;
-}
-
-static status arr(MemCh *m, Roebling *rbl){
-    status r = READY;
-    Roebling_ResetPatterns(rbl);
-    r |= Roebling_SetPattern(rbl,
-        leadDef, JSON_LEAD, JSON_ARR);
-    r |= Roebling_SetPattern(rbl,
-        quotedStringDef, JSON_VALUE, JSON_KEY_SEP);
-    r |= Roebling_SetPattern(rbl,
-        numberDef, JSON_NUMBER, JSON_KEY_SEP);
-    r |= Roebling_SetPattern(rbl,
-        indentDef, JSON_INDENT, JSON_KEY);
-    r |= Roebling_SetPattern(rbl,
-        indentArrDef, JSON_ARR_INDENT, JSON_ARR);
-
-    return r;
-}
-
-static status kvSep(MemCh *m, Roebling *rbl){
-    status r = READY;
-    Roebling_ResetPatterns(rbl);
-    r |= Roebling_SetPattern(rbl,
-        leadDef, JSON_LEAD, JSON_KEY_VALUE);
-    r |= Roebling_SetPattern(rbl,
-        commaSepDef, JSON_COMMA_SEP, JSON_KEY);
-    r |= Roebling_SetPattern(rbl,
-        outdentDef, JSON_OUTDENT, JSON_START);
-
-    return r;
-}
-
-static status arrSep(MemCh *m, Roebling *rbl){
-    status r = READY;
-    Roebling_ResetPatterns(rbl);
-    r |= Roebling_SetPattern(rbl,
-        leadDef, JSON_LEAD, JSON_COMMA_SEP);
-    r |= Roebling_SetPattern(rbl,
-        commaSepDef, JSON_COMMA_SEP, JSON_ARR);
     r |= Roebling_SetPattern(rbl,
         outdentDef, JSON_OUTDENT, JSON_START);
     r |= Roebling_SetPattern(rbl,
@@ -242,7 +169,7 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
         Iter_Prev(it);
     }else if(captureKey == JSON_KEY){
         Table_SetKey(prevIt, v);
-    }else if(captureKey == JSON_VALUE){
+    }else if(captureKey == JSON_STRING){
         value = v;
     }else if(captureKey == JSON_NUMBER){
         i64 n = I64_FromStr(Ifc(m, v, TYPE_STR));
@@ -274,18 +201,6 @@ Roebling *JsonParser_Make(MemCh *m, Cursor *curs){
     Roebling *rbl = Roebling_Make(m, curs, Capture, NULL); 
     Roebling_AddStep(rbl, I16_Wrapped(m, JSON_START));
     Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)start));
-    Roebling_AddStep(rbl, I16_Wrapped(m, JSON_KEY));
-    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)key));
-    Roebling_AddStep(rbl, I16_Wrapped(m, JSON_ARR));
-    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)arr));
-    Roebling_AddStep(rbl, I16_Wrapped(m, JSON_KEY_SEP));
-    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)keySep));
-    Roebling_AddStep(rbl, I16_Wrapped(m, JSON_KEY_VALUE));
-    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)keyValue));
-    Roebling_AddStep(rbl, I16_Wrapped(m, JSON_KEY_VALUE_SEP));
-    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)kvSep));
-    Roebling_AddStep(rbl, I16_Wrapped(m, JSON_COMMA_SEP));
-    Roebling_AddStep(rbl, Do_Wrapped(m, (DoFunc)arrSep));
     Roebling_AddStep(rbl, I16_Wrapped(m, JSON_END));
     Roebling_Start(rbl);
 
