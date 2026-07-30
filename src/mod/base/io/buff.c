@@ -257,15 +257,15 @@ static status Buff_sendToFd(Buff *bf, i32 fd){
     return bf->type.state;
 }
 
-util Buff_Hash(void *_bf){
+util Hash_Buff(void *_bf){
     Buff *bf = (Buff *)_bf;
     util parity = 0;
     if(bf->path == NULL){
-        return _Hash_Bytes(&bf, sizeof(void *));
+        return Hash_Ptr(&bf);
     }else{
-        parity = Parity_PreVec(bf->path);
+        parity = Parity_Pre(bf->path);
         parity += bf->pfd != NULL ? bf->pfd->fd : 0;
-        return Parity_Finalize(parity, bf->path->total);
+        return Parity_Finalize(parity, bf->path->length);
     }
 }
 

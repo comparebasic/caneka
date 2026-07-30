@@ -20,11 +20,6 @@ static util _Hash_Bytes(byte *bt, size_t length){
     return Parity_From(&s);
 }
 
-static util Hash_Ptr(void *ptr){
-	util h = 5381;
-    return _Hash_Bytes((byte *)&ptr, sizeof(void *));
-}
-
 static util Hash_Str(void *a){
     Str *s = (Str *)a;
     return Parity_From(s);
@@ -55,6 +50,11 @@ static util Hash_WI16(void *a){
 static util Hash_Util(void *a){
     Single *sg = (Single *)a;
     return _Hash_Bytes((byte *)&sg->val.value, sizeof(util));
+}
+
+util Hash_Ptr(void *ptr){
+	util h = 5381;
+    return _Hash_Bytes((byte *)&ptr, sizeof(void *));
 }
 
 util Hash_Bytes(byte *bt, size_t length){

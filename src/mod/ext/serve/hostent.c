@@ -15,7 +15,7 @@ static i32 openAddrToFd(HostEnt *ent){
         serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     }else if(ent->addr->type.of == TYPE_NET_ADDR4){
         NetAddr *net = (NetAddr *)ent->addr;
-        serv_addr.sin_addr.s_addr = net->ip4addr.sin_addr.s_addr;
+        serv_addr.sin_addr.s_addr = net->net.ip4addr.sin_addr.s_addr;
     }else{
         void *ar[] = {ent->addr, NULL};
         Error(ent->m, FUNCNAME, FILENAME, LINENUMBER,

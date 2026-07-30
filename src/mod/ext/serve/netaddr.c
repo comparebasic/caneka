@@ -7,7 +7,7 @@ NetAddr *NetAddr_Make4(MemCh *m){
     return addr;
 }
 
-void NetAddr_SetFromStr4(NetAddr *net, Str *s){
+void NetAddr_SetFromStr4(MemCh *m, NetAddr *net, Str *s){
     if(net->type.of != TYPE_NET_ADDR4){
         void *ar[] = {net, NULL};
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -15,11 +15,11 @@ void NetAddr_SetFromStr4(NetAddr *net, Str *s){
         return;
     }
 
-    net->ip4addr.sin_addr.s_addr = Str_ToIp4(s);
+    net->net.ip4addr.sin_addr.s_addr = Str_ToIp4(m, s);
 }
 
-void NetAddr_SetFromStrPort(NetAddr *net, Str *s){
-    net->port = ;
+void NetAddr_SetFromStrPort(NetAddr *net, i32 port){
+    net->port = port;
 }
 
 NetAddr *NetAddr_Make6(MemCh *m){

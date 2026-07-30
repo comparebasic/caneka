@@ -35,6 +35,11 @@ void *Json_FromPath(MemCh *m, void *path){
     File_Close(bf);
 
     Roebling *rbl = JsonParser_Make(m, Cursor_Make(m, bf->v));
+    Abstract *a = rbl->dest;
+    rbl->type.state |= DEBUG;
+    a->type.state |= DEBUG;
+
+
     Roebling_Run(rbl);
     Roebling_Last(rbl);
     if(rbl->nest == 0){

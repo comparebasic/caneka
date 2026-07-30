@@ -247,7 +247,7 @@ void StrVec_OnToStr(MemCh *m, StrVec *v, word length, Str *s, boolean filter){
             args[1] = NULL;
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
                 "Failed text char filter &", args);
-            return NULL;
+            return;
         }
     }
 }

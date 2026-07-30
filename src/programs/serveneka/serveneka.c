@@ -17,37 +17,11 @@ void Serveneka_Serve(MemCh *m, Node *config){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
             Table *props = Span_Get(h->value, INST_PROPIDX_CHILDREN);
-            StrVec *type = Table_Get(props, K(m, "type"));
-            StrVec *handler = Table_Get(props, K(m, "handler"));
-            if(type == NULL || handler == NULL){
-                args[0] = props;
-                args[1] = NULL;
-                Out("^Error Configuring Endpoint type or handler is NULL $", args);
-                ReturnVoid(m);
-            }
-
-            if(Equals(type, K(m, "ip4"))){
-                /* parse key */
-                /* make HostEnt as key to routes Hashed */
-                /* grap handlers and make value to routes Hashed */
-                HostEnt *ent = HostEnt_Make(m);
-                NetAddr *addr = NetAddr_Make4(m); 
-                ent->addr = addr;
-            }else if(Equals(type, K(m, "ip6"))){
-                /*
-                Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                    "Not yet implemented", NULL);
-                    */
-            if(Equals(type, K(m, "file"))){
-                args[0] = props;
-                args[1] = NULL;
-                Out("^y.File $^0\n", args);
-            }else{
-                Buff *bf = Buff_Make(m, ZERO);
-            }
+            args[0] = props;
+            args[1] = NULL;
+            Out("^y.Endpoint @^0\n", args);
         }
     }
-
 
     /*
     HttpStatic_Init(m);

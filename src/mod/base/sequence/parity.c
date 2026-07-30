@@ -186,8 +186,33 @@ util Parity_From(Str *s){
     return parity;
 }
 
+util Parity_Pre(Str *s){
+    util parity = 0;
+    util slot = 0;
+    word pos = 0;
+    util size = sizeof(util);
+    util mod = size-1;
+    word remaining = s->length;
+    byte *ptr = s->bytes;
+
+    while(remaining >= size){
+        memcpy(((byte *)&slot), ptr, size);
+        parity += slot;
+        remaining -= size;
+        ptr += size;
+    }
+
+    if(remaining){
+        slot = 0;
+        memcpy(&slot, ptr, remaining);
+        parity += slot;
+    }
+
+    return parity;
+}
+
 util Parity_FromVec(StrVec *v){
-    parity = Parity_PreVec(v);
+    util parity = Parity_PreVec(v);
     return Parity_Finalize(parity, v->total);
 }
 

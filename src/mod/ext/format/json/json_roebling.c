@@ -70,7 +70,7 @@ static status start(MemCh *m, Roebling *rbl){
     r |= Roebling_SetPattern(rbl,
         numberDef, JSON_NUMBER, JSON_END);
     r |= Roebling_SetPattern(rbl,
-        commaSepDef, JSON_COMMA_SEP, JSON_KEY);
+        commaSepDef, JSON_COMMA_SEP, JSON_START);
     r |= Roebling_SetPattern(rbl,
         outdentDef, JSON_OUTDENT, JSON_START);
     r |= Roebling_SetPattern(rbl,
