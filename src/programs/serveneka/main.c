@@ -42,6 +42,7 @@ i32 main(int argc, char **argv){
     IoUtil_TrimDir(m, configPath);
     Node *config = Json_FromPath(m, configPath);
 
+    Serveneka_Init(m);
     Serveneka_Serve(m, config);
 
     return (r & ERROR) == 0 ? 0 : 1;

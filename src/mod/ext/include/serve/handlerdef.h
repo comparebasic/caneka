@@ -3,9 +3,10 @@ typedef void (*ReqFunc)(MemCh *m, struct req *req, struct serve *srv);
 typedef struct req_handler_def {
     Type type;
     SourceMakerFunc extra;
+    ReqFunc prepare;
     ReqFunc finalize;
     Span *route;
-    Node *tbl;
+    Node *extensions;
     struct {
         ReqFunc open;
         ReqFunc final;

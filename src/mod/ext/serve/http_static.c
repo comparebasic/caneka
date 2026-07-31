@@ -30,7 +30,6 @@ status HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
         StrVec_Add(local, S(m, "index.html"));
     }
 
-
     Str *dir = Seel_Get(srv->config, K(m, "dir"));
     StrVec *path = Clone(m, dir);
     StrVec_AddVec(path, local);

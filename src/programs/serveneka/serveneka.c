@@ -1,6 +1,33 @@
 #include <external.h>
 #include <caneka.h>
 
+Table *extensions = NULL;
+
+status HttpReq_Stats(MemCh *m, Req *req, Serve *srv){
+    return NOOP;
+}
+
+status ServenekaReq_Prepare(MemCh *m, Req *req, Serve *srv){
+    Span *path = Span_Make(m);
+    Span_Add(path, K(m, "by-path"));
+    Span_Add(path, req->path);
+    Single *sg = Inst_ByPath(req->def->extensions, path);
+    if(sg != NULL){
+        Span_Set(req->chain.p, req->chain.idx, sg);
+    }else{
+        Span *path = Span_Make(m);
+        Span_Add(path, K(m, "static"));
+        sg = Inst_ByPath(req->def->extensions, path);
+    }
+
+    if(sg != NULL){
+        ReqFunc func = (ReqFunc)sg->val.ptr;
+        func(m, req, srv);
+    }
+    
+    return req->type.state;
+}
+
 void Serveneka_Serve(MemCh *m, Node *config){
     Debug_Push(m, config);
     void *args[5];
@@ -9,7 +36,21 @@ void Serveneka_Serve(MemCh *m, Node *config){
     args[1] = NULL;
     Out("^p.Config: $^0\n", args);
 
-    Span *path = Span_Make(m);
+
+    Span *path;
+
+    Node *extensions = Inst_Make(m, TYPE_NODE);
+
+    path = Span_Make(m);
+    Span_Add(path, S(m, "static"));
+    Inst_SetByPath(extensions, path, Func_Wrapped(m, HttpStatic_RetrieveFile));
+
+    path = Span_Make(m);
+    Span_Add(path, S(m, "by-path"));
+    Span_Add(path, S(m, "/stat"));
+    Inst_SetByPath(extensions, path, Func_Wrapped(m, HttpReq_Stats));
+
+    path = Span_Make(m);
     Span_Add(path, K(m, "endpoints"));
 
     Iter it;
@@ -54,4 +95,14 @@ void Serveneka_Serve(MemCh *m, Node *config){
 
     Serve_ServeTcp(srv);
     */
+}
+
+void Serveneka_Init(MemCh *m, Node *config){
+    if(extensions == NULL){
+        extensions = Table_Make(m);
+        Table_Set(extensions, S(m, "static"),
+            );
+        Table_Set(extensions, S(m, "/stats"), 
+            Func_Wrapped(m, HttpReq_Stats));
+    }
 }

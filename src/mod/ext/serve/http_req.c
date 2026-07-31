@@ -70,9 +70,14 @@ static void HttpReq_writeBody(MemCh *m, HttpReq *hreq){
     }
 }
 
-static void HttpReq_Finalize(MemCh *m, Req *req, Serve *srv){
+status HttpReq_Close(MemCh *m, Req *req, Serve *srv){
     HttpReq *hreq = (HttpReq *)req->source;
-    HttpReq_Close(m, req, srv);
+    Return(m, req->type.state);
+}
+
+void HttpReq_Finalize(MemCh *m, Req *req, Serve *srv){
+    HttpReq *hreq = (HttpReq *)req->source;
+    close(req->crit->pfd.fd);
 
     Buff *bf = NULL;
     if(req->type.state & ERROR && srv->log.err != NULL){
@@ -182,31 +187,6 @@ void HttpReq_RemoveHeader(HttpReq *req, Str *key){
     }
 }
 
-status HttpReq_ReadToRblTls(MemCh *m, Req *req, Serve *srv){
-    Debug_Push(m, req);
-    HttpReq *hreq = (HttpReq *)req->source;
-
-    if((hreq->rbl->type.state & (SUCCESS|ERROR)) == 0){
-        req->def->capsule->readTo(hreq->cap);
-        Roebling_Run(hreq->rbl);
-    }
-    
-    req->type.state |= hreq->rbl->type.state & (SUCCESS|ERROR);
-
-    if(req->type.state & SUCCESS){
-        HttpReq_ParseBody(hreq);            
-        if(req->type.state & DEBUG){
-            void *args[] = {
-                req,
-                NULL,
-            };
-            Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
-        }
-    }
-
-    Return(m, req->type.state);
-}
-
 status HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
@@ -237,19 +217,12 @@ status HttpReq_Write(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
 
+    Buff_SetSocket(hreq->out, req->crit->pfd.fd);
     HttpReq_SetHeader(hreq, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
-    if(hreq->cap == NULL){
-        Buff_SetSocket(hreq->out, req->crit->pfd.fd);
-    }
-
     HttpReq_writeStatus(m, hreq, req);
     HttpReq_setLength(m, hreq);
     HttpReq_writeHeaders(m, hreq);
     HttpReq_writeBody(m, hreq);
-
-    if(hreq->cap != NULL){
-        req->def->capsule->writeTo(hreq->cap);
-    }
 
     req->type.state |= (SUCCESS|END);
     Return(m, req->type.state);
@@ -281,35 +254,6 @@ void HttpReq_ParseBody(HttpReq *hreq){
     }
 
     ReturnVoid(m);
-}
-
-
-status HttpReq_Accept(MemCh *m, Req *req, Serve *srv){
-    HttpReq *hreq = (HttpReq *)req->source;
-    if(req->def->capsule != NULL){
-#ifdef CNKOPT_CRYPTO
-        if(hreq->cap == NULL){
-            TlsInfo *info = TlsInfo_Make(m, req->crit->pfd.fd, req->conn.ent->ctx);
-            hreq->cap = Capsule_Make(m, TYPE_TLS_CAPSULE, hreq->in, hreq->out, info); 
-        }
-#endif
-        if(req->def->capsule->open(hreq->cap) & SUCCESS){;
-            req->type.state |= SUCCESS;
-        }
-    }else{
-        Buff_SetSocket(hreq->in, req->crit->pfd.fd);
-    }
-
-    Return(m, req->type.state);
-}
-
-status HttpReq_Close(MemCh *m, Req *req, Serve *srv){
-    HttpReq *hreq = (HttpReq *)req->source;
-    if(req->def->capsule != NULL){
-        req->def->capsule->close(hreq->cap);
-    }
-    close(req->crit->pfd.fd);
-    Return(m, req->type.state);
 }
 
 void HttpReq_Setup(MemCh *m, Req *req, Serve *srv){
@@ -380,22 +324,7 @@ HandlerDef *HttpReq_DefMake(MemCh *m){
     def->log.final = (ReqFunc) HttpReq_logFinalized;
     def->route = Span_Make(m);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_RespToRbl));
-    Span_Add(def->route, Func_Wrapped(m, HttpStatic_RetrieveFile));
-    Span_Add(def->route, Func_Wrapped(m, HttpReq_Write));
-
-    return def;
-}
-
-HandlerDef *HttpTlsReq_DefMake(MemCh *m){
-    HandlerDef *def = HandlerDef_Make(m);
-    def->extra = (SourceMakerFunc)HttpReq_SourceMake;
-    def->finalize = (ReqFunc) HttpReq_Finalize;
-    def->log.open = (ReqFunc) HttpReq_logOpen;
-    def->log.final = (ReqFunc) HttpReq_logFinalized;
-    def->route = Span_Make(m);
-    Span_Add(def->route, Func_Wrapped(m, HttpReq_Accept));
-    Span_Add(def->route, Func_Wrapped(m, HttpReq_ReadToRblTls));
-    Span_Add(def->route, Func_Wrapped(m, HttpStatic_RetrieveFile));
+    Span_Add(def->route, Func_Wrapped(m, HttpReq_Prepare));
     Span_Add(def->route, Func_Wrapped(m, HttpReq_Write));
 
     return def;

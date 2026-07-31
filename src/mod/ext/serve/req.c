@@ -1,7 +1,11 @@
 #include <external.h>
 #include <caneka.h>
 
-void Serve_Handle(MemCh *m, Req *req, Serve *srv){
+status Req_Prepare(MemCh *m, Req *req, Serve *srv){
+    return req->def->prepare(m, req, srv);
+}
+
+void Req_Handle(MemCh *m, Req *req, Serve *srv){
     HttpReq *hreq = (HttpReq *)req->source;
     if(req->type.state & ERROR){
         Single *sg = Iter_GetByIdx(&req->chain, req->chain.p->max_idx);
@@ -23,9 +27,6 @@ void Serve_Handle(MemCh *m, Req *req, Serve *srv){
     return;
 }
 
-void Req_Setup(MemCh *m, Serve *srv){
-    ;
-}
 
 void Req_SetFd(Req *req, i32 fd){
     req->crit->pfd.fd = fd;
