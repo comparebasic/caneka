@@ -482,7 +482,7 @@ int main(int argc, char *argv[]){
         runcmd[0] = buildWebServerNoCrypto;
         runcmd[1] = NULL;
     }else if(compareCstr("build-run-webserver", choice)){
-        runcmd[0] = buildWebServerNoCrypto;
+        runcmd[0] = buildWebServer;
         runcmd[1] = runWebServer;
         runcmd[2] = NULL;
     }else if(compareCstr("read-documentation", choice)){

@@ -17,11 +17,10 @@ typedef struct req {
     void *source;
 } Req;
 
-status Req_SetExtension(MemCh *m, Req *req, Serve *srv);
 void Req_ExpectRecv(Req *req);
 void Req_ExpectSend(Req *req);
 void Req_ExpectInternal(Req *req);
 void Req_SetFd(Req *req, i32 fd);
 void Req_Handle(MemCh *m, Req *req, struct serve *srv);
 Req *Req_Make(MemCh *m, HandlerDef *def, void *source);
-status Req_Prepare(MemCh *m, Req *req, Serve *srv);
+void Req_Prepare(MemCh *m, Req *req, struct serve *srv);

@@ -4,20 +4,22 @@
 Table *extensions = NULL;
 
 status HttpReq_Stats(MemCh *m, Req *req, Serve *srv){
+    HttpReq *hreq = (HttpReq *)req->source;
     return NOOP;
 }
 
 status ServenekaReq_Prepare(MemCh *m, Req *req, Serve *srv){
+    HttpReq *hreq = (HttpReq *)req->source;
     Span *path = Span_Make(m);
     Span_Add(path, K(m, "by-path"));
-    Span_Add(path, req->path);
-    Single *sg = Inst_ByPath(req->def->extensions, path);
+    Span_Add(path, hreq->path);
+    Single *sg = Inst_GetByPath(req->def->extensions, path);
     if(sg != NULL){
         Span_Set(req->chain.p, req->chain.idx, sg);
     }else{
         Span *path = Span_Make(m);
         Span_Add(path, K(m, "static"));
-        sg = Inst_ByPath(req->def->extensions, path);
+        sg = Inst_GetByPath(req->def->extensions, path);
     }
 
     if(sg != NULL){
@@ -101,7 +103,7 @@ void Serveneka_Init(MemCh *m, Node *config){
     if(extensions == NULL){
         extensions = Table_Make(m);
         Table_Set(extensions, S(m, "static"),
-            );
+            Func_Wrapped(m, HttpStatic_RetrieveFile));
         Table_Set(extensions, S(m, "/stats"), 
             Func_Wrapped(m, HttpReq_Stats));
     }

@@ -1,8 +1,8 @@
 #include <external.h>
 #include <caneka.h> 
 
-extern Table *ServeProtoTable = NULL;
 static Table *services = NULL;
+Table *ServeProtoTable = NULL;
 
 i32 Serve_PortByService(Str *s){
     Single *sg = Table_Get(services, s);
@@ -22,7 +22,7 @@ void Serve_Init(MemCh *m){
     }
     if(ServeProtoTable == NULL){
         ServeProtoTable = Table_Make(m);
-        Table_Add(ServeProtoTable, S(m, "https"), HttpTlsReq_DefMake(m));
-        Table_Add(ServeProtoTable, S(m, "http"), HttpReq_DefMake(m));
+        Table_Set(ServeProtoTable, S(m, "https"), HttpTlsReq_DefMake(m));
+        Table_Set(ServeProtoTable, S(m, "http"), HttpReq_DefMake(m));
     }
 }

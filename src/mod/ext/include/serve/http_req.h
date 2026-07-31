@@ -24,11 +24,18 @@ typedef struct http_req {
     Span *sections;
 } HttpReq;
 
-status HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv);
-status HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv);
-status HttpReq_Write(MemCh *m, Req *req, Serve *srv);
-status HttpReq_Accept(MemCh *m, Req *req, Serve *srv);
-status HttpReq_Close(MemCh *m, Req *req, Serve *srv);
+void HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv);
+void HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv);
+void HttpReq_Write(MemCh *m, Req *req, Serve *srv);
+void HttpReq_Accept(MemCh *m, Req *req, Serve *srv);
+void HttpReq_Close(MemCh *m, Req *req, Serve *srv);
+void HttpReq_LogOpen(MemCh *m, HttpReq *req, Serve *srv);
+void HttpReq_LogFinalized(MemCh *m, HttpReq *req, Serve *srv);
+void HttpReq_SetLength(MemCh *m, HttpReq *hreq);
+void HttpReq_WriteStatus(MemCh *m, HttpReq *hreq, Req *req);
+void HttpReq_WriteHeaders(MemCh *m, HttpReq *hreq);
+void HttpReq_WriteBody(MemCh *m, HttpReq *hreq);
+void HttpReq_Finalize(MemCh *m, Req *req, Serve *srv);
 
 void HttpReq_ParseBody(HttpReq *req);
 void *HttpReq_SourceMake(MemCh *m, Serve *srv, HandlerDef *def);
@@ -40,4 +47,3 @@ void HttpReq_SetHeader(HttpReq *req, Str *key, void *value);
 void HttpReq_RemoveHeader(HttpReq *req, Str *key);
 void HttpReq_Init(MemCh *m);
 HandlerDef *HttpReq_DefMake(MemCh *m);
-HandlerDef *HttpTlsReq_DefMake(MemCh *m);

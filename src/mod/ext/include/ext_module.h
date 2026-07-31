@@ -11,6 +11,5 @@
 #include "navigate.h"
 #include "format.h"
 #include "serve.h"
-#include "http.h"
 
 #endif

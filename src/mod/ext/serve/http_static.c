@@ -19,7 +19,7 @@ static void HttpStatic_Setup(MemCh *m, Req *req, Serve *srv){
     HttpReq_SetToRecv((HttpReq *)req->source, req);
 }
 
-status HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
+void HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
 
@@ -44,7 +44,7 @@ status HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
     File_Open(bf, path, O_RDONLY);
     if(bf->type.state & ERROR){
         req->type.state |= NOOP;
-        Return(m, req->type.state);
+        ReturnVoid(m);
     }
     Buff_Stat(bf);
 
@@ -92,7 +92,5 @@ status HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
 
     Req_ExpectSend(req);
     req->type.state |= SUCCESS;
-    Return(m, req->type.state);
+    ReturnVoid(m);
 }
-
-

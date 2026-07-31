@@ -1,15 +1,15 @@
 #include <external.h>
 #include <caneka.h>
 
-static void HttpReq_logOpen(MemCh *m, HttpReq *req, Serve *srv){
+void HttpReq_LogOpen(MemCh *m, HttpReq *req, Serve *srv){
     return;
 }
 
-static void HttpReq_logFinalized(MemCh *m, HttpReq *req, Serve *srv){
+void HttpReq_LogFinalized(MemCh *m, HttpReq *req, Serve *srv){
     return;
 }
 
-static void HttpReq_setLength(MemCh *m, HttpReq *hreq){
+void HttpReq_SetLength(MemCh *m, HttpReq *hreq){
     i64 length = 0;
     Iter it;
     if(hreq->sections->nvalues > 0){
@@ -26,7 +26,7 @@ static void HttpReq_setLength(MemCh *m, HttpReq *hreq){
     }
 }
 
-static void HttpReq_writeStatus(MemCh *m, HttpReq *hreq, Req *req){
+void HttpReq_WriteStatus(MemCh *m, HttpReq *hreq, Req *req){
     char *st = NULL;
     if(req->type.state & NOOP){
         if(req->type.state & ERROR){
@@ -44,7 +44,7 @@ static void HttpReq_writeStatus(MemCh *m, HttpReq *hreq, Req *req){
     Buff_Add(hreq->out, s);
 }
 
-static void HttpReq_writeHeaders(MemCh *m, HttpReq *hreq){
+void HttpReq_WriteHeaders(MemCh *m, HttpReq *hreq){
     Iter it;
     Iter_Init(&it, Table_Ordered(m, hreq->headersOut));
     while((Iter_Next(&it) & END) == 0){
@@ -55,7 +55,7 @@ static void HttpReq_writeHeaders(MemCh *m, HttpReq *hreq){
     Buff_Add(hreq->out, K(m, "\r\n"));
 }
 
-static void HttpReq_writeBody(MemCh *m, HttpReq *hreq){
+void HttpReq_WriteBody(MemCh *m, HttpReq *hreq){
     Iter it;
     if(hreq->sections->nvalues > 0){
         Iter_Init(&it, hreq->sections);
@@ -70,9 +70,8 @@ static void HttpReq_writeBody(MemCh *m, HttpReq *hreq){
     }
 }
 
-status HttpReq_Close(MemCh *m, Req *req, Serve *srv){
+void HttpReq_Close(MemCh *m, Req *req, Serve *srv){
     HttpReq *hreq = (HttpReq *)req->source;
-    Return(m, req->type.state);
 }
 
 void HttpReq_Finalize(MemCh *m, Req *req, Serve *srv){
@@ -123,7 +122,7 @@ void HttpReq_Finalize(MemCh *m, Req *req, Serve *srv){
     Log_Flat(m, bf, K(m, "Request "), Table_Ordered(m, tbl), format);
 }
 
-status HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv){
+void HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
 
@@ -170,7 +169,7 @@ status HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv){
 
     Req_ExpectInternal(req);
 
-    Return(m, req->type.state);
+    ReturnVoid(m);
 }
 
 void HttpReq_SetHeader(HttpReq *hreq, Str *key, void *value){
@@ -187,7 +186,7 @@ void HttpReq_RemoveHeader(HttpReq *req, Str *key){
     }
 }
 
-status HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv){
+void HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
 
@@ -210,22 +209,22 @@ status HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv){
         }
     }
 
-    Return(m, req->type.state);
+    ReturnVoid(m);
 }
 
-status HttpReq_Write(MemCh *m, Req *req, Serve *srv){
+void HttpReq_Write(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
 
     Buff_SetSocket(hreq->out, req->crit->pfd.fd);
     HttpReq_SetHeader(hreq, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
-    HttpReq_writeStatus(m, hreq, req);
-    HttpReq_setLength(m, hreq);
-    HttpReq_writeHeaders(m, hreq);
-    HttpReq_writeBody(m, hreq);
+    HttpReq_WriteStatus(m, hreq, req);
+    HttpReq_SetLength(m, hreq);
+    HttpReq_WriteHeaders(m, hreq);
+    HttpReq_WriteBody(m, hreq);
 
     req->type.state |= (SUCCESS|END);
-    Return(m, req->type.state);
+    ReturnVoid(m);
 }
 
 void HttpReq_ParseBody(HttpReq *hreq){
@@ -320,11 +319,11 @@ HandlerDef *HttpReq_DefMake(MemCh *m){
     HandlerDef *def = HandlerDef_Make(m);
     def->extra = (SourceMakerFunc)HttpReq_SourceMake;
     def->finalize = (ReqFunc) HttpReq_Finalize;
-    def->log.open = (ReqFunc) HttpReq_logOpen;
-    def->log.final = (ReqFunc) HttpReq_logFinalized;
+    def->log.open = (ReqFunc) HttpReq_LogOpen;
+    def->log.final = (ReqFunc) HttpReq_LogFinalized;
     def->route = Span_Make(m);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_RespToRbl));
-    Span_Add(def->route, Func_Wrapped(m, HttpReq_Prepare));
+    Span_Add(def->route, Func_Wrapped(m, Req_Prepare));
     Span_Add(def->route, Func_Wrapped(m, HttpReq_Write));
 
     return def;

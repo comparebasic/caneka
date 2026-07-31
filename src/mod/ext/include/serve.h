@@ -24,3 +24,6 @@ enum serve_types {
 #include "serve/tcp_source.h"
 #include "serve/serve_init.h"
 #include "serve/serve_tos.h"
+#include "serve/http_static.h"
+#include "serve/http_req.h"
+#include "serve/http_req_tls.h"

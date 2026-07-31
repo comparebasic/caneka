@@ -1,8 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-status Req_Prepare(MemCh *m, Req *req, Serve *srv){
-    return req->def->prepare(m, req, srv);
+void Req_Prepare(MemCh *m, Req *req, Serve *srv){
+    req->def->prepare(m, req, srv);
 }
 
 void Req_Handle(MemCh *m, Req *req, Serve *srv){
