@@ -1,10 +1,6 @@
 #include <external.h>
 #include <caneka.h>
 
-void Req_Prepare(MemCh *m, Req *req, Serve *srv){
-    req->def->prepare(m, req, srv);
-}
-
 void Req_Handle(MemCh *m, Req *req, Serve *srv){
     HttpReq *hreq = (HttpReq *)req->source;
     if(req->type.state & ERROR){
@@ -18,11 +14,12 @@ void Req_Handle(MemCh *m, Req *req, Serve *srv){
         }
     }
 
-    Single *sg = Iter_Get(&req->chain);
-    ReqFunc func = (ReqFunc)sg->val.ptr;
-
     req->type.state = req->type.state & (DEBUG|END|ERROR|NOOP|PROCESSING);
-    func(m, req, srv);
+    do {
+        Single *sg = Iter_Get(&req->chain);
+        ReqFunc func = (ReqFunc)sg->val.ptr;
+        func(m, req, srv);
+    }while(req->type.state & MORE);
 
     return;
 }

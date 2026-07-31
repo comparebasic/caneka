@@ -67,7 +67,7 @@ void HttpReq_TlsWrite(MemCh *m, Req *req, Serve *srv){
 }
 
 
-HandlerDef *HttpTlsReq_DefMake(MemCh *m){
+HandlerDef *HttpTlsReq_DefMake(MemCh *m, Span *handlers, Node *extensions){
     HandlerDef *def = HandlerDef_Make(m);
     def->extra = (SourceMakerFunc)HttpReq_SourceMake;
     def->finalize = (ReqFunc) HttpReq_TlsFinalize;
@@ -76,8 +76,10 @@ HandlerDef *HttpTlsReq_DefMake(MemCh *m){
     def->route = Span_Make(m);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsAccept));
     Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsReadToRbl));
-    Span_Add(def->route, Func_Wrapped(m, Req_Prepare));
+    Span_AddSpan(def->route, handlers);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsWrite));
+
+    def->extensions = extensions;
 
     return def;
 }

@@ -23,4 +23,3 @@ void Req_ExpectInternal(Req *req);
 void Req_SetFd(Req *req, i32 fd);
 void Req_Handle(MemCh *m, Req *req, struct serve *srv);
 Req *Req_Make(MemCh *m, HandlerDef *def, void *source);
-void Req_Prepare(MemCh *m, Req *req, struct serve *srv);

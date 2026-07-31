@@ -2,10 +2,10 @@
 #include <caneka.h>
 
 static i32 openAddrToFd(HostEnt *ent){
-    i32 port = ent->port;
     i32 fd = 0;
 	struct sockaddr_in serv_addr;
     NetAddr *addr = (NetAddr *)ent->addr;
+    i32 port = addr->port;
 
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 	memset(&serv_addr, '0', sizeof(serv_addr));
@@ -88,6 +88,17 @@ util HostEnt_Hash(void *a){
     HostEnt *ent = (HostEnt *)a;
     Single *sg = (Single *)ent->addr;
     return (util)sg->val.i;
+}
+
+boolean HostEnt_Equals(void *_a, void *_b){
+    HostEnt *a = (HostEnt *)_a;
+    HostEnt *b = (HostEnt *)_b;
+    if(a->type.of != b->type.of){
+        return FALSE;
+    }
+    Single *sgA = (Single *)a->addr;
+    Single *sgB = (Single *)b->addr;
+    return sgA->val.i == sgB->val.i;
 }
 
 HostEnt *HostEnt_Make(MemCh *m){

@@ -315,7 +315,7 @@ status HttpStatic_Error(MemCh *m, HttpReq *req, ErrorMsg *msg){
     return ZERO;
 }
 
-HandlerDef *HttpReq_DefMake(MemCh *m){
+HandlerDef *HttpReq_DefMake(MemCh *m, Span *handlers, Node *extensions){
     HandlerDef *def = HandlerDef_Make(m);
     def->extra = (SourceMakerFunc)HttpReq_SourceMake;
     def->finalize = (ReqFunc) HttpReq_Finalize;
@@ -323,8 +323,10 @@ HandlerDef *HttpReq_DefMake(MemCh *m){
     def->log.final = (ReqFunc) HttpReq_LogFinalized;
     def->route = Span_Make(m);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_RespToRbl));
-    Span_Add(def->route, Func_Wrapped(m, Req_Prepare));
+    Span_AddSpan(def->route, handlers);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_Write));
+
+    def->extensions = extensions;
 
     return def;
 }
