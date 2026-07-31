@@ -24,3 +24,4 @@ void Path_SwapSep(StrVec *path, Str *s, status flags);
 status Path_RmTrailingSlash(MemCh *m, StrVec *path);
 status Path_StrRmTrailingSlash(MemCh *m, Str *s);
 StrVec *Path_DotPath(MemCh *m, void *vs);
+Str *DotStr(MemCh *m);

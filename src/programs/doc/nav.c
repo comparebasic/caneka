@@ -7,12 +7,12 @@ void Doc_GenNav(NodeObj *config, Span *files, WwwNav *nav){
 
 
     NodeObj *out = Inst_ByPath(config,
-        Sv(m, "out"), NULL, SPAN_OP_GET, NULL);
+        Sv(m, "out")->p, NULL, SPAN_OP_GET, NULL);
 
     StrVec *prefix = Inst_Att(out, K(m, "prefix"));
     IoUtil_Annotate(m, prefix);
 
-    NodeObj *src = Inst_ByPath(config, IoPath(m, "/in/src"), NULL, SPAN_OP_GET, NULL);
+    NodeObj *src = Inst_ByPath(config, IoPath(m, "/in/src")->p, NULL, SPAN_OP_GET, NULL);
 
     StrVec *inDir = IoUtil_AbsVec(m, Inst_Att(src, K(m, "dir")));
 

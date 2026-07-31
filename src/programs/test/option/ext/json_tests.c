@@ -75,14 +75,21 @@ status Json_Tests(MemCh *m){
     args[2] = NULL;
     r |= Test(n != NULL, "Json has been parsed: $ -> $^0", args);
 
-    StrVec *path = Path_DotPath(m, S(m, "endpoints.::"));
+    Span *path = Span_Make(m);
+    Span_Add(path, S(m, "endpoints"));
+    Span_Add(path, I32_Wrapped(m, 0));
+    Span_Add(path, S(m, "interfaces"));
+    Span_Add(path, I32_Wrapped(m, 1));
     Node *value = Inst_GetByPath(n, path);
 
-    args[0] = Inst_GetChild(value, K(m, "type"));
-    args[1] = K(m, "ip6");
-    args[2] = NULL;
-    r |= Test(Equals(args[0], args[1]), 
-        "Expected key/value pair is in Node expected @, have @", args);
+    args[0] = Inst_GetChild(value, K(m, "proto"));
+    args[1] = Inst_GetChild(value, K(m, "port"));
+    args[2] = K(m, "https");
+    args[3] = I32_Wrapped(m, 8443);
+    args[4] = NULL;
+    r |= Test(Equals(args[0], args[2]) && Equals(args[1], args[3]), 
+        "Expected key/value pair is in Node expected @/@, have @/@", args);
 
+    r |= ERROR;
     Return(m, r);
 }

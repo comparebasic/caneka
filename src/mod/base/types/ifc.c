@@ -20,6 +20,8 @@ IfcMap *Ifc_Get(Abstract *a, cls typeOf){
 cls Ifc_GetRoot(cls typeOf){
     if(typeOf == TYPE_SPAN || typeOf == TYPE_TABLE){
         return TYPE_SPAN;
+    }else if(typeOf >= TYPE_WRAPPED_UTIL && typeOf <= TYPE_WRAPPED_I8){
+        return TYPE_WRAPPED_UTIL;
     }else if(typeOf > _TYPE_WRAPPED_START && typeOf < _TYPE_WRAPPED_END){
         return TYPE_WRAPPED;
     }

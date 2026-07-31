@@ -13,25 +13,25 @@ status Node_Tests(MemCh *m){
 
     Node *nobj = Inst_Make(m, TYPE_NODE);
     Seel_Set(nobj, S(m, "name"), Sv(m, "one"));
-    Inst_ByPath(root, IoPath(m, "/one"), nobj, SPAN_OP_SET, NULL);
+    Inst_ByPath(root, IoPath(m, "/one")->p, nobj, SPAN_OP_SET, NULL);
 
     nobj = Inst_Make(m, TYPE_NODE);
     Seel_Set(nobj, S(m, "name"), Sv(m, "two"));
-    Inst_ByPath(root, IoPath(m, "/two"), nobj, SPAN_OP_SET, NULL);
+    Inst_ByPath(root, IoPath(m, "/two")->p, nobj, SPAN_OP_SET, NULL);
 
     nobj = Inst_Make(m, TYPE_NODE);
     Seel_Set(nobj, S(m, "name"), Sv(m, "three"));
-    Inst_ByPath(root, IoPath(m, "/three"), nobj, SPAN_OP_SET, NULL);
+    Inst_ByPath(root, IoPath(m, "/three")->p, nobj, SPAN_OP_SET, NULL);
 
     nobj = Inst_Make(m, TYPE_NODE);
     Seel_Set(nobj, S(m, "name"), Sv(m, "four"));
-    Inst_ByPath(root, IoPath(m, "/four"), nobj, SPAN_OP_SET, NULL);
+    Inst_ByPath(root, IoPath(m, "/four")->p, nobj, SPAN_OP_SET, NULL);
 
     StrVec *path = NULL;
     Node *returned = NULL;
 
     path = IoPath(m, "/one");
-    returned = Inst_ByPath(root, path, NULL, SPAN_OP_GET, NULL);
+    returned = Inst_ByPath(root, path->p, NULL, SPAN_OP_GET, NULL);
     args[0] = path;
     args[1] = S(m, "one"); 
     args[2] = returned;
@@ -40,7 +40,7 @@ status Node_Tests(MemCh *m){
         "After setting and requesting ByPath Nodes match and has expected property @ -> name:@ -> @", args);
 
     path = IoPath(m, "/two");
-    returned = Inst_ByPath(root, path, NULL, SPAN_OP_GET, NULL);
+    returned = Inst_ByPath(root, path->p, NULL, SPAN_OP_GET, NULL);
     args[0] = path;
     args[1] = S(m, "two"); 
     args[2] = returned;
@@ -49,7 +49,7 @@ status Node_Tests(MemCh *m){
         "After setting and requesting ByPath Nodes match and has expected property @ -> name:@ -> @", args);
 
     path = IoPath(m, "/three");
-    returned = Inst_ByPath(root, path, NULL, SPAN_OP_GET, NULL);
+    returned = Inst_ByPath(root, path->p, NULL, SPAN_OP_GET, NULL);
     args[0] = path;
     args[1] = S(m, "three"); 
     args[2] = returned;
@@ -58,7 +58,7 @@ status Node_Tests(MemCh *m){
         "After setting and requesting ByPath Nodes match and has expected property @ -> name:@ -> @", args);
 
     path = IoPath(m, "/four");
-    returned = Inst_ByPath(root, path, NULL, SPAN_OP_GET, NULL);
+    returned = Inst_ByPath(root, path->p, NULL, SPAN_OP_GET, NULL);
     args[0] = path;
     args[1] = S(m, "four"); 
     args[2] = returned;
@@ -69,21 +69,21 @@ status Node_Tests(MemCh *m){
     nobj = Inst_Make(m, TYPE_NODE);
     path = IoPath(m, "/two/and/nested/stuff-one");
     Seel_Set(nobj, S(m, "name"), Sv(m, "two-nested-one"));
-    Inst_ByPath(root, path, nobj, SPAN_OP_SET, NULL);
+    Inst_ByPath(root, path->p, nobj, SPAN_OP_SET, NULL);
 
     nobj = Inst_Make(m, TYPE_NODE);
     path = IoPath(m, "/two/secondary/stuff-two");
     Seel_Set(nobj, S(m, "name"), Sv(m, "two-nested"));
-    Inst_ByPath(root, path, nobj, SPAN_OP_SET, NULL);
+    Inst_ByPath(root, path->p, nobj, SPAN_OP_SET, NULL);
 
     nobj = Inst_Make(m, TYPE_NODE);
     path = IoPath(m, "/six/new-root/stuff-three");
     Seel_Set(nobj, S(m, "name"), Sv(m, "fresh-three"));
-    Inst_ByPath(root, path, nobj, SPAN_OP_SET, NULL);
+    Inst_ByPath(root, path->p, nobj, SPAN_OP_SET, NULL);
 
 
     path = IoPath(m, "/two/secondary/stuff-two");
-    returned = Inst_ByPath(root, path, NULL, SPAN_OP_GET, NULL);
+    returned = Inst_ByPath(root, path->p, NULL, SPAN_OP_GET, NULL);
     args[0] = path;
     args[1] = S(m, "two-nested"); 
     args[2] = returned;
@@ -92,7 +92,7 @@ status Node_Tests(MemCh *m){
         "After setting and requesting ByPath Nodes match and has expected property @ -> name:@ -> @", args);
 
     path = IoPath(m, "/six/new-root/stuff-three");
-    returned = Inst_ByPath(root, path, NULL, SPAN_OP_GET, NULL);
+    returned = Inst_ByPath(root, path->p, NULL, SPAN_OP_GET, NULL);
     args[0] = path;
     args[1] = S(m, "fresh-three"); 
     args[2] = returned;
@@ -101,7 +101,7 @@ status Node_Tests(MemCh *m){
         "After setting and requesting ByPath Nodes match and has expected property @ -> name:@ -> @", args);
 
     path = IoPath(m, "/two/and/nested/stuff-one");
-    returned = Inst_ByPath(root, path, NULL, SPAN_OP_GET, NULL);
+    returned = Inst_ByPath(root, path->p, NULL, SPAN_OP_GET, NULL);
     args[0] = path;
     args[1] = S(m, "two-nested-one"); 
     args[2] = returned;
@@ -110,7 +110,7 @@ status Node_Tests(MemCh *m){
         "After setting and requesting ByPath Nodes match and has expected property @ -> name:@ -> @", args);
 
     path = IoPath(m, "/two/and/not-found/here");
-    returned = Inst_ByPath(root, path, NULL, SPAN_OP_GET, NULL);
+    returned = Inst_ByPath(root, path->p, NULL, SPAN_OP_GET, NULL);
     r |= Test(returned == NULL, "Missing path should be NULL", args);
 
     Return(m, r);

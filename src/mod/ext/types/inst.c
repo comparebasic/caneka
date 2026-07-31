@@ -1,12 +1,11 @@
 #include <external.h>
 #include <caneka.h>
 
-void Inst_IterInitChild(Iter *it, Inst *inst, StrVec *path){
+void Inst_IterInitChild(Iter *it, Inst *inst, Span *path){
     Node *child = Inst_GetByPath(inst, path);
     void *ar[] = {
         Span_Get(child, INST_PROPIDX_CHILDREN)
     };
-    Out("^p.Chilren @^0\n", ar);
     Iter_Init(it, Span_Get(child, INST_PROPIDX_CHILDREN));
 }
 
@@ -84,7 +83,7 @@ void *Inst_GetNthChild(Inst *inst, i32 nth){
     return Span_Get(children, nth);
 }
 
-void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
+void *Inst_ByPath(Span *inst, Span *path, void *value, word op, Span *coords){
     MemCh *m = inst->m;
     Debug_Push(m, inst);
 
@@ -92,28 +91,24 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
 
     cls typeOf = inst->type.of;
 
-    if((path->type.state & STRVEC_PATH) == 0 && path->p->nvalues > 1){
-        void *args[] = {inst, NULL};
-        Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Error Inst_ByPath requires a strvec path", args);
-        return NULL;
-    }
-
     i32 coordIdx = 0;
     if(op == SPAN_OP_SET && coords != NULL){
         Span_Wipe(coords);
     }
     Inst *current = inst;
-    Abstract *prev = NULL;
 
     Iter it;
-    Iter_Init(&it, path->p);
+    Iter_Init(&it, path);
     while((Iter_Next(&it) & END) == 0){
-        Abstract *token = Iter_Get(&it);
+        Abstract *key = Iter_Get(&it);
         if(it.type.state & LAST){
-            Abstract *key = ((token->type.state & MORE) && it.idx > 0) ? prev : token;
-            Table *children = Span_Get(current, INST_PROPIDX_CHILDREN);
-            Abstract *child = Table_Get(children, key);
+            Span *children = Span_Get(current, INST_PROPIDX_CHILDREN);
+            Abstract *child;
+            if(key->type.of == TYPE_WRAPPED_I32){
+                child = Span_Get(children, ((Single *)key)->val.i);
+            }else{
+                child = Table_Get(children, key);
+            }
 
             if(op == SPAN_OP_SET){
                 Hashed *h = Table_SetHashed(children, key, value); 
@@ -126,43 +121,53 @@ void *Inst_ByPath(Span *inst, StrVec *path, void *value, word op, Span *coords){
             }else{
                 Return(inst->m, child);
             }
-        }else if(token->type.state & MORE){
-            if(prev){
-                Table *children = Span_Get(current, INST_PROPIDX_CHILDREN);
-                Hashed *h = Table_GetHashed(children, prev);
-                Abstract *child = h != NULL ? h->value : NULL;
-                if(op == SPAN_OP_SET){
-                    if(child == NULL){
-                        Inst *new = Inst_Make(inst->m, typeOf);
-                        h = Table_SetHashed(children, prev, new); 
-                        current = new;
-                    }else if(child->type.of == typeOf){
-                        current = (Inst *)child;
+        }else{
+            Span *children = Span_Get(current, INST_PROPIDX_CHILDREN);
+            Abstract *child;
+            if(key->type.of == TYPE_WRAPPED_I32){
+                child = Span_Get(children, ((Single *)key)->val.i);
+            }else{
+                Hashed *h = Table_GetHashed(children, key);
+                child = h != NULL ? h->value : NULL;
+            }
+
+            if(op == SPAN_OP_SET){
+                i32 idx = 0;
+                if(child == NULL){
+                    Inst *new = Inst_Make(inst->m, typeOf);
+                    if(key->type.of == TYPE_WRAPPED_I32){
+                        idx = ((Single *)key)->val.i;
+                        Span_Set(children, idx, new);
                     }else{
-                        args[0] = prev;
-                        args[1] = NULL;
-                        Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
-                            "The key slot is occupied by a different type,"
-                            " conflict, cannot insert into $", args);
-                        break;
+                        Hashed *h = Table_SetHashed(children, key, new); 
+                        idx = h->orderIdx;
                     }
-                    if(coords != NULL){
-                        Span_Set(coords,
-                            coordIdx, I32_Wrapped(coords->m, h->orderIdx));
-                        coordIdx++;
-                    }
+                    current = new;
+                }else if(child->type.of == typeOf){
+                    current = (Inst *)child;
                 }else{
-                    if(child == NULL){
-                        return child;
-                    }else if(child->type.of == typeOf){
-                        current = (Inst *)child;
-                    }else{
-                        break;
-                    }
+                    args[0] = key;
+                    args[1] = NULL;
+                    Error(inst->m, FUNCNAME, FILENAME, LINENUMBER,
+                        "The key slot is occupied by a different type,"
+                        " conflict, cannot insert into $", args);
+                    break;
+                }
+                if(coords != NULL){
+                    Span_Set(coords,
+                        coordIdx, I32_Wrapped(coords->m, idx));
+                    coordIdx++;
+                }
+            }else{
+                if(child == NULL){
+                    return child;
+                }else if(child->type.of == typeOf){
+                    current = (Inst *)child;
+                }else{
+                    break;
                 }
             }
         }
-        prev = token;
     }
 
     Return(m, NULL);

@@ -9,17 +9,27 @@ void Serveneka_Serve(MemCh *m, Node *config){
     args[1] = NULL;
     Out("^p.Config: $^0\n", args);
 
-    Node *endpoints = Inst_GetByPath(config, Sv(m, "endpoints"));
+    Span *path = Span_Make(m);
+    Span_Add(path, K(m, "endpoints"));
 
     Iter it;
-    Inst_IterInitChild(&it, config, Sv(m, "endpoints"));
+    Inst_IterInitChild(&it, config, path);
     while((Iter_Next(&it) & END) == 0){
-        Hashed *h = Iter_Get(&it);
-        if(h != NULL){
-            Table *props = Span_Get(h->value, INST_PROPIDX_CHILDREN);
-            args[0] = props;
-            args[1] = NULL;
-            Out("^y.Endpoint @^0\n", args);
+        Node *nd = Iter_Get(&it);
+        Table *props = Span_Get(nd, INST_PROPIDX_CHILDREN);
+        args[0] = props;
+        args[1] = NULL;
+        Out("^y.Endpoint @^0\n", args);
+        Iter ifcIt;
+        Node *ifcs = Table_Get(props, K(m, "interfaces"));
+        Iter_Init(&ifcIt, Span_Get(ifcs, INST_PROPIDX_CHILDREN));
+        while((Iter_Next(&ifcIt) & END) == 0){
+            Node *ifc = Iter_Get(&ifcIt);
+            void *ar[] = {
+                ifc,
+                NULL
+            };
+            Out("^y.    Ifc @^0\n", ar);
         }
     }
 

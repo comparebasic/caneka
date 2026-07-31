@@ -74,16 +74,16 @@ i32 main(int argc, char **argv){
         WwwNav *nav = NULL;
 
         NodeObj *out = Inst_ByPath(config,
-            Sv(m, "out"), NULL, SPAN_OP_GET, NULL);
+            Sv(m, "out")->p, NULL, SPAN_OP_GET, NULL);
 
         outDir = IoUtil_AbsVec(m, Inst_Att(out, K(m, "dir")));
-        NodeObj *pageObj = Inst_ByPath(out, Sv(m, "page"), NULL, SPAN_OP_GET, NULL);
+        NodeObj *pageObj = Inst_ByPath(out, Sv(m, "page")->p, NULL, SPAN_OP_GET, NULL);
 
         StrVec *headerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "header")));
         StrVec *childrenPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "children")));
         StrVec *footerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "footer")));
 
-        NodeObj *in = Inst_ByPath(config, Sv(m, "in"), NULL, SPAN_OP_GET, NULL);
+        NodeObj *in = Inst_ByPath(config, Sv(m, "in")->p, NULL, SPAN_OP_GET, NULL);
 
         Table *dirTbl = Table_Make(m);
         Inst_ChAttsAdd(in, K(m, "dir"), dirTbl);

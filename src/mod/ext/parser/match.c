@@ -62,7 +62,6 @@ static void match_NextKoTerm(Match *mt){
 }
 
 static void addCount(MemCh *m, Match *mt, word flags, i32 length){
-
     if(mt->snip.type.state == ZERO){
         mt->snip.type.state = flags;
     }else if(mt->snip.type.state == SNIP_NOTAIL){
@@ -72,25 +71,10 @@ static void addCount(MemCh *m, Match *mt, word flags, i32 length){
     if((mt->snip.type.state & flags) == flags){
         mt->snip.length += length;
     }else{
-        void *ar[] = {
-            &mt->snip,
-            NULL
-        };
-        Out("^y.   > AddCount @^0\n", ar);
-
         SnipSpan_Add(mt->backlog, &mt->snip);
         mt->snip.type.state = flags;
         mt->snip.length = length;
     }
-
-    void *ar[] = {
-        Type_StateVec(m, TYPE_SNIP, flags),
-        I32_Wrapped(m, length),
-        mt->backlog,
-        &mt->snip,
-        NULL
-    };
-    Out("^y.addCount $ $: @ snipNow:@^0\n", ar);
 
     return;
 }
@@ -112,8 +96,6 @@ status Match_AddBoundrySnip(MemCh *m, Match *mt){
 }
 
 status Match_ResolveOverlay(Match *mt, i32 length){
-    printf("   > ResolvingOverlay\n");
-    fflush(stdout);
     SnipSpan_Add(mt->backlog, &mt->snip);
     return SnipSpan_Remove(mt->backlog, length);
 }
@@ -146,8 +128,6 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
         }
 
         if(matched){
-            printf("matched\n");
-            fflush(stdout);
             unclaimed = FALSE;
             if((def->flags & (PAT_KO|PAT_INVERT)) == (PAT_KO|PAT_INVERT)){
                 mt->type.state |= MATCH_KO_INVERT;
@@ -217,13 +197,6 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
             }else{
                 snipFlag = SNIP_CONTENT;
             }
-            void *ar[] = {
-                Type_StateVec(m, TYPE_SNIP, snipFlag),
-                Ptr_Wrapped(m, def, TYPE_PATCHARDEF),
-                &mt->snip,
-                NULL
-            };
-            Out("^b.   > ContentMatch @ of def@ snipIs:@^0\n", ar);
             addCount(m, mt, snipFlag, 1);
             
             if((def->flags & (PAT_ANY|PAT_MANY)) != 0 || 
@@ -244,7 +217,9 @@ status Match_Feed(MemCh *m, Match *mt, byte c){
                 unclaimed = TRUE;
                 if((def->flags & PAT_KO) == 0){
                     mt->snip.type.state &= ~NOOP;
-                    mt->snip.type.state = SNIP_CONTENT;
+                    if((def->flags & PAT_INVERT_CAPTURE) == 0){
+                        mt->snip.type.state = SNIP_CONTENT;
+                    }
                     if((mt->type.state & MATCH_LEAVE) != 0){
                         goto miss;
                         break;
@@ -303,8 +278,6 @@ miss:
         if(unclaimed){
             addCount(m, mt, SNIP_UNCLAIMED, 1);
         }
-        printf("   > AddSnip\n");
-        fflush(stdout);
         SnipSpan_Add(mt->backlog, &mt->snip);
         mt->snip.length = 0;
         if(SnipSpan_Total(mt->backlog, SNIP_CONTENT) == 0 &&

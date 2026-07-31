@@ -295,6 +295,10 @@ status Path_Around(MemCh *m, StrVec *path, word sep, Coord *cr){
     return r;
 }
 
+Str *DotStr(MemCh *m){
+    return Str_Ref(m, (byte *)".", 1, 2, MORE);
+}
+
 StrVec *Path_DotPath(MemCh *m, void *vs){
     StrVec *v = Ifc(m, vs, TYPE_STRVEC);
     Path_DotAnnotate(m, v);
@@ -425,6 +429,21 @@ void Path_SwapSep(StrVec *path, Str *sep, status flags){
         }
     }
 }
+
+/* TODO: make conversion from path StrVec to Span 
+Span *Path_ToSpan(MemCh *m, StrVec *path){
+    Span *p = Span_Make(m);
+    Iter it;
+    Iter_Init(&it, path);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        if(s->type.state & MORE){
+             
+        }
+    }
+    return p;
+}
+*/
 
 status Path_Init(MemCh *m){
     status r = READY;
