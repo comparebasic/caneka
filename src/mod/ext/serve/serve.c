@@ -27,9 +27,16 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         ReturnVoid(m);
     }
 
+    printf("Available %d\n", available);
+    fflush(stdout);
+
     if(available > 0){
         while((Iter_Next(&srv->endPointIt) & END) == 0){
             Hashed *h = Iter_Get(&srv->endPointIt);
+            void *ar[] = {
+                h, NULL
+            };
+            Out("^b.Endpoint @^0\n", ar);
             HostEnt *ent = (HostEnt *)h->key;
             HandlerDef *def = (HandlerDef *)h->value;
             if(ent->type.of == TYPE_HOST_ENT){
@@ -39,6 +46,10 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                 while(max-- > 0){
                     i32 new_fd = accept(ent->pfd->fd, (struct sockaddr*)&cliaddr, &len);
                     if(new_fd > 0){
+                        void *ar[] = {
+                            ent, I32_Wrapped(m, new_fd), NULL
+                        };
+                        Out("^b.Accepting @ fd$^0\n", ar);
                         fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
                         MemCh *rm = MemCh_Make();
@@ -69,6 +80,12 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         }
     }
 
+    void *ar[] = {
+        srv->q,
+        NULL
+    };
+    Out("^c.About to call Next on @^0\n", ar);
+
     srv->type.state |= (NOOP|PROCESSING);
     while((Queue_Next(srv->q) & END) == 0){
         if(srv->type.state & DEBUG){
@@ -98,16 +115,21 @@ struct pollfd *Serve_TcpGetPollFd(Req *req){
      return (struct pollfd *)&req->crit->pfd;
 }
 
-void Serve_Serve(Serve *srv){
+void Serve_Setup(Serve *srv){
+    Debug_Push(srv->m, srv);
     srv->endPointPfds = PfdArr_Make(srv->m, srv->endPointIt.p->nvalues);
     while((Iter_Next(&srv->endPointIt) & END) == 0){
-        Abstract *a = Iter_Get(&srv->endPointIt);
-        if(a->type.of == TYPE_HOST_ENT){
-            HostEnt *ent = (HostEnt *)a;
+        Hashed *h = Iter_Get(&srv->endPointIt);
+        if(h == NULL){
+            continue;
+        }
+        if(((Abstract *)h->key)->type.of == TYPE_HOST_ENT){
+            HostEnt *ent = (HostEnt *)h->key;
             ent->pfd = &srv->endPointPfds->pfds[srv->endPointIt.idx];
-            HostEnt_OpenTcp(ent);
-        }else if(a->type.of == TYPE_BUFF){
-            Buff *bf = (Buff *)a;
+            ent->type.state |= DEBUG;
+            HostEnt_OpenTcp(srv->m, ent);
+        }else if(((Abstract *)h->key)->type.of == TYPE_BUFF){
+            Buff *bf = (Buff *)h->key;
             if(bf->pfd != NULL){
                 memcpy(srv->endPointPfds->pfds+srv->endPointIt.idx,
                     bf->pfd, sizeof(struct pollfd));
@@ -115,6 +137,14 @@ void Serve_Serve(Serve *srv){
             bf->pfd = &srv->endPointPfds->pfds[srv->endPointIt.idx];
             /* setup request for file in Q */
         }
+    }
+    ReturnVoid(srv->m);
+}
+
+void Serve_Serve(Serve *srv){
+    if((srv->type.state & PROCESSING) == 0){
+        Serve_Setup(srv);
+        srv->type.state |= PROCESSING;
     }
 
     while((srv->type.state & ERROR) == 0){
@@ -143,8 +173,13 @@ Serve *Serve_Make(MemCh *m, Table *routes /* <HostEnt, HandlerDef> */, void *sou
     srv->m = m;
     srv->q = Queue_Make(m, (QueueCritFunc)ReqCrit_Func);
     srv->source = source;
+    if(routes->type.of == TYPE_TABLE){
+        routes = Table_Ordered(m, routes);
+    }
     Iter_Init(&srv->endPointIt, routes);
     srv->log.out = OutStream;
+
+    srv->type.state |= DEBUG;
 
     return srv;
 }

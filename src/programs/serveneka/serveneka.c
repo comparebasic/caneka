@@ -69,10 +69,10 @@ void Serveneka_Serve(MemCh *m, Node *config){
 
             if(ip4Str != NULL){
                 NetAddr *addr = NetAddr_Make4(m);
-                addr->port = port->val.i;
                 NetAddr_SetFromStr4(m, addr, Ifc(m, ip4Str, TYPE_STR));
-                HostEnt *ent = HostEnt_Make(m);
-                ent->addr = (Abstract *)addr;
+                NetAddr_SetPort(m, addr, port->val.i);
+
+                HostEnt *ent = HostEnt_Make(m, addr);
 
                 key = (Abstract *)ent;
                 Single *sg = Table_Get(ServeProtoTable, proto);
@@ -110,27 +110,11 @@ void Serveneka_Serve(MemCh *m, Node *config){
         }
     }
 
-    /*
-    HttpStatic_Init(m);
-    HandlerDef *def = HttpStatic_DefMake(m);
-
-    Table *routes = Table_Make(m);
-    HandlerDef *def = HttpStatic_DefMake(m);
-    Table_Set(routes, ent, def);
     TcpSource *source = TcpSource_Make(m);
-
-    Serve *srv = Serve_Make(m, Table_Ordered(m, routes), source);
+    Serve *srv = Serve_Make(m, routes, source);
     srv->config = config;
 
-    if(cmdFile != NULL && tlsKey != NULL){
-        Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
-        if(File_Open(bf, IoUtil_GetAbsPath(m, cmdFile), O_RDONLY|O_CREAT) & SUCCESS){
-            HttpStatic_SetCmdFile(m, srv, file);
-        }
-    }
-
-    Serve_ServeTcp(srv);
-    */
+    Serve_Serve(srv);
 }
 
 void Serveneka_Init(MemCh *m, Node *config){

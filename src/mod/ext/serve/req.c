@@ -2,6 +2,7 @@
 #include <caneka.h>
 
 void Req_Handle(MemCh *m, Req *req, Serve *srv){
+    Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
     if(req->type.state & ERROR){
         Single *sg = Iter_GetByIdx(&req->chain, req->chain.p->max_idx);
@@ -21,7 +22,7 @@ void Req_Handle(MemCh *m, Req *req, Serve *srv){
         func(m, req, srv);
     }while(req->type.state & MORE);
 
-    return;
+    ReturnVoid(m);
 }
 
 

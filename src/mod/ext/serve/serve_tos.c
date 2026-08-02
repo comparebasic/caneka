@@ -78,7 +78,7 @@ static status NetAddr_Print(Buff *bf, void *a, cls type, word flags){
     if(addr->type.of == TYPE_NET_ADDR4){
         args[0] = S(m, "ip4");
         args[1] = Ip4_ToStr(m, (quad )addr->net.ip4addr.sin_addr.s_addr);
-        args[2] = I32_Wrapped(m, addr->port);
+        args[2] = I32_Wrapped(m, ntohs(addr->net.ip4addr.sin_port));
         args[3] = NULL;
     }else if(addr->type.of == TYPE_NET_ADDR6){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -94,11 +94,14 @@ static status NetAddr_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Serve_Print(Buff *bf, void *a, cls type, word flags){
-    Serve *ctx = (Serve*)a;
+    MemCh *m = bf->m;
+    Serve *srv = (Serve*)a;
     void *args[] = {
+        Type_StateVec(m, srv->type.of, srv->type.state),
+        srv->endPointIt.p,
         NULL,
     };
-    return Fmt(bf, "Serve<>", args);
+    return Fmt(bf, "Serve<@ @>", args);
 }
 
 static status Req_Print(Buff *bf, void *a, cls type, word flags){

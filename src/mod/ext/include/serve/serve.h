@@ -6,6 +6,7 @@ typedef struct serve {
     Type type;
     MemCh *m;
     Queue *q;
+    i32 fixedIdx;
     Iter endPointIt /* Hashed<HostEnt/Str, HandlerDef> */;
     PfdArr *endPointPfds;
     Inst *config;
@@ -27,6 +28,7 @@ typedef struct serve {
 void Serve_LogOpen(Serve *srv, Req *req);
 void Serve_LogFinalized(Serve *srv, Req *req);
 struct pollfd *Serve_TcpGetPollFd(Req *req);
-void Serve_ServeTcp(Serve *srv);
+void Serve_Setup(Serve *srv);
+void Serve_Serve(Serve *srv);
 
 Serve *Serve_Make(MemCh *m, Table *routes, void *source);
