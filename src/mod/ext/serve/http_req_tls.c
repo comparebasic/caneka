@@ -1,5 +1,7 @@
+#include <external.h>
+#include <caneka.h>
 
-status HttpReq_TlsReadToRbl(MemCh *m, Req *req, Serve *srv){
+void HttpReq_TlsReadToRbl(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
 
@@ -21,16 +23,16 @@ status HttpReq_TlsReadToRbl(MemCh *m, Req *req, Serve *srv){
         }
     }
 
-    Return(m, req->type.state);
+    ReturnVoid(m);
 }
 
-status HttpReq_TlsFinalize(MemCh *m, Req *req, Serve *srv){
+void HttpReq_TlsFinalize(MemCh *m, Req *req, Serve *srv){
     HttpReq *hreq = (HttpReq *)req->source;
     req->def->capsule->close(hreq->cap);
-    return HttpReq_Finalize(m, req, srv);
+    HttpReq_Finalize(m, req, srv);
 }
 
-status HttpReq_TlsAccept(MemCh *m, Req *req, Serve *srv){
+void HttpReq_TlsAccept(MemCh *m, Req *req, Serve *srv){
     HttpReq *hreq = (HttpReq *)req->source;
     if(req->def->capsule != NULL){
         if(hreq->cap == NULL){
@@ -44,38 +46,48 @@ status HttpReq_TlsAccept(MemCh *m, Req *req, Serve *srv){
         Buff_SetSocket(hreq->in, req->crit->pfd.fd);
     }
 
-    Return(m, req->type.state);
+    ReturnVoid(m);
 }
 
-status HttpReq_TlsWrite(MemCh *m, Req *req, Serve *srv){
+void HttpReq_TlsWrite(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
 
     HttpReq_SetHeader(hreq, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
 
-    HttpReq_writeStatus(m, hreq, req);
-    HttpReq_setLength(m, hreq);
-    HttpReq_writeHeaders(m, hreq);
-    HttpReq_writeBody(m, hreq);
+    HttpReq_WriteStatus(m, hreq, req);
+    HttpReq_SetLength(m, hreq);
+    HttpReq_WriteHeaders(m, hreq);
+    HttpReq_WriteBody(m, hreq);
 
     req->def->capsule->writeTo(hreq->cap);
 
     req->type.state |= (SUCCESS|END);
-    Return(m, req->type.state);
+    ReturnVoid(m);
 }
 
+void HttpReq_TlsSetup(MemCh *m, Req *req){
+    HttpReq *hreq = (HttpReq *)req->source;
+    hreq->out->type.state &= ~BUFF_UNBUFFERED;
+    /* TODO: setup capsule here */
+    HttpReq_SetToResponse(hreq, req);
+    Req_ExpectRecv(req);
+}
 
-HandlerDef *HttpTlsReq_DefMake(MemCh *m){
+HandlerDef *HttpTlsReq_DefMake(MemCh *m, Span *handlers, Node *extensions){
     HandlerDef *def = HandlerDef_Make(m);
     def->extra = (SourceMakerFunc)HttpReq_SourceMake;
     def->finalize = (ReqFunc) HttpReq_TlsFinalize;
-    def->log.open = (ReqFunc) HttpReq_logOpen;
-    def->log.final = (ReqFunc) HttpReq_logFinalized;
+    def->setup = (DoFunc) HttpReq_TlsSetup;
+    def->log.open = (ReqFunc) HttpReq_LogOpen;
+    def->log.final = (ReqFunc) HttpReq_LogFinalized;
     def->route = Span_Make(m);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsAccept));
     Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsReadToRbl));
-    Span_Add(def->route, Func_Wrapped(m, Req_Prepare));
+    Span_AddSpan(def->route, handlers);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsWrite));
+
+    def->extensions = extensions;
 
     return def;
 }

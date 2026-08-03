@@ -1,11 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-status Req_Prepare(MemCh *m, Req *req, Serve *srv){
-    return req->def->prepare(m, req, srv);
-}
-
 void Req_Handle(MemCh *m, Req *req, Serve *srv){
+    Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
     Single *sg = NULL;
     Iter *it = &req->chain;
@@ -34,9 +31,6 @@ void Req_Handle(MemCh *m, Req *req, Serve *srv){
         }
     }
 
-    Single *sg = Iter_Get(&req->chain);
-    ReqFunc func = (ReqFunc)sg->val.ptr;
-
     req->type.state = req->type.state & (DEBUG|END|ERROR|NOOP|PROCESSING);
     func(m, req, srv);
     if(req->type.state & (SUCCESS|ERROR)){
@@ -44,12 +38,7 @@ void Req_Handle(MemCh *m, Req *req, Serve *srv){
         Iter_Prev(&it);
     }
 
-    return;
-}
-
-
-void Req_SetFd(Req *req, i32 fd){
-    req->crit->pfd.fd = fd;
+    ReturnVoid(m);
 }
 
 void Req_ExpectRecv(Req *req){
@@ -64,11 +53,19 @@ void Req_ExpectSend(Req *req){
     req->crit->pfd.events = POLLOUT|POLLNVAL|POLLHUP|POLLERR;
 }
 
-Req *Req_Make(MemCh *m, HandlerDef *def, void *source){
+Req *Req_Make(MemCh *m, HandlerDef *def, NetAddr *addr, i32 fd, void *source){
     Req *req = MemCh_AllocOf(m, sizeof(Req), TYPE_REQ);
+    req->m = m;
     req->type.of = TYPE_REQ;
     req->def = def;
+    req->addr = addr;
+    req->crit = ReqCrit_Make(m);
+    req->crit->pfd.fd = fd;
     req->source = source;
+    void *ar[] = {req->source, NULL};
+    Out("^p.HttpReq @^0\n", ar);
+
+    def->setup(m, req);
 
     return req;
 }

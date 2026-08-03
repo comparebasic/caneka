@@ -1,99 +1,105 @@
 #include <external.h>
 #include <caneka.h>
 
-static i32 openAddrToFd(HostEnt *ent){
-    i32 port = ent->port;
-    i32 fd = 0;
-	struct sockaddr_in serv_addr;
-    NetAddr *addr = (NetAddr *)ent->addr;
-
-	fd = socket(AF_INET, SOCK_STREAM, 0);
-	memset(&serv_addr, '0', sizeof(serv_addr));
-
-	serv_addr.sin_family = AF_INET;
+void HostEnt_OpenTcp(MemCh *m, HostEnt *ent){
     if(ent->addr == NULL){
-        serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    }else if(ent->addr->type.of == TYPE_NET_ADDR4){
-        NetAddr *net = (NetAddr *)ent->addr;
-        serv_addr.sin_addr.s_addr = net->net.ip4addr.sin_addr.s_addr;
-    }else{
-        void *ar[] = {ent->addr, NULL};
+        ent->type.state |= ERROR;
+        void *ar[] = {ent, NULL};
         Error(ent->m, FUNCNAME, FILENAME, LINENUMBER,
-            "Unsopported address type @", ar);
-        return -1;
+            "Unsupported address type @", ar);
+        return;
     }
 
-	serv_addr.sin_port = htons(port);
-
-    if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
+    ent->pfd->fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fcntl(ent->pfd->fd, F_SETFL, O_NONBLOCK) == -1) {
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd setting nonblock", NULL);
-		return -1;
+		return;
     }
 
     i32 one = 1;
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(i32)) < 0) {
+    if(setsockopt(ent->pfd->fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(i32)) < 0 || 
+        setsockopt(ent->pfd->fd, SOL_SOCKET, SO_REUSEPORT, &one, sizeof(i32)) < 0) {
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
-            "openPortToFd setting reuse addr", NULL);
-		return -1;
-	}
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &one, sizeof(i32)) < 0) {
-        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
-            "openPortToFd setting reuse addr", NULL);
-		return -1;
+            "openPortToFd setting reuse addr or port", NULL);
+		return;
 	}
 
-	if(bind(fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) != 0){
+	if(bind(ent->pfd->fd,
+                (struct sockaddr*)&ent->addr->net.ip4addr,
+                sizeof(ent->addr->net.ip4addr))
+            != 0){
+        ent->type.state |= ERROR;
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd binding", NULL);
-		return -1;
+		return;
     }
 
-	if(listen(fd, TCP_LISTEN_BACKLOG) != 0){
+	if(listen(ent->pfd->fd, TCP_LISTEN_BACKLOG) != 0){
+        ent->type.state |= ERROR;
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd listening", NULL);
-		return -1;
+		return;
     };
 
-    return fd;
-}
-
-
-void HostEnt_OpenTcp(HostEnt *ent){
-    i32 fd = openAddrToFd(ent);
-    if(fd > 0){
-        ent->pfd->fd = fd;
-        ent->pfd->events = POLLIN;
-        ent->pfd->revents = 0;
-    }else{
+    if(ent->pfd->fd <= 0){
+        void *ar[] = {ent, NULL};
         ent->type.state |= ERROR;
+        Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
+            "Error opening Ent: @", NULL);
+		return;
+    }
+
+    ent->pfd->events = POLLIN;
+    ent->pfd->revents = 0;
+
+    if(ent->type.state & DEBUG){
+        void *ar[] = {ent, NULL};
+        Out("^p.HostEnt is open: @^0\n", ar);
     }
 }
 
 HostEnt *HostEnt_FromName(MemCh *m, Str *name, Str *service){
-    HostEnt *ent = HostEnt_Make(m);
-    ent->name = name;
-    if(getaddrinfo(Str_Cstr(m, name), Str_Cstr(m, service), NULL, &ent->info) != 0){
+    struct addrinfo *info;
+    if(getaddrinfo(Str_Cstr(m, name), Str_Cstr(m, service), NULL, &info) != 0){
         void *ar[] = {
             name, service, NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER, 
             "Error getting network address info for $/$", ar);
-        ent->type.state |= ERROR;
+        return NULL;
     }
+    
+    NetAddr *addr = NetAddr_Make4(m);
+    /* ToDo: copy lookup into info NetAddr */
+    HostEnt *ent = HostEnt_Make(m, addr);
+    ent->name = name;
     return ent;
 }
 
 util HostEnt_Hash(void *a){
     HostEnt *ent = (HostEnt *)a;
-    Single *sg = (Single *)ent->addr;
-    return (util)sg->val.i;
+    util u = (util)ent->addr->net.ip4addr.sin_port;
+    return (u << 32) + (util)ent->addr->net.ip4addr.sin_addr.s_addr;
 }
 
-HostEnt *HostEnt_Make(MemCh *m){
-    HostEnt *h = MemCh_AllocOf(m, sizeof(HostEnt), TYPE_HOST_ENT);
-    h->type.of = TYPE_HOST_ENT;
-    h->m = m;
-    return h;
+boolean HostEnt_Equals(void *_a, void *_b){
+    HostEnt *a = (HostEnt *)_a;
+    HostEnt *b = (HostEnt *)_b;
+    if(a->type.of != b->type.of){
+        return FALSE;
+    }
+    NetAddr *netA = a->addr;
+    NetAddr *netB = b->addr;
+    return netA->net.ip4addr.sin_addr.s_addr == netB->net.ip4addr.sin_addr.s_addr && 
+        netA->net.ip4addr.sin_port == netB->net.ip4addr.sin_port;
+}
+
+HostEnt *HostEnt_Make(MemCh *m, NetAddr *addr){
+    HostEnt *ent = MemCh_AllocOf(m, sizeof(HostEnt), TYPE_HOST_ENT);
+    ent->type.of = TYPE_HOST_ENT;
+    ent->m = m;
+    ent->addr = addr;
+    return ent;
 }
 
