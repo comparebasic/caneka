@@ -16,9 +16,6 @@ static void HttpStatic_Cmd(MemCh *m, Req *_req, Serve *srv){
 
 static void HttpStatic_Setup(MemCh *m, Req *req, Serve *srv){
     Req_ExpectInternal(req);
-    Iter *it = Iter_Make(m);
-    Iter_Add(it, Func_Wrapped(m, HttpReq_RespToRbl));
-    Iter_Add(&req->chain, it);
     req->type.state |= MORE;
 }
 

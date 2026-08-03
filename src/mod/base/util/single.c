@@ -35,6 +35,14 @@ Single *Func_Wrapped(MemCh *m, void *func){
     return sgl;
 }
 
+Single *Func_Wrapped(MemCh *m, void *func, word flags){
+    Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
+    sgl->type.of = TYPE_WRAPPED_FUNC;
+    sg->objType.state = flags;
+    sgl->val.ptr = func;
+    return sgl;
+}
+
 Single *Ptr_Wrapped(MemCh *m, void *ptr, cls typeOf){
     Single *sgl = (Single *)MemCh_Alloc(m, sizeof(Single));
     sgl->type.of = TYPE_WRAPPED_PTR;

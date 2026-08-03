@@ -1,16 +1,17 @@
+#define RECV_FLAGS (POLLIN|POLLNVAL|POLLHUP|POLLERR)
+#define BIDIR_FLAGS (POLLOUT|POLLIN|POLLNVAL|POLLHUP|POLLERR)
+#define SEND_FLAGS (POLLOUT|POLLNVAL|POLLHUP|POLLERR)
+#define INTERNAL_FLAGS (POLLNVAL|POLLHUP|POLLERR)
+
 typedef struct req {
     Type type;
     MemCh *m;
     i32 idx;
     ReqCrit *crit;
     HandlerDef *def;
+    Span *keys;
+    Iter route;
     struct netaddr *addr;
-    Span *extPath;
-    union {
-        struct host_ent_wr *ent;
-        Buff *bf;
-    } conn;
-    Iter chain;
     struct {
         struct timespec start;
         struct timespec end;

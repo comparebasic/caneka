@@ -6,7 +6,7 @@ typedef struct req_handler_def {
     DoFunc setup;
     ReqFunc finalize;
     Span *route;
-    Node *extensions;
+    Node *ext;
     struct {
         ReqFunc open;
         ReqFunc final;

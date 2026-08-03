@@ -604,6 +604,26 @@ status Iter_Push(Iter *it, void *value){
     return r;
 }
 
+status Iter_AddSpan(Iter *it, Span *p){
+    status r = READY;
+    Iter it2;
+    Iter_Init(&it2, p);
+    while((Iter_Next(&it2) & END) == 0){
+        r |= Iter_Add(it, Iter_Get(&it2);
+    }
+    return r;
+}
+
+status Iter_AddSpanRev(Iter *it, Span *p){
+    status r = READY;
+    Iter it2;
+    Iter_Init(&it2, p);
+    while((Iter_Prev(&it2) & END) == 0){
+        r |= Iter_Add(it, Iter_Get(&it2);
+    }
+    return r;
+}
+
 status Iter_Add(Iter *it, void *value){
     it->type.state = (it->type.state & NORMAL_FLAGS) | SPAN_OP_ADD;
     it->value = value;

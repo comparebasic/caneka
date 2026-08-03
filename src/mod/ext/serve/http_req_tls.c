@@ -74,20 +74,22 @@ void HttpReq_TlsSetup(MemCh *m, Req *req){
     Req_ExpectRecv(req);
 }
 
-HandlerDef *HttpTlsReq_DefMake(MemCh *m, Span *handlers, Node *extensions){
+HandlerDef *HttpTlsReq_DefMake(MemCh *m, Span *steps, Node *ext){
     HandlerDef *def = HandlerDef_Make(m);
+
     def->extra = (SourceMakerFunc)HttpReq_SourceMake;
     def->finalize = (ReqFunc) HttpReq_TlsFinalize;
     def->setup = (DoFunc) HttpReq_TlsSetup;
     def->log.open = (ReqFunc) HttpReq_LogOpen;
     def->log.final = (ReqFunc) HttpReq_LogFinalized;
-    def->route = Span_Make(m);
-    Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsAccept));
-    Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsReadToRbl));
-    Span_AddSpan(def->route, handlers);
-    Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsWrite));
 
-    def->extensions = extensions;
+    def->route = Span_Make(m);
+    Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsWrite, SEND_FLAGS));
+    Span_AddSpanRev(def->route, steps);
+    Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsReadToRbl, RECV_FLAGS));
+    Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsAccept, BIDIR_FLAGS));
+
+    def->ext = ext;
 
     return def;
 }
