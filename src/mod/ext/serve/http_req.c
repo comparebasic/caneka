@@ -324,7 +324,6 @@ HandlerDef *HttpReq_DefMake(MemCh *m){
     def->log.final = (ReqFunc) HttpReq_logFinalized;
     def->route = Span_Make(m);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_RespToRbl));
-    Span_Add(def->route, Func_Wrapped(m, HttpReq_Prepare));
     Span_Add(def->route, Func_Wrapped(m, HttpReq_Write));
 
     return def;

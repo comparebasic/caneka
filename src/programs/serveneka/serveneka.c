@@ -13,16 +13,11 @@ status ServenekaReq_Prepare(MemCh *m, Req *req, Serve *srv){
     Span_Add(path, req->path);
     Single *sg = Inst_ByPath(req->def->extensions, path);
     if(sg != NULL){
-        Span_Set(req->chain.p, req->chain.idx, sg);
-    }else{
-        Span *path = Span_Make(m);
-        Span_Add(path, K(m, "static"));
-        sg = Inst_ByPath(req->def->extensions, path);
-    }
-
-    if(sg != NULL){
+        Iter_Add(&req->chain, sg);
         ReqFunc func = (ReqFunc)sg->val.ptr;
         func(m, req, srv);
+    }else{
+        HttpStatic_Setup(m, req, serve);
     }
     
     return req->type.state;
