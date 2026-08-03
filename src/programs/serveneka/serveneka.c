@@ -85,6 +85,7 @@ void Serveneka_Serve(MemCh *m, Node *config){
 
                 DefMakerFunc func = (DefMakerFunc)sg->val.ptr;
                 def = func(m, handlers, httpStaticExt);
+                def->source = ent;
             }else if(ip6Str != NULL){
                 printf("make ip6\n");
                 fflush(stdout);
@@ -110,10 +111,7 @@ void Serveneka_Serve(MemCh *m, Node *config){
         }
     }
 
-    TcpSource *source = TcpSource_Make(m);
-    Serve *srv = Serve_Make(m, routes, source);
-    srv->config = config;
-
+    Serve *srv = Serve_Make(m, routes, config);
     Serve_Serve(srv);
 }
 

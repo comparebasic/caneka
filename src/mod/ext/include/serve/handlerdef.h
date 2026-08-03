@@ -3,6 +3,7 @@ typedef void (*ReqFunc)(MemCh *m, struct req *req, struct serve *srv);
 typedef struct req_handler_def {
     Type type;
     SourceMakerFunc extra;
+    DoFunc setup;
     ReqFunc finalize;
     Span *route;
     Node *extensions;

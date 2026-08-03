@@ -4,6 +4,7 @@ typedef struct req {
     i32 idx;
     ReqCrit *crit;
     HandlerDef *def;
+    struct netaddr *addr;
     Span *extPath;
     union {
         struct host_ent_wr *ent;
@@ -22,4 +23,4 @@ void Req_ExpectSend(Req *req);
 void Req_ExpectInternal(Req *req);
 void Req_SetFd(Req *req, i32 fd);
 void Req_Handle(MemCh *m, Req *req, struct serve *srv);
-Req *Req_Make(MemCh *m, HandlerDef *def, void *source);
+Req *Req_Make(MemCh *m, HandlerDef *def, struct netaddr *addr, i32 fd, void *source);

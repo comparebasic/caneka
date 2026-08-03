@@ -31,4 +31,4 @@ struct pollfd *Serve_TcpGetPollFd(Req *req);
 void Serve_Setup(Serve *srv);
 void Serve_Serve(Serve *srv);
 
-Serve *Serve_Make(MemCh *m, Table *routes, void *source);
+Serve *Serve_Make(MemCh *m, Table *routes, Node *config);

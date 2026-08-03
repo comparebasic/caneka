@@ -53,14 +53,15 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                         fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
                         MemCh *rm = MemCh_Make();
-                        TcpSource *ts = (TcpSource *)srv->source;
-                        ts->new_fd = new_fd;
-                        ts->addr = NetAddr_Make4(m);
-                        memcpy(&ts->addr->net.ip4addr, &cliaddr, sizeof(cliaddr));
+                        NetAddr *addr = NetAddr_Make4(m);
+                        memcpy(&addr->net.ip4addr, &cliaddr, sizeof(cliaddr));
 
-                        Req *req = Req_Make(m, def, def->extra(m, srv, def));
-                        Time_Now(&req->metrics.start);
+                        Req *req = Req_Make(rm,
+                            def, addr, new_fd, def->extra(m, srv, def));
                         req->idx = Queue_Add(srv->q, req, req->crit);
+                        Time_Now(&req->metrics.start);
+
+                        srv->metrics.open++;
 
                         if(srv->type.state & DEBUG){
                             Buff_SetTemp(OutStream); 
@@ -167,12 +168,11 @@ void Serve_LogFinalized(Serve *srv, Req *req){
     */
 }
 
-Serve *Serve_Make(MemCh *m, Table *routes /* <HostEnt, HandlerDef> */, void *source){
+Serve *Serve_Make(MemCh *m, Table *routes /* <HostEnt, HandlerDef> */, Node *config){
     Serve *srv = MemCh_AllocOf(m, sizeof(Serve), TYPE_SERVE);
     srv->type.of = TYPE_SERVE;
     srv->m = m;
     srv->q = Queue_Make(m, (QueueCritFunc)ReqCrit_Func);
-    srv->source = source;
     if(routes->type.of == TYPE_TABLE){
         routes = Table_Ordered(m, routes);
     }
@@ -180,6 +180,7 @@ Serve *Serve_Make(MemCh *m, Table *routes /* <HostEnt, HandlerDef> */, void *sou
     srv->log.out = OutStream;
 
     srv->type.state |= DEBUG;
+    srv->config = config;
 
     return srv;
 }

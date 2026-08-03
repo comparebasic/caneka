@@ -14,11 +14,6 @@ static void HttpStatic_Cmd(MemCh *m, Req *_req, Serve *srv){
     Out("^p.Cmd: @^0\n", ar);
 }
 
-static void HttpStatic_Setup(MemCh *m, Req *req, Serve *srv){
-    HttpReq_Setup(m, req, srv);
-    HttpReq_SetToRecv((HttpReq *)req->source, req);
-}
-
 void HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;

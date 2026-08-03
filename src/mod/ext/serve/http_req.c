@@ -216,7 +216,7 @@ void HttpReq_Write(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
 
-    Buff_SetSocket(hreq->out, req->crit->pfd.fd);
+    Buff_SetSocketPfd(hreq->out, &req->crit->pfd);
     HttpReq_SetHeader(hreq, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
     HttpReq_WriteStatus(m, hreq, req);
     HttpReq_SetLength(m, hreq);
@@ -255,19 +255,10 @@ void HttpReq_ParseBody(HttpReq *hreq){
     ReturnVoid(m);
 }
 
-void HttpReq_Setup(MemCh *m, Req *req, Serve *srv){
+void HttpReq_Setup(MemCh *m, Req *req){
     HttpReq *hreq = (HttpReq *)req->source;
-    srv->metrics.open++;
-
-    TcpSource *ts = (TcpSource *)srv->source;
-    hreq->addr = ts->addr;
-    req->crit = ReqCrit_Make(m);
-    req->crit->pfd.fd = ts->new_fd;
-    if(req->def->capsule != NULL){
-        hreq->out->type.state &= ~BUFF_UNBUFFERED;
-    }
-
-    Req_SetFd(req, ts->new_fd);
+    HttpReq_SetToResponse(hreq, req);
+    Buff_SetSocketPfd(hreq->in, &req->crit->pfd);
     Req_ExpectRecv(req);
 }
 
@@ -276,16 +267,15 @@ void HttpReq_SetToRecv(HttpReq *hreq, Req *req){
     hreq->rbl = HttpRbl_Make(m, Cursor_Make(m, hreq->in->v), hreq);
 }
 
-void HttpReq_SetToResponse(HttpReq *hreq, Req *req, i32 fd){
+void HttpReq_SetToResponse(HttpReq *hreq, Req *req){
     MemCh *m = hreq->m;
-    if(fd >= 0){
-        Req_SetFd(req, fd);
-    }
     hreq->rbl = HttpRespRbl_Make(m, Cursor_Make(m, hreq->in->v), hreq);
     req->type.state |= HTTP_REQ_RESPONSE;
 }
 
 void *HttpReq_SourceMake(MemCh *m, Serve *srv, HandlerDef *def){
+    printf("HttpReq SourceMake\n");
+    fflush(stdout);
     HttpReq *hreq = MemCh_AllocOf(m, sizeof(HttpReq), TYPE_HTTP_REQ);
     hreq->type.of = TYPE_HTTP_REQ;
     hreq->m = m;
@@ -319,6 +309,7 @@ HandlerDef *HttpReq_DefMake(MemCh *m, Span *handlers, Node *extensions){
     HandlerDef *def = HandlerDef_Make(m);
     def->extra = (SourceMakerFunc)HttpReq_SourceMake;
     def->finalize = (ReqFunc) HttpReq_Finalize;
+    def->setup = (DoFunc) HttpReq_Setup;
     def->log.open = (ReqFunc) HttpReq_LogOpen;
     def->log.final = (ReqFunc) HttpReq_LogFinalized;
     def->route = Span_Make(m);

@@ -66,11 +66,19 @@ void HttpReq_TlsWrite(MemCh *m, Req *req, Serve *srv){
     ReturnVoid(m);
 }
 
+void HttpReq_TlsSetup(MemCh *m, Req *req){
+    HttpReq *hreq = (HttpReq *)req->source;
+    hreq->out->type.state &= ~BUFF_UNBUFFERED;
+    /* TODO: setup capsule here */
+    HttpReq_SetToResponse(hreq, req);
+    Req_ExpectRecv(req);
+}
 
 HandlerDef *HttpTlsReq_DefMake(MemCh *m, Span *handlers, Node *extensions){
     HandlerDef *def = HandlerDef_Make(m);
     def->extra = (SourceMakerFunc)HttpReq_SourceMake;
     def->finalize = (ReqFunc) HttpReq_TlsFinalize;
+    def->setup = (DoFunc) HttpReq_TlsSetup;
     def->log.open = (ReqFunc) HttpReq_LogOpen;
     def->log.final = (ReqFunc) HttpReq_LogFinalized;
     def->route = Span_Make(m);

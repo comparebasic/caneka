@@ -25,11 +25,6 @@ void Req_Handle(MemCh *m, Req *req, Serve *srv){
     ReturnVoid(m);
 }
 
-
-void Req_SetFd(Req *req, i32 fd){
-    req->crit->pfd.fd = fd;
-}
-
 void Req_ExpectRecv(Req *req){
     req->crit->pfd.events = POLLIN|POLLNVAL|POLLHUP|POLLERR;
 }
@@ -42,11 +37,19 @@ void Req_ExpectSend(Req *req){
     req->crit->pfd.events = POLLOUT|POLLNVAL|POLLHUP|POLLERR;
 }
 
-Req *Req_Make(MemCh *m, HandlerDef *def, void *source){
+Req *Req_Make(MemCh *m, HandlerDef *def, NetAddr *addr, i32 fd, void *source){
     Req *req = MemCh_AllocOf(m, sizeof(Req), TYPE_REQ);
+    req->m = m;
     req->type.of = TYPE_REQ;
     req->def = def;
+    req->addr = addr;
+    req->crit = ReqCrit_Make(m);
+    req->crit->pfd.fd = fd;
     req->source = source;
+    void *ar[] = {req->source, NULL};
+    Out("^p.HttpReq @^0\n", ar);
+
+    def->setup(m, req);
 
     return req;
 }

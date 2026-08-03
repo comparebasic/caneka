@@ -316,6 +316,12 @@ status Buff_SetSocket(Buff *bf, i32 fd){
     return SUCCESS;
 }
 
+status Buff_SetSocketPfd(Buff *bf, struct pollfd *pfd){
+    bf->pfd = pfd;
+    bf->type.state |= BUFF_SOCKET;
+    return SUCCESS;
+}
+
 status Buff_UnsetFd(Buff *bf){
     bf->pfd->fd = -1;
     bf->type.state &= ~BUFF_SOCKET;

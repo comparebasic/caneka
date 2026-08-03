@@ -76,11 +76,12 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
         if(ctx->current.target != NULL){
             Span_Add(cmd, StrVec_Str(m, ctx->current.target));
         }
+
+        Span_AddSpan(cmd, ctx->current.staticlibs);
+        Span_AddSpan(cmd, ctx->input.libs);
         if(ctx->current.liblist != NULL && ctx->current.liblist->nvalues > 0){
             Span_AddSpan(cmd, ctx->current.liblist);
         }
-        Span_AddSpan(cmd, ctx->current.staticlibs);
-        Span_AddSpan(cmd, ctx->input.libs);
     }else{
         Span_Add(cmd, Str_CstrRef(m, "-g"));
         Span_Add(cmd, Str_CstrRef(m, "-c"));

@@ -33,6 +33,7 @@ typedef struct buff {
 
 status Buff_SetFd(Buff *bf, i32 fd);
 status Buff_SetSocket(Buff *bf, i32 fd);
+status Buff_SetSocketPfd(Buff *bf, struct pollfd *pfd);
 status Buff_UnsetFd(Buff *bf);
 status Buff_UnsetSocket(Buff *bf);
 
