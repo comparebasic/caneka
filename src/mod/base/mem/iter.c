@@ -609,7 +609,7 @@ status Iter_AddSpan(Iter *it, Span *p){
     Iter it2;
     Iter_Init(&it2, p);
     while((Iter_Next(&it2) & END) == 0){
-        r |= Iter_Add(it, Iter_Get(&it2);
+        r |= Iter_Add(it, Iter_Get(&it2));
     }
     return r;
 }
@@ -619,7 +619,7 @@ status Iter_AddSpanRev(Iter *it, Span *p){
     Iter it2;
     Iter_Init(&it2, p);
     while((Iter_Prev(&it2) & END) == 0){
-        r |= Iter_Add(it, Iter_Get(&it2);
+        r |= Iter_Add(it, Iter_Get(&it2));
     }
     return r;
 }

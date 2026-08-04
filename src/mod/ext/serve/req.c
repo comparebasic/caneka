@@ -4,7 +4,7 @@
 void Req_SetRoute(MemCh *m, Req *req, Serve *srv){
     Abstract *a = NULL; 
     if(req->keys == NULL || req->keys->nvalues == 0 ||
-            (a = Inst_GetByPath(req->def->routes, req->keys)) == NULL){
+            (a = Inst_GetByPath(req->def->ext, req->keys)) == NULL){
         req->type.state |= ERROR;
         void *ar[] = {req, NULL};
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -13,7 +13,7 @@ void Req_SetRoute(MemCh *m, Req *req, Serve *srv){
     };
 
     if(a->type.of == TYPE_WRAPPED_FUNC){
-        Iter_Add(&req->route, sg);
+        Iter_Add(&req->route, a);
         req->type.state |= MORE;
     }else if(a->type.of == TYPE_SPAN){
         Iter_AddSpanRev(&req->route, (Span *)a);  
@@ -30,11 +30,11 @@ void Req_Handle(MemCh *m, Req *req, Serve *srv){
     do {
         req->type.state &= ~(MORE|SUCCESS);
         Single *sg = Iter_Get(&req->route);
-        ReqFunc func = (ReqFunc *)sg->val.ptr;
+        ReqFunc func = (ReqFunc)sg->val.ptr;
         func(m, req, srv);
         if(req->type.state & SUCCESS){
-            Iter_Remove(&it);
-            if(Iter_Prev(&it) & END){
+            Iter_Remove(&req->route);
+            if(Iter_Prev(&req->route) & END){
                 break;
             }
         }

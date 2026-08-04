@@ -36,7 +36,7 @@ void HttpReq_TlsAccept(MemCh *m, Req *req, Serve *srv){
     HttpReq *hreq = (HttpReq *)req->source;
     if(req->def->capsule != NULL){
         if(hreq->cap == NULL){
-            TlsInfo *info = TlsInfo_Make(m, req->crit->pfd.fd, req->conn.ent->ctx);
+            TlsInfo *info = TlsInfo_Make(m, req->crit->pfd.fd, req->def->ent->ctx);
             hreq->cap = Capsule_Make(m, TYPE_TLS_CAPSULE, hreq->in, hreq->out, info); 
         }
         if(req->def->capsule->open(hreq->cap) & SUCCESS){;

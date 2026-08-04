@@ -1,4 +1,4 @@
-typedef struct host_ent_wr {
+typedef struct host_ent {
     Type type;
     MemCh *m;
     Type objType;

@@ -11,3 +11,4 @@ struct queue;
 struct slotter;
 struct slotter_crit;
 struct crypto_tls_ctx;
+struct host_ent;

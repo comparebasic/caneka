@@ -23,7 +23,7 @@ void Serve_Init(MemCh *m){
     }
     if(ServeProtoTable == NULL){
         ServeProtoTable = Table_Make(m);
-        Table_Set(ServeProtoTable, S(m, "https"), Func_Wrapped(m, HttpTlsReq_DefMake));
-        Table_Set(ServeProtoTable, S(m, "http"), Func_Wrapped(m, HttpReq_DefMake));
+        Table_Set(ServeProtoTable, S(m, "https"), Func_Wrapped(m, HttpTlsReq_DefMake, ZERO));
+        Table_Set(ServeProtoTable, S(m, "http"), Func_Wrapped(m, HttpReq_DefMake, ZERO));
     }
 }

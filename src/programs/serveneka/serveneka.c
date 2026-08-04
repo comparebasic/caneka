@@ -86,6 +86,7 @@ void Serveneka_Serve(MemCh *m, Node *config){
 
                 DefMakerFunc func = (DefMakerFunc)sg->val.ptr;
                 def = func(m, handlers, ext);
+                def->ent = ent;
                 def->source = ent;
             }else if(ip6Str != NULL){
                 printf("make ip6\n");
