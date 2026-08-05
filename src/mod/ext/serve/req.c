@@ -1,6 +1,11 @@
 #include <external.h>
 #include <caneka.h>
 
+void Req_StepHandled(MemCh *m, Req *req, Serve *srv){
+    Iter_Remove(&req->route);
+    req->type.state |= (SUCCESS | (Iter_Prev(&req->route) & END));
+}
+
 void Req_SetRoute(MemCh *m, Req *req, Serve *srv){
     Abstract *a = NULL; 
     if(req->keys == NULL || req->keys->nvalues == 0 ||
@@ -23,22 +28,26 @@ void Req_SetRoute(MemCh *m, Req *req, Serve *srv){
 
 void Req_Handle(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
-    if(req->type.state & ERROR){
+    if((req->type.state & (ERROR|NOOP)) == ERROR){
         return;
     }
 
+    i16 guard = 0;
     do {
+        Guard_Incr(m, &guard, REQ_HANDLE_MAX, FUNCNAME, FILENAME, LINENUMBER);
         req->type.state &= ~(MORE|SUCCESS);
         Single *sg = Iter_Get(&req->route);
+
         ReqFunc func = (ReqFunc)sg->val.ptr;
         func(m, req, srv);
+
         if(req->type.state & SUCCESS){
-            Iter_Remove(&req->route);
-            if(Iter_Prev(&req->route) & END){
-                break;
+            if((req->type.state & END) == 0){
+                Single *sg = Iter_Get(&req->route);
+                req->crit->pfd.events = sg->objType.state;
             }
         }
-    } while(req->type.state & MORE);
+    } while((req->type.state & MORE) && ReqCrit_Func(srv->q, req, req->crit));
 
     ReturnVoid(m);
 }
@@ -57,9 +66,6 @@ Req *Req_Make(MemCh *m, HandlerDef *def, NetAddr *addr, i32 fd, void *source){
     Iter_Init(&req->route, Span_Make(m));
     Iter_AddSpan(&req->route, def->route);
     def->setup(m, req);
-
-    void *ar[] = {req->source, NULL};
-    Out("^p.HttpReq @^0\n", ar);
 
     return req;
 }

@@ -117,12 +117,12 @@ void HttpReq_Finalize(MemCh *m, Req *req, Serve *srv){
     Table_Set(tbl, K(m, "path"), hreq->path);
     Table_Set(tbl, K(m, "status"), st);
     Table_Set(tbl, K(m, "duration"), Duration_Str(m, d));
-    Table_Set(tbl, K(m, "from"), hreq->addr);
+    Table_Set(tbl, K(m, "from"), req->addr);
 
     Log_Flat(m, bf, K(m, "Request "), Table_Ordered(m, tbl), format);
 }
 
-void HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv){
+void HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
 
@@ -148,7 +148,7 @@ void HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv){
     
     req->type.state |= hreq->rbl->type.state & (SUCCESS|ERROR);
 
-    if(hreq->type.state & SUCCESS){
+    if(req->type.state & SUCCESS){
         HttpReq_ParseBody(hreq);            
         if(req->type.state & DEBUG){
             void *args[] = {
@@ -157,6 +157,7 @@ void HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv){
             };
             Out("^p.  Parsed Tcp Initial Request -> ^c.@^0\n", args);
         }
+        Req_StepHandled(m, req, srv);
     }else{
         if(req->type.state & DEBUG){
             void *args[] = {
@@ -166,8 +167,6 @@ void HttpReq_RespToRbl(MemCh *m, Req *req, Serve *srv){
             Out("^r.  Error Parsing Tcp Initial Request -> ^c.@^0\n", args);
         }
     }
-
-    Req_ExpectInternal(req);
 
     ReturnVoid(m);
 }
@@ -186,32 +185,6 @@ void HttpReq_RemoveHeader(HttpReq *req, Str *key){
     }
 }
 
-void HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv){
-    Debug_Push(m, req);
-    HttpReq *hreq = (HttpReq *)req->source;
-
-    Buff_SetSocket(hreq->in, req->crit->pfd.fd);
-    if((hreq->rbl->type.state & (SUCCESS|ERROR)) == 0 &&
-            (Buff_ReadAmount(hreq->in, SERVE_READ_SIZE) & NOOP) == 0){
-        Roebling_Run(hreq->rbl);
-    }
-    
-    req->type.state |= hreq->rbl->type.state & (SUCCESS|ERROR);
-
-    if(req->type.state & SUCCESS){
-        HttpReq_ParseBody(hreq);            
-        if(req->type.state & DEBUG){
-            void *args[] = {
-                req,
-                NULL,
-            };
-            Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
-        }
-    }
-
-    ReturnVoid(m);
-}
-
 void HttpReq_Write(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
@@ -223,7 +196,7 @@ void HttpReq_Write(MemCh *m, Req *req, Serve *srv){
     HttpReq_WriteHeaders(m, hreq);
     HttpReq_WriteBody(m, hreq);
 
-    req->type.state |= (SUCCESS|END);
+    Req_StepHandled(m, req, srv);
     ReturnVoid(m);
 }
 
@@ -257,14 +230,8 @@ void HttpReq_ParseBody(HttpReq *hreq){
 
 void HttpReq_Setup(MemCh *m, Req *req){
     HttpReq *hreq = (HttpReq *)req->source;
-    HttpReq_SetToResponse(hreq, req);
-    Buff_SetSocketPfd(hreq->in, &req->crit->pfd);
-    Req_ExpectRecv(req);
-}
-
-void HttpReq_SetToRecv(HttpReq *hreq, Req *req){
-    MemCh *m = hreq->m;
     hreq->rbl = HttpRbl_Make(m, Cursor_Make(m, hreq->in->v), hreq);
+    Buff_SetSocketPfd(hreq->in, &req->crit->pfd);
 }
 
 void HttpReq_SetToResponse(HttpReq *hreq, Req *req){
@@ -274,8 +241,6 @@ void HttpReq_SetToResponse(HttpReq *hreq, Req *req){
 }
 
 void *HttpReq_SourceMake(MemCh *m, Serve *srv, HandlerDef *def){
-    printf("HttpReq SourceMake\n");
-    fflush(stdout);
     HttpReq *hreq = MemCh_AllocOf(m, sizeof(HttpReq), TYPE_HTTP_REQ);
     hreq->type.of = TYPE_HTTP_REQ;
     hreq->m = m;
@@ -317,7 +282,7 @@ HandlerDef *HttpReq_DefMake(MemCh *m, Span *steps, Node *ext){
     def->route = Span_Make(m);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_Write, SEND_FLAGS));
     Span_AddSpanRev(def->route, steps);
-    Span_Add(def->route, Func_Wrapped(m, HttpReq_RespToRbl, RECV_FLAGS));
+    Span_Add(def->route, Func_Wrapped(m, HttpReq_ReadToRbl, RECV_FLAGS));
 
     def->ext = ext;
 

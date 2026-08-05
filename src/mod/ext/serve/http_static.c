@@ -14,11 +14,6 @@ static void HttpStatic_Cmd(MemCh *m, Req *_req, Serve *srv){
     Out("^p.Cmd: @^0\n", ar);
 }
 
-static void HttpStatic_Setup(MemCh *m, Req *req, Serve *srv){
-    Req_ExpectInternal(req);
-    req->type.state |= MORE;
-}
-
 void HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
     Debug_Push(m, req);
     HttpReq *hreq = (HttpReq *)req->source;
@@ -30,7 +25,7 @@ void HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
         StrVec_Add(local, S(m, "index.html"));
     }
 
-    Str *dir = Seel_Get(srv->config, K(m, "dir"));
+    Str *dir = Inst_GetChild(req->def->subConfig, K(m, "dir"));
     StrVec *path = Clone(m, dir);
     StrVec_AddVec(path, local);
 
@@ -41,11 +36,14 @@ void HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
     }
 
     Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+    bf->type.state |= NOOP;
     File_Open(bf, path, O_RDONLY);
     if(bf->type.state & ERROR){
-        req->type.state |= NOOP;
+        req->type.state |= NOOP|ERROR;
+        Req_StepHandled(m, req, srv);
         ReturnVoid(m);
     }
+
     Buff_Stat(bf);
 
     Str *timeStr = Time_ToRStr(m, &bf->st.st_mtim);
@@ -53,7 +51,7 @@ void HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
     StrVec *lastEtag = Table_GetByIter(&hreq->headersIt, K(m, "If-None-Match"));
     StrVec *since = Table_GetByIter(&hreq->headersIt, K(m, "If-Modified-Since"));
 
-    Table *tags = Seel_Get(srv->config, K(m, "etags"));
+    Table *tags = srv->etags;
     Inst *etag = (Inst *)Table_Get(tags, local);
     Str *etagStr = NULL;
     Str *etagLatest = NULL;
@@ -90,7 +88,6 @@ void HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
         HttpReq_SetHeader(hreq, S(m, "Last-Modified"), timeStr);
     }
 
-    Req_ExpectSend(req);
-    req->type.state |= SUCCESS;
+    Req_StepHandled(m, req, srv);
     ReturnVoid(m);
 }

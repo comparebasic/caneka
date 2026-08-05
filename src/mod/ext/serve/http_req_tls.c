@@ -71,7 +71,6 @@ void HttpReq_TlsSetup(MemCh *m, Req *req){
     hreq->out->type.state &= ~BUFF_UNBUFFERED;
     /* TODO: setup capsule here */
     HttpReq_SetToResponse(hreq, req);
-    Req_ExpectRecv(req);
 }
 
 HandlerDef *HttpTlsReq_DefMake(MemCh *m, Span *steps, Node *ext){

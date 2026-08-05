@@ -4,12 +4,8 @@
 
 boolean ReqCrit_Func(Queue *q, Req *req, ReqCrit *crit){
     if(crit->until.tv_sec > 0 && Time_IsPast(&q->time.present, &crit->until)){
-        printf("Time\n");
-        fflush(stdout);
         return TRUE; 
     }else{
-        printf("POLL\n");
-        fflush(stdout);
         return crit->pfd.fd != -1 && 
             ((crit->pfd.events & (POLLIN|POLLOUT)) == 0 || poll(&crit->pfd, 1, 0) == 1);
     }

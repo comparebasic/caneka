@@ -19,9 +19,8 @@ typedef struct req {
     void *source;
 } Req;
 
-void Req_ExpectRecv(Req *req);
-void Req_ExpectSend(Req *req);
-void Req_ExpectInternal(Req *req);
 void Req_SetFd(Req *req, i32 fd);
 void Req_Handle(MemCh *m, Req *req, struct serve *srv);
 Req *Req_Make(MemCh *m, HandlerDef *def, struct netaddr *addr, i32 fd, void *source);
+void Req_SetRoute(MemCh *m, Req *req, struct serve *srv);
+void Req_StepHandled(MemCh *m, Req *req, struct serve *srv);

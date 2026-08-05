@@ -8,7 +8,7 @@
                 {"ip6":"::", "port": 8443, "proto":"https"}
             ],
             "handler": "http-static",
-            "dir": "public"
+            "dir": "fixtures/serveneka/public"
         },
         {
             "interfaces": [

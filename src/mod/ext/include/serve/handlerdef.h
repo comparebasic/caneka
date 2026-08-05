@@ -13,6 +13,7 @@ typedef struct req_handler_def {
         ReqFunc final;
     } log;
     CapsuleDef *capsule;
+    Node *subConfig;
     void *source;
 } HandlerDef;
 

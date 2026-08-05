@@ -5,7 +5,6 @@ enum req_flags {
 typedef struct http_req {
     Type type;
     MemCh *m;
-    NetAddr *addr;
     Str *key;
     struct {
         i16 method;

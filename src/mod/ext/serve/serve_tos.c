@@ -6,7 +6,6 @@ static status HttpReq_Print(Buff *bf, void *a, cls type, word flags){
     MemCh *m = bf->m;
     if(flags & DEBUG){
         void *args[] = {
-            Type_StateVec(m, req->type.of, req->type.state),
             HttpMethodStr(m, req->address.method),
             req->path,
             req->headersIt.p,
@@ -18,12 +17,11 @@ static status HttpReq_Print(Buff *bf, void *a, cls type, word flags){
             req->out,
             NULL
         };
-        return Fmt(bf, "HttpReq<@ method:$ path:@"
+        return Fmt(bf, "HttpReq<method:$ path:@"
             " headers:@ query:@ body:@ meta:@"
             " sections:@ in:& out:&>", args);
     }else if(flags & MORE){
         void *args[] = {
-            Type_StateVec(m, req->type.of, req->type.state),
             HttpMethodStr(m, req->address.method),
             req->path,
             req->headersIt.p,
@@ -31,7 +29,7 @@ static status HttpReq_Print(Buff *bf, void *a, cls type, word flags){
             req->body,
             NULL
         };
-        return Fmt(bf, "HttpReq<@ $ @ headers:@ query:@ body:@>", args);
+        return Fmt(bf, "HttpReq<$ @ headers:@ query:@ body:@>", args);
     }else{
         void *args[] = {
             Type_StateVec(m, req->type.of, req->type.state),
@@ -105,11 +103,18 @@ static status Serve_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 static status Req_Print(Buff *bf, void *a, cls type, word flags){
-    Serve *ctx = (Serve*)a;
+    Req *req = (Req*)a;
     void *args[] = {
+        Type_StateVec(bf->m, req->type.of, req->type.state),
+        req->route.p,
+        req->source,
         NULL,
     };
-    return Fmt(bf, "Serve<>", args);
+    if(flags & DEBUG){
+        return Fmt(bf, "Req<@ @ &>", args);
+    }else{
+        return Fmt(bf, "Req<@ @ @>", args);
+    }
 }
 
 static status HostEnt_Print(Buff *bf, void *a, cls type, word flags){

@@ -1,6 +1,7 @@
 #define SERVE_READ_SIZE 1024
 #define TCP_LISTEN_BACKLOG 192
 #define TCP_ZERO_REQ_DELAY 5000
+#define REQ_HANDLE_MAX 64 
 
 typedef struct serve {
     Type type;
@@ -10,6 +11,7 @@ typedef struct serve {
     Iter endPointIt /* Hashed<HostEnt/Str, HandlerDef> */;
     PfdArr *endPointPfds;
     Inst *config;
+    Table *etags;
     void *source;
     struct {
         Buff *out;

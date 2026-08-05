@@ -27,16 +27,9 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         ReturnVoid(m);
     }
 
-    printf("Available %d\n", available);
-    fflush(stdout);
-
     if(available > 0){
         while((Iter_Next(&srv->endPointIt) & END) == 0){
             Hashed *h = Iter_Get(&srv->endPointIt);
-            void *ar[] = {
-                h, NULL
-            };
-            Out("^b.Endpoint @^0\n", ar);
             HostEnt *ent = (HostEnt *)h->key;
             HandlerDef *def = (HandlerDef *)h->value;
             if(ent->type.of == TYPE_HOST_ENT){
@@ -46,10 +39,6 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                 while(max-- > 0){
                     i32 new_fd = accept(ent->pfd->fd, (struct sockaddr*)&cliaddr, &len);
                     if(new_fd > 0){
-                        void *ar[] = {
-                            ent, I32_Wrapped(m, new_fd), NULL
-                        };
-                        Out("^b.Accepting @ fd$^0\n", ar);
                         fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
                         MemCh *rm = MemCh_Make();
@@ -80,12 +69,6 @@ static void ServeTcp_AcceptPoll(Serve *srv){
             }
         }
     }
-
-    void *ar[] = {
-        srv->q,
-        NULL
-    };
-    Out("^c.About to call Next on @^0\n", ar);
 
     srv->type.state |= (NOOP|PROCESSING);
     while((Queue_Next(srv->q) & END) == 0){
@@ -179,8 +162,8 @@ Serve *Serve_Make(MemCh *m, Table *routes /* <HostEnt, HandlerDef> */, Node *con
     Iter_Init(&srv->endPointIt, routes);
     srv->log.out = OutStream;
 
-    srv->type.state |= DEBUG;
     srv->config = config;
+    srv->etags = Table_Make(m);
 
     return srv;
 }

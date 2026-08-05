@@ -1,8 +1,8 @@
 #include <external.h>
 #include <caneka.h>
 
-static Node *ext = NULL;
-static Span *handlers = NULL;
+static Node *extStatic = NULL;
+static Span *handlersStatic = NULL;
 
 status HttpReq_Stats(MemCh *m, Req *req, Serve *srv){
     HttpReq *hreq = (HttpReq *)req->source;
@@ -13,13 +13,20 @@ status Serveneka_Prepare(MemCh *m, Req *req, Serve *srv){
     HttpReq *hreq = (HttpReq *)req->source;
     req->keys = Span_Make(m);
     Span_Add(req->keys, S(m, "by-path"));
-    Span_Add(req->keys, req->path);
+    Span_Add(req->keys, hreq->path);
 
-    if(Inst_GetByPath(req->def->ext, path) != NULL){
+    void*ar[] = {
+       hreq->path,
+       NULL
+    };
+
+    if(Inst_GetByPath(req->def->ext, req->keys) != NULL){
+        Req_StepHandled(m, req, srv);
         Req_SetRoute(m, req, srv);
     }else{
         Span_Wipe(req->keys);
         Span_Add(req->keys, S(m, "static"));
+        Req_StepHandled(m, req, srv);
         Req_SetRoute(m, req, srv);
     }
 
@@ -29,6 +36,8 @@ status Serveneka_Prepare(MemCh *m, Req *req, Serve *srv){
 void Serveneka_Serve(MemCh *m, Node *config){
     Debug_Push(m, config);
     void *args[5];
+
+    Serveneka_Init(m, config);
 
     Table *routes = Table_Make(m);
 
@@ -44,12 +53,15 @@ void Serveneka_Serve(MemCh *m, Node *config){
     while((Iter_Next(&it) & END) == 0){
         Node *nd = Iter_Get(&it);
         Table *props = Span_Get(nd, INST_PROPIDX_CHILDREN);
-        Span *handlers = Span_Make(m);
         args[0] = props;
         args[1] = NULL;
         Out("^y.Endpoint @^0\n", args);
-        StrVec *handlerKey = Table_Get(props, K(m, "handler")); Node *ext = NULL; if(Equals(handlerKey, K(m, "http-static"))){
-            ext = httpStaticExt; 
+        StrVec *handlerKey = Table_Get(props, K(m, "handler")); 
+        Node *ext = NULL;
+        Span *handlers = NULL;
+        if(Equals(handlerKey, K(m, "http-static"))){
+            ext = extStatic; 
+            handlers = handlersStatic;
         }
 
         Iter ifcIt;
@@ -87,6 +99,7 @@ void Serveneka_Serve(MemCh *m, Node *config){
                 DefMakerFunc func = (DefMakerFunc)sg->val.ptr;
                 def = func(m, handlers, ext);
                 def->ent = ent;
+                def->subConfig = nd;
                 def->source = ent;
             }else if(ip6Str != NULL){
                 printf("make ip6\n");
@@ -118,24 +131,21 @@ void Serveneka_Serve(MemCh *m, Node *config){
 }
 
 void Serveneka_Init(MemCh *m, Node *config){
-    if(httpStaticExt == NULL){
-        ext = Inst_Make(m, TYPE_NODE);
+    if(extStatic == NULL){
+        extStatic = Inst_Make(m, TYPE_NODE);
 
         Span *path = Span_Make(m);
         Span_Add(path, S(m, "static"));
-        Span *steps = Span_Make(m);
-
-        Span_Add(handlers, Func_Wrapped(m, HttpStatic_Setup, INTERNAL_FLAGS));
-        Span_Add(handlers, Func_Wrapped(m, HttpStatic_RetrieveFile, INTERNAL_FLAGS));
-        Inst_SetByPath(httpStaticExt, path, steps);
+        Inst_SetByPath(extStatic, path,
+            Func_Wrapped(m, HttpStatic_RetrieveFile, INTERNAL_FLAGS));
 
         path = Span_Make(m);
         Span_Add(path, S(m, "by-path"));
         Span_Add(path, S(m, "/stats"));
-        Inst_SetByPath(httpStaticExt, path, 
+        Inst_SetByPath(extStatic, path, 
             Func_Wrapped(m, HttpReq_Stats, INTERNAL_FLAGS));
 
-        handlers = Span_Make(m);
-        Span_Add(handlers, Func_Wrapped(m, Serveneka_Prepare));
+        handlersStatic = Span_Make(m);
+        Span_Add(handlersStatic, Func_Wrapped(m, Serveneka_Prepare, INTERNAL_FLAGS));
     }
 }
