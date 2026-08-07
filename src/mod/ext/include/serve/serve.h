@@ -27,10 +27,14 @@ typedef struct serve {
     } metrics;
 } Serve;
 
+extern Table *ServeProtoTable;
+i32 Serve_PortByService(Str *s);
+
 void Serve_LogOpen(Serve *srv, Req *req);
 void Serve_LogFinalized(Serve *srv, Req *req);
 struct pollfd *Serve_TcpGetPollFd(Req *req);
 void Serve_Setup(Serve *srv);
 void Serve_Serve(Serve *srv);
+void Serve_Init(MemCh *m);
 
 Serve *Serve_Make(MemCh *m, Table *routes, Node *config);

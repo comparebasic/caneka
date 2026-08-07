@@ -1,6 +1,9 @@
 #include <external.h>
 #include <caneka.h>
 
+static Table *services = NULL;
+Table *ServeProtoTable = NULL;
+
 static i16 _g = 0;
 static void ServeTcp_AcceptPoll(Serve *srv){
     MemCh *m = srv->m;
@@ -48,6 +51,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                         Req *req = Req_Make(rm,
                             def, addr, new_fd, def->extra(m, srv, def));
                         req->idx = Queue_Add(srv->q, req, req->crit);
+                        rm->owner = req;
                         Time_Now(&req->metrics.start);
 
                         srv->metrics.open++;
@@ -97,6 +101,16 @@ static void ServeTcp_AcceptPoll(Serve *srv){
 
 struct pollfd *Serve_TcpGetPollFd(Req *req){
      return (struct pollfd *)&req->crit->pfd;
+}
+
+
+i32 Serve_PortByService(Str *s){
+    Single *sg = Table_Get(services, s);
+    if(s == NULL){
+        return -1;
+    }else{
+        return sg->val.i;
+    }
 }
 
 void Serve_Setup(Serve *srv){
@@ -166,4 +180,19 @@ Serve *Serve_Make(MemCh *m, Table *routes /* <HostEnt, HandlerDef> */, Node *con
     srv->etags = Table_Make(m);
 
     return srv;
+}
+
+void Serve_Init(MemCh *m){
+    if(services == NULL){
+        services = Table_Make(m);
+        Table_Set(services, S(m, "http"), I32_Wrapped(m, 80));
+        Table_Set(services, S(m, "https"), I32_Wrapped(m, 443));
+        Lookup_Add(m, HashLookup, TYPE_HOST_ENT, (void *)HostEnt_Hash);
+        Lookup_Add(m, EqualsLookup, TYPE_HOST_ENT, (void *)HostEnt_Equals);
+        ServeProtoTable = Table_Make(m);
+        Table_Set(ServeProtoTable, S(m, "https"), Func_Wrapped(m, HttpTlsReq_DefMake, ZERO));
+        Table_Set(ServeProtoTable, S(m, "http"), Func_Wrapped(m, HttpReq_DefMake, ZERO));
+
+        Lookup_Add(m, ErrorHandlers, TYPE_REQ, (void *)Req_Error);
+    }
 }

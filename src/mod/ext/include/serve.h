@@ -21,7 +21,6 @@ enum serve_types {
 #include "serve/netaddr.h"
 #include "serve/serve.h"
 #include "serve/log.h"
-#include "serve/serve_init.h"
 #include "serve/serve_tos.h"
 #include "serve/http_static.h"
 #include "serve/http_req.h"

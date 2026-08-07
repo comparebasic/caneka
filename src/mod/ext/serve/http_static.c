@@ -22,7 +22,7 @@ void HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
     IoUtil_Relativise(m, local);
 
     if(IoUtil_IsSep(Span_Get(local->p, local->p->max_idx))){
-        StrVec_Add(local, S(m, "index.html"));
+        StrVec_AddVec(local, IoPath_From(m, S(m, "index.html")));
     }
 
     Str *dir = Inst_GetChild(req->def->subConfig, K(m, "dir"));
@@ -39,6 +39,15 @@ void HttpStatic_RetrieveFile(MemCh *m, Req *req, Serve *srv){
     bf->type.state |= NOOP;
     File_Open(bf, path, O_RDONLY);
     if(bf->type.state & ERROR){
+        Buff *bf = Buff_Make(m, ZERO);
+        void *ar[] = {hreq->path, NULL};
+        Fmt(bf, "File not found $\n", ar);
+        Buff_Stat(bf);
+        Span_Add(hreq->sections, bf);
+
+        Str *mime = Table_Get(MimeByExt, S(m, "txt"));
+        HttpReq_SetHeader(hreq, S(m, "Content-Type"), mime);
+
         req->type.state |= NOOP|ERROR;
         Req_StepHandled(m, req, srv);
         ReturnVoid(m);

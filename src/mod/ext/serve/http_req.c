@@ -118,6 +118,9 @@ void HttpReq_Finalize(MemCh *m, Req *req, Serve *srv){
     Table_Set(tbl, K(m, "status"), st);
     Table_Set(tbl, K(m, "duration"), Duration_Str(m, d));
     Table_Set(tbl, K(m, "from"), req->addr);
+    if(req->err != NULL){
+        Table_Set(tbl, K(m, "error"), req->err);
+    }
 
     Log_Flat(m, bf, K(m, "Request "), Table_Ordered(m, tbl), format);
 }
@@ -200,6 +203,29 @@ void HttpReq_Write(MemCh *m, Req *req, Serve *srv){
     ReturnVoid(m);
 }
 
+status HttpReq_Error(MemCh *m, Req *req, ErrorMsg *msg){
+    HttpReq *hreq = (HttpReq *)req->source;
+    req->type.state |= ERROR;
+    req->type.state &= ~NOOP;
+    HttpReq_RemoveHeader(hreq, S(m, "Etag"));
+    HttpReq_RemoveHeader(hreq, S(m, "Last-Modified"));
+
+    Span_Wipe(hreq->sections);
+
+    Buff *bf = Buff_Make(m, ZERO);
+    Buff_Add(bf, S(m, "<h1>Error</h1><p>"));
+    ErrorMsg_Fmt(bf, msg);
+    Buff_Add(bf, S(m, "</p>"));
+
+    Span_Add(hreq->sections, bf);
+
+    Span_Wipe(req->route.p);
+    Iter_Add(&req->route, Func_Wrapped(m, HttpReq_Write, SEND_FLAGS));
+    req->type.state |= MORE;
+
+    return ZERO;
+}
+
 void HttpReq_ParseBody(HttpReq *hreq){
     MemCh *m = hreq->m;
     Debug_Push(m, hreq);
@@ -253,23 +279,6 @@ void *HttpReq_SourceMake(MemCh *m, Serve *srv, HandlerDef *def){
     return hreq;
 }
 
-status HttpStatic_Error(MemCh *m, HttpReq *req, ErrorMsg *msg){
-    req->type.state |= ERROR;
-    req->type.state &= ~NOOP;
-    HttpReq_RemoveHeader(req, S(m, "Etag"));
-    HttpReq_RemoveHeader(req, S(m, "Last-Modified"));
-
-    Span_Wipe(req->sections);
-
-    Buff *bf = Buff_Make(m, ZERO);
-    Buff_Add(bf, S(m, "<h1>Error</h1><p>"));
-    ErrorMsg_Fmt(bf, msg);
-    Buff_Add(bf, S(m, "</p>"));
-
-    Span_Add(req->sections, bf);
-    return ZERO;
-}
-
 HandlerDef *HttpReq_DefMake(MemCh *m, Span *steps, Node *ext){
     HandlerDef *def = HandlerDef_Make(m);
 
@@ -290,5 +299,5 @@ HandlerDef *HttpReq_DefMake(MemCh *m, Span *steps, Node *ext){
 }
 
 void HttpReq_Init(MemCh *m){
-    Lookup_Add(m, ErrorHandlers, TYPE_HTTP_REQ, (void *)HttpStatic_Error);
+    Lookup_Add(m, ErrorHandlers, TYPE_HTTP_REQ, (void *)HttpReq_Error);
 }

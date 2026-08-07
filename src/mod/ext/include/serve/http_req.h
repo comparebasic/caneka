@@ -36,6 +36,7 @@ void HttpReq_WriteHeaders(MemCh *m, HttpReq *hreq);
 void HttpReq_WriteBody(MemCh *m, HttpReq *hreq);
 void HttpReq_Finalize(MemCh *m, Req *req, Serve *srv);
 
+status HttpReq_Error(MemCh *m, Req *req, ErrorMsg *msg);
 void HttpReq_ParseBody(HttpReq *req);
 void *HttpReq_SourceMake(MemCh *m, Serve *srv, HandlerDef *def);
 void HttpReq_Setup(MemCh *m, Req *req);

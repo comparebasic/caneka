@@ -52,6 +52,17 @@ void Req_Handle(MemCh *m, Req *req, Serve *srv){
     ReturnVoid(m);
 }
 
+status Req_Error(MemCh *m, Req *req, ErrorMsg *msg){
+    req->type.state |= ERROR;
+    req->type.state &= ~NOOP;
+    req->err = msg;
+    Abstract *a = req->source;
+    if(a != NULL && a->type.of == TYPE_HTTP_REQ){
+        return HttpReq_Error(m, req, msg);
+    }
+    return (ERROR|NOOP);
+}
+
 Req *Req_Make(MemCh *m, HandlerDef *def, NetAddr *addr, i32 fd, void *source){
     Req *req = MemCh_AllocOf(m, sizeof(Req), TYPE_REQ);
     req->type.of = TYPE_REQ;

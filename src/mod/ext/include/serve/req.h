@@ -16,6 +16,7 @@ typedef struct req {
         struct timespec start;
         struct timespec end;
     } metrics;
+    ErrorMsg *err;
     void *source;
 } Req;
 
@@ -24,3 +25,4 @@ void Req_Handle(MemCh *m, Req *req, struct serve *srv);
 Req *Req_Make(MemCh *m, HandlerDef *def, struct netaddr *addr, i32 fd, void *source);
 void Req_SetRoute(MemCh *m, Req *req, struct serve *srv);
 void Req_StepHandled(MemCh *m, Req *req, struct serve *srv);
+status Req_Error(MemCh *m, Req *req, ErrorMsg *msg);
