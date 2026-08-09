@@ -3,9 +3,15 @@
         {
             "interfaces": [
                 {"ip4":"0.0.0.0", "port": 8080, "proto":"http"},
-                {"ip4":"0.0.0.0", "port": 8443, "proto":"https"},
+                {"ip4":"0.0.0.0", "port": 8443, "proto":"https",
+                    "tls-cert":"/var/fixtures/server.crt",
+                    "tls-key": "/var/fixtures/server.key"
+                },
                 {"ip6":"::", "port": 8080, "proto":"http"},
-                {"ip6":"::", "port": 8443, "proto":"https"}
+                {"ip6":"::", "port": 8443, "proto":"https"
+                    "tls-cert":"/var/fixtures/server.crt",
+                    "tls-key": "/var/fixtures/server.key"
+                }
             ],
             "handler": "http-static",
             "dir": "fixtures/serveneka/public"

@@ -102,6 +102,11 @@ TlsCtx *TlsCtx_Make(MemCh *m, StrVec *cert, StrVec *key){
     TlsCtx *ctx = MemCh_AllocOf(m, sizeof(TlsCtx), TYPE_TLS_CTX);
     ctx->type.of = TYPE_TLS_CTX;
 
+    if(cert == NULL || key == NULL){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, "Cert or Key NULL", NULL);
+        return NULL;
+    }
+
     const SSL_METHOD *method = TLS_server_method();
     SSL_CTX *tlsCtx = SSL_CTX_new(method);
     if (!tlsCtx) {

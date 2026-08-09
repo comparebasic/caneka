@@ -1,8 +1,10 @@
 #include <external.h>
 #include <caneka.h>
 
+
 void HttpReq_TlsReadToRbl(MemCh *m, Req *req, Serve *srv){
-    Debug_Push(m, req);
+    printf("ReadTls\n");
+    fflush(stdout);
     HttpReq *hreq = (HttpReq *)req->source;
 
     if((hreq->rbl->type.state & (SUCCESS|ERROR)) == 0){
@@ -21,9 +23,8 @@ void HttpReq_TlsReadToRbl(MemCh *m, Req *req, Serve *srv){
             };
             Out("^0.Parsed Tcp Initial Request -> ^c.@^0\n", args);
         }
+        Req_StepHandled(m, req, srv);
     }
-
-    ReturnVoid(m);
 }
 
 void HttpReq_TlsFinalize(MemCh *m, Req *req, Serve *srv){
@@ -33,25 +34,34 @@ void HttpReq_TlsFinalize(MemCh *m, Req *req, Serve *srv){
 }
 
 void HttpReq_TlsAccept(MemCh *m, Req *req, Serve *srv){
+    printf("AcceptTls\n");
+    fflush(stdout);
     HttpReq *hreq = (HttpReq *)req->source;
-    if(req->def->capsule != NULL){
-        if(hreq->cap == NULL){
-            TlsInfo *info = TlsInfo_Make(m, req->crit->pfd.fd, req->def->ent->ctx);
-            hreq->cap = Capsule_Make(m, TYPE_TLS_CAPSULE, hreq->in, hreq->out, info); 
-        }
-        if(req->def->capsule->open(hreq->cap) & SUCCESS){;
-            req->type.state |= SUCCESS;
-        }
-    }else{
-        Buff_SetSocket(hreq->in, req->crit->pfd.fd);
+    if(req->def->capsule == NULL){
+        void*ar[] = {
+            req,
+            NULL
+        };
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Capsule required on HandlerDef for TLS envelope", ar);
+        return;
     }
 
-    ReturnVoid(m);
+    if(hreq->cap == NULL){
+        TlsInfo *info = TlsInfo_Make(m, req->crit->pfd.fd, req->def->ent->ctx);
+        hreq->cap = Capsule_Make(m, TYPE_TLS_CAPSULE, hreq->in, hreq->out, info); 
+    }
+
+    if(req->def->capsule->open(hreq->cap) & SUCCESS){;
+        Req_StepHandled(m, req, srv);
+    }
 }
 
 void HttpReq_TlsWrite(MemCh *m, Req *req, Serve *srv){
-    Debug_Push(m, req);
+    printf("WriteTls\n");
+    fflush(stdout);
     HttpReq *hreq = (HttpReq *)req->source;
+    hreq->out->type.state &= ~BUFF_UNBUFFERED;
 
     HttpReq_SetHeader(hreq, S(m, "Server"), S(m, "Caneka/1.0.0-alpha"));
 
@@ -62,25 +72,28 @@ void HttpReq_TlsWrite(MemCh *m, Req *req, Serve *srv){
 
     req->def->capsule->writeTo(hreq->cap);
 
-    req->type.state |= (SUCCESS|END);
-    ReturnVoid(m);
+    Req_StepHandled(m, req, srv);
 }
 
-void HttpReq_TlsSetup(MemCh *m, Req *req){
-    HttpReq *hreq = (HttpReq *)req->source;
-    hreq->out->type.state &= ~BUFF_UNBUFFERED;
-    /* TODO: setup capsule here */
-    HttpReq_SetToResponse(hreq, req);
+void HttpTls_EntSetup(MemCh *m, HostEnt *ent, Node *config){
+    Table *props = Span_Get(config, INST_PROPIDX_CHILDREN);
+    ent->ctx = TlsCtx_Make(m,
+        Table_Get(props, K(m, "tls-cert")), Table_Get(props, K(m, "tls-key")));
 }
 
-HandlerDef *HttpTlsReq_DefMake(MemCh *m, Span *steps, Node *ext){
+HandlerDef *HttpTlsReq_DefMake(MemCh *m,
+        Span *steps, Node *ext, HostEnt *ent, Node *config){
+
+    HttpTls_EntSetup(m, ent, config);
     HandlerDef *def = HandlerDef_Make(m);
 
+    def->ent = ent;
     def->extra = (SourceMakerFunc)HttpReq_SourceMake;
     def->finalize = (ReqFunc) HttpReq_TlsFinalize;
-    def->setup = (DoFunc) HttpReq_TlsSetup;
+    def->setup = (DoFunc) HttpReq_Setup;
     def->log.open = (ReqFunc) HttpReq_LogOpen;
     def->log.final = (ReqFunc) HttpReq_LogFinalized;
+    def->capsule = Lookup_Get(CapsuleDefLookup, TYPE_TLS_CAPSULE);
 
     def->route = Span_Make(m);
     Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsWrite, SEND_FLAGS));
@@ -89,6 +102,5 @@ HandlerDef *HttpTlsReq_DefMake(MemCh *m, Span *steps, Node *ext){
     Span_Add(def->route, Func_Wrapped(m, HttpReq_TlsAccept, BIDIR_FLAGS));
 
     def->ext = ext;
-
     return def;
 }

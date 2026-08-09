@@ -97,10 +97,8 @@ void Serveneka_Serve(MemCh *m, Node *config){
                 }
 
                 DefMakerFunc func = (DefMakerFunc)sg->val.ptr;
-                def = func(m, handlers, ext);
-                def->ent = ent;
+                def = func(m, handlers, ext, ent, ifc);
                 def->subConfig = nd;
-                def->source = ent;
             }else if(ip6Str != NULL){
                 printf("make ip6\n");
                 fflush(stdout);
@@ -132,6 +130,7 @@ void Serveneka_Serve(MemCh *m, Node *config){
 
 void Serveneka_Init(MemCh *m, Node *config){
     if(extStatic == NULL){
+        Crypto_Init(m);
         extStatic = Inst_Make(m, TYPE_NODE);
 
         Span *path = Span_Make(m);
@@ -147,5 +146,6 @@ void Serveneka_Init(MemCh *m, Node *config){
 
         handlersStatic = Span_Make(m);
         Span_Add(handlersStatic, Func_Wrapped(m, Serveneka_Prepare, INTERNAL_FLAGS));
+
     }
 }

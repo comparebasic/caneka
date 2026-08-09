@@ -131,6 +131,22 @@ static status HostEnt_Print(Buff *bf, void *a, cls type, word flags){
     return ZERO;
 }
 
+static status HandlerDef_Print(Buff *bf, void *a, cls type, word flags){
+    MemCh *m = bf->m;
+    HandlerDef *def = (HandlerDef *)a;
+    void *ar[] = {
+        def->route,
+        def->ext,
+        def->capsule,
+        def->subConfig,
+        def->source,
+        NULL,
+    };
+    Fmt(bf, "HandlerDef<route:@ ext:@ capsule:@ subConfig:@ source:@>", ar);
+    
+    return ZERO;
+}
+
 status Serve_TosInit(MemCh *m){
     status r = READY;
     Lookup *lk = ToStreamLookup;
@@ -140,5 +156,6 @@ status Serve_TosInit(MemCh *m){
     r |= Lookup_Add(m, lk, TYPE_NET_ADDR4, (void *)NetAddr_Print);
     r |= Lookup_Add(m, lk, TYPE_NET_ADDR6, (void *)NetAddr_Print);
     r |= Lookup_Add(m, lk, TYPE_HTTP_REQ, (void *)HttpReq_Print);
+    r |= Lookup_Add(m, lk, TYPE_HANDLER_DEF, (void *)HandlerDef_Print);
     return r;
 }
