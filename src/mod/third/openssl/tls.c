@@ -30,7 +30,7 @@ static status Tls_Open(Capsule *cap){
 
     ret = SSL_accept(info->tls);
     if(ret == 1){
-        cap->type.state |= SUCCESS;
+        cap->type.state |= (SUCCESS|CAPSULE_ENCRYPT_SUCCESS);
     }if(ret <= 0){
         i32 err = SSL_get_error(info->tls, ret);
         if(err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE){
@@ -88,14 +88,20 @@ static status Tls_ReadTo(Capsule *cap){
     byte _bytes[STR_DEFAULT];
     s.bytes = _bytes;
 
+    status r = READY;
     TlsInfo *info = (TlsInfo *)cap->source;
-    i32 read = SSL_read(info->tls, s.bytes, s.length);
-    if(read > 0){
-        s.length = (i16) read;
+    s.length = (i16)SSL_read(info->tls, s.bytes, s.length);
+    while((i16)s.length > 0){
         Buff_Add(cap->in, &s);
-        return SUCCESS;
+        r |=  SUCCESS;
+        s.length = STR_DEFAULT;
+        s.length = (i16)SSL_read(info->tls, s.bytes, s.length);
     }
-    return NOOP;
+
+    if(r == READY){
+        return r |= NOOP;
+    }
+    return r;
 }
 
 TlsCtx *TlsCtx_Make(MemCh *m, StrVec *cert, StrVec *key){

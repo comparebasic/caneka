@@ -122,6 +122,10 @@ void HttpReq_Finalize(MemCh *m, Req *req, Serve *srv){
         Table_Set(tbl, K(m, "error"), req->err);
     }
 
+    if(hreq->cap != NULL && (hreq->cap->type.state & CAPSULE_ENCRYPT_SUCCESS)){
+        Table_Set(tbl, K(m, "tls"), K(m, "yes"));
+    }
+
     Log_Flat(m, bf, K(m, "Request "), Table_Ordered(m, tbl), format);
 }
 

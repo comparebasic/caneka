@@ -1,3 +1,7 @@
+enum capsule_flags {
+    CAPSULE_ENCRYPT_SUCCESS = 1 << 8,
+};
+
 typedef struct capsule {
     Type type;
     Type objType;

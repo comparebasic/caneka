@@ -3,12 +3,11 @@
 
 
 void HttpReq_TlsReadToRbl(MemCh *m, Req *req, Serve *srv){
-    printf("ReadTls\n");
-    fflush(stdout);
     HttpReq *hreq = (HttpReq *)req->source;
 
+    status r = READY;
     if((hreq->rbl->type.state & (SUCCESS|ERROR)) == 0){
-        req->def->capsule->readTo(hreq->cap);
+        r = req->def->capsule->readTo(hreq->cap);
         Roebling_Run(hreq->rbl);
     }
     
@@ -34,8 +33,6 @@ void HttpReq_TlsFinalize(MemCh *m, Req *req, Serve *srv){
 }
 
 void HttpReq_TlsAccept(MemCh *m, Req *req, Serve *srv){
-    printf("AcceptTls\n");
-    fflush(stdout);
     HttpReq *hreq = (HttpReq *)req->source;
     if(req->def->capsule == NULL){
         void*ar[] = {
@@ -58,8 +55,6 @@ void HttpReq_TlsAccept(MemCh *m, Req *req, Serve *srv){
 }
 
 void HttpReq_TlsWrite(MemCh *m, Req *req, Serve *srv){
-    printf("WriteTls\n");
-    fflush(stdout);
     HttpReq *hreq = (HttpReq *)req->source;
     hreq->out->type.state &= ~BUFF_UNBUFFERED;
 

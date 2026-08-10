@@ -46,6 +46,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
 
                         MemCh *rm = MemCh_Make();
                         NetAddr *addr = NetAddr_Make4(m);
+                        cliaddr.sin_port = ntohs(cliaddr.sin_port); 
                         memcpy(&addr->net.ip4addr, &cliaddr, sizeof(cliaddr));
 
                         Req *req = Req_Make(rm,
@@ -82,7 +83,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                I32_Wrapped(OutStream->m, srv->q->it.idx), 
                NULL
             };
-            Out("^y.   Handling qIdx:$ ", ar);
+            Out("^y.   Handling qIdx:$^0", ar);
         }
         srv->type.state &= ~(NOOP|PROCESSING);
         Req *req = (Req *)Queue_Get(srv->q);
