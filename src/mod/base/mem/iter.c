@@ -596,12 +596,20 @@ status Iter_ExpandTo(Iter *it, i32 idx){
 }
 
 status Iter_Push(Iter *it, void *value){
-    it->type.state = (it->type.state & (NORMAL_FLAGS|PROCESSING)) | SPAN_OP_ADD;
-    it->idx = it->p->max_idx;
-    it->value = value;
-    status r = Iter_Query(it);
-    it->type.state |= PROCESSING;
-    return r;
+    i32 idx = it->idx;
+    Iter_Add(it, value);
+    Iter_GetByIdx(it, it->idx);
+    if((it->type.state & (END|PROCESSING)) == END){
+        it->type.state &= ~END;
+    }
+
+    void *ar[] = {
+        it,
+        NULL
+    };
+    Out("^p.Iter_Push @^0\n", ar);
+
+    return it->type.state;
 }
 
 status Iter_AddSpan(Iter *it, Span *p){

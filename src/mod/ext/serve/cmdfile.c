@@ -8,6 +8,7 @@ void *CmdFile_SourceMake(MemCh *m, Abstract *key, HandlerDef *def){
     cmd->in = bf;
     Iter_Init(&cmd->it, Span_Make(m));
     cmd->rbl = NlParser_Make(m, &cmd->it, Cursor_Make(m, bf->v));
+    cmd->rbl->type.state |= DEBUG;
     return cmd;
 }
 
