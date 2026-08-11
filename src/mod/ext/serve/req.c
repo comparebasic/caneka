@@ -70,7 +70,7 @@ Req *Req_MakeFile(MemCh *m, HandlerDef *def, Buff *bf, void *source){
     req->m = m;
     req->def = def;
     req->crit = ReqCrit_Make(m);
-    req->crit->pfd.fd = bf->pfd->fd;
+    memcpy(&req->crit->pfd, bf->pfd, sizeof(struct pollfd));
     req->source = source;
 
     Iter_Init(&req->route, Span_Make(m));

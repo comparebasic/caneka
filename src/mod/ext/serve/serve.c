@@ -125,14 +125,15 @@ void Serve_AddEndpoint(Serve *srv, Abstract *key, HandlerDef *def){
         Buff *bf = (Buff *)key;
 
         struct pollfd *pfd = PfdSpan_GetNextPfd(srv->pfds);
-        pfd->events = RECV_FLAGS;
         if(bf->pfd != NULL){
             memcpy(pfd, bf->pfd, sizeof(struct pollfd));
         }
+        pfd->events = RECV_FLAGS;
         bf->pfd = pfd;
 
         MemCh *rm = MemCh_Make();
         Req *req = Req_MakeFile(rm, def, bf, def->extra(rm, (Abstract *)bf, def));
+        req->crit->type.of = TYPE_FILE_CRIT;
         req->idx = Queue_Add(srv->q, req, req->crit);
         rm->owner = req;
         Time_Now(&req->metrics.start);

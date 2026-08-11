@@ -14,18 +14,21 @@ void *CmdFile_SourceMake(MemCh *m, Abstract *key, HandlerDef *def){
 
 void CmdFile_HandleInput(MemCh *m, Req *req, Serve *srv){
     CmdFile *cmd = (CmdFile *)req->source;
+    printf("HandleInput\n");
+    fflush(stdout);
 
-    if((cmd->rbl->type.state & (SUCCESS|ERROR)) == 0){
+    if((cmd->rbl->type.state & ERROR) == 0){
         Buff_ReadAmount(cmd->in, SERVE_READ_SIZE);
+        printf("Poll %d\n", poll(cmd->in->pfd, 1, 0));
 
         if((cmd->in->type.state & NOOP) == 0){
-            void *ar[] = {
-                cmd->in->v,
-                NULL
-            };
-            Out("^p.Content @^0\n", ar);
+            cmd->rbl->curs->type.state &= ~END;
             Roebling_Run(cmd->rbl);
         }
+    }
+
+    if(cmd->rbl->type.state & (NOOP|ERROR)){
+        cmd->rbl->type.state &= ~(NOOP|ERROR);
     }
 
     if((cmd->it.type.state & END) == 0){
@@ -33,17 +36,16 @@ void CmdFile_HandleInput(MemCh *m, Req *req, Serve *srv){
             void *ar[] = {
                 I32_Wrapped(m, cmd->it.idx),
                 Iter_Get(&cmd->it),
+                cmd->rbl,
                 NULL
             };
-            Out("^g.Cmd recieved $: @^0\n", ar);
+            Out("^g.Cmd recieved $: @^0\n   @", ar);
         }
     }
 }
 
 HandlerDef *CmdFile_DefMake(MemCh *m, Span *steps, Node *ext, Abstract *key, Node *config){
     Buff *bf = Ifc(m, key, TYPE_BUFF);
-    printf("CmdFile DefMake\n");
-    fflush(stdout);
 
     HandlerDef *def = HandlerDef_Make(m);
 

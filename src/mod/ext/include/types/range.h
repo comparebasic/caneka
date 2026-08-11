@@ -54,6 +54,7 @@ enum ext_types {
     TYPE_POLL_FD_ARR,
     TYPE_REQ,
     TYPE_REQ_CRIT,
+    TYPE_FILE_CRIT,
     TYPE_HTTP_REQ,
     TYPE_IP4_ADDRESS,
     TYPE_IP6_ADDRESS,
