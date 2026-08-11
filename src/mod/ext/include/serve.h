@@ -25,3 +25,5 @@ enum serve_types {
 #include "serve/http_static.h"
 #include "serve/http_req.h"
 #include "serve/http_req_tls.h"
+#include "serve/cmdfile.h"
+#include "serve/serveneka.h"

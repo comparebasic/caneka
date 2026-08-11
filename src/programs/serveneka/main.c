@@ -32,15 +32,12 @@ i32 main(int argc, char **argv){
     Args_Add(cli, configKey, NULL, ZERO, 
         Sv(m, "Path to config file."));
 
-    CliArgs_Parse(cli);
-
     if(CliArgs_Get(cli, noColorKey)){
         Ansi_SetColor(OutStream, FALSE);
     }
 
-    StrVec *configPath = IoUtil_GetAbsVec(m, CliArgs_Get(cli, configKey));
-    IoUtil_TrimDir(m, configPath);
-    Node *config = Json_FromPath(m, configPath);
+    CliArgs_Parse(cli);
+    Node *config = Serveneka_Setup(m, cli);
 
     Serveneka_Serve(m, config);
 

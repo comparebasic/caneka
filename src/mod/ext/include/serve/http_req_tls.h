@@ -6,4 +6,4 @@ void HttpReq_TlsWrite(MemCh *m, Req *req, Serve *srv);
 void HttpReq_TlsSetup(MemCh *m, Req *req);
 void HttpTls_EntSetup(MemCh *m, HostEnt *ent, Node *config);
 HandlerDef *HttpTlsReq_DefMake(MemCh *m, 
-    Span *handlers, Node *extensions, HostEnt *ent, Node *config);
+    Span *handlers, Node *extensions, Abstract *key, Node *config);

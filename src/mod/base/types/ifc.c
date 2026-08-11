@@ -30,7 +30,7 @@ cls Ifc_GetRoot(cls typeOf){
 
 void *Ifc(MemCh *m, void *_a, cls typeOf){
     Abstract *a = (Abstract *)_a;
-    if(a->type.of == typeOf){
+    if(a == NULL || a->type.of == typeOf){
         return a;
     }
 

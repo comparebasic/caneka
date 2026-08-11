@@ -283,7 +283,9 @@ void *HttpReq_SourceMake(MemCh *m, Serve *srv, HandlerDef *def){
     return hreq;
 }
 
-HandlerDef *HttpReq_DefMake(MemCh *m, Span *steps, Node *ext, HostEnt *ent, Node *config){
+HandlerDef *HttpReq_DefMake(MemCh *m, Span *steps, Node *ext, Abstract *key, Node *config){
+    HostEnt *ent = Ifc(m, key, TYPE_HOST_ENT);
+
     HandlerDef *def = HandlerDef_Make(m);
 
     def->ent = ent;

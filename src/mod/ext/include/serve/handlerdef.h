@@ -18,7 +18,7 @@ typedef struct req_handler_def {
 } HandlerDef;
 
 typedef HandlerDef *(*DefMakerFunc)(MemCh *m,
-    Span *handlers, Node *extensions, struct host_ent *ent, Node *config);
+    Span *handlers, Node *extensions, Abstract *key, Node *config);
 
+DefMakerFunc HandlerDefFunc_ByVec(MemCh *m, StrVec *proto);
 HandlerDef *HandlerDef_Make(MemCh *m);
-void HandlerDef_SetExt(MemCh *m, struct req *req, Span *path);

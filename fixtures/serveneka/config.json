@@ -8,7 +8,7 @@
                     "tls-key": "/var/fixtures/server.key"
                 },
                 {"ip6":"::", "port": 8080, "proto":"http"},
-                {"ip6":"::", "port": 8443, "proto":"https"
+                {"ip6":"::", "port": 8443, "proto":"https",
                     "tls-cert":"/var/fixtures/server.crt",
                     "tls-key": "/var/fixtures/server.key"
                 }

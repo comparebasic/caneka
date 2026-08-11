@@ -19,7 +19,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
         timeout = TCP_ZERO_REQ_DELAY;
     }
 
-    i32 available = poll(srv->endPointPfds->pfds, srv->endPointPfds->length, timeout);
+    i32 available = PfdSpan_Poll(srv->pfds, timeout);
     if(available == -1){
         args[0] = Str_CstrRef(ErrStream->m, strerror(errno));
         args[1] = NULL;
@@ -104,7 +104,6 @@ struct pollfd *Serve_TcpGetPollFd(Req *req){
      return (struct pollfd *)&req->crit->pfd;
 }
 
-
 i32 Serve_PortByService(Str *s){
     Single *sg = Table_Get(services, s);
     if(s == NULL){
@@ -114,38 +113,33 @@ i32 Serve_PortByService(Str *s){
     }
 }
 
-void Serve_Setup(Serve *srv){
+void Serve_AddEndpoint(Serve *srv, Abstract *key, HandlerDef *def){
     Debug_Push(srv->m, srv);
-    srv->endPointPfds = PfdArr_Make(srv->m, srv->endPointIt.p->nvalues);
-    while((Iter_Next(&srv->endPointIt) & END) == 0){
-        Hashed *h = Iter_Get(&srv->endPointIt);
-        if(h == NULL){
-            continue;
+
+    if(key->type.of == TYPE_HOST_ENT){
+        HostEnt *ent = (HostEnt *)key;
+        ent->pfd = PfdSpan_GetNextPfd(srv->pfds);
+        ent->type.state |= DEBUG;
+        HostEnt_OpenTcp(srv->m, ent);
+    }else if(key->type.of == TYPE_BUFF){
+        Buff *bf = (Buff *)key;
+
+        struct pollfd *pfd = PfdSpan_GetNextPfd(srv->pfds);
+        if(bf->pfd != NULL){
+            memcpy(pfd, bf->pfd, sizeof(struct pollfd));
         }
-        if(((Abstract *)h->key)->type.of == TYPE_HOST_ENT){
-            HostEnt *ent = (HostEnt *)h->key;
-            ent->pfd = &srv->endPointPfds->pfds[srv->endPointIt.idx];
-            ent->type.state |= DEBUG;
-            HostEnt_OpenTcp(srv->m, ent);
-        }else if(((Abstract *)h->key)->type.of == TYPE_BUFF){
-            Buff *bf = (Buff *)h->key;
-            if(bf->pfd != NULL){
-                memcpy(srv->endPointPfds->pfds+srv->endPointIt.idx,
-                    bf->pfd, sizeof(struct pollfd));
-            }
-            bf->pfd = &srv->endPointPfds->pfds[srv->endPointIt.idx];
-            /* setup request for file in Q */
-        }
+        bf->pfd = pfd;
+        /* setup request for file in Q */
     }
+
+    Hashed *h = Hashed_Make(srv->m, key);
+    h->value = def;
+    Iter_Add(&srv->endPointIt, h);
+
     ReturnVoid(srv->m);
 }
 
 void Serve_Serve(Serve *srv){
-    if((srv->type.state & PROCESSING) == 0){
-        Serve_Setup(srv);
-        srv->type.state |= PROCESSING;
-    }
-
     while((srv->type.state & ERROR) == 0){
         ServeTcp_AcceptPoll(srv);
     }
@@ -166,19 +160,16 @@ void Serve_LogFinalized(Serve *srv, Req *req){
     */
 }
 
-Serve *Serve_Make(MemCh *m, Table *routes /* <HostEnt, HandlerDef> */, Node *config){
+Serve *Serve_Make(MemCh *m){
     Serve *srv = MemCh_AllocOf(m, sizeof(Serve), TYPE_SERVE);
     srv->type.of = TYPE_SERVE;
     srv->m = m;
     srv->q = Queue_Make(m, (QueueCritFunc)ReqCrit_Func);
-    if(routes->type.of == TYPE_TABLE){
-        routes = Table_Ordered(m, routes);
-    }
-    Iter_Init(&srv->endPointIt, routes);
+    Iter_Init(&srv->endPointIt, Span_Make(m));
     srv->log.out = OutStream;
 
-    srv->config = config;
     srv->etags = Table_Make(m);
+    srv->pfds = Span_Make(m);
 
     return srv;
 }
@@ -193,6 +184,7 @@ void Serve_Init(MemCh *m){
         ServeProtoTable = Table_Make(m);
         Table_Set(ServeProtoTable, S(m, "https"), Func_Wrapped(m, HttpTlsReq_DefMake, ZERO));
         Table_Set(ServeProtoTable, S(m, "http"), Func_Wrapped(m, HttpReq_DefMake, ZERO));
+        Table_Set(ServeProtoTable, S(m, "cmd-file"), Func_Wrapped(m, CmdFile_DefMake, ZERO));
 
         Lookup_Add(m, ErrorHandlers, TYPE_REQ, (void *)Req_Error);
     }

@@ -77,8 +77,9 @@ void HttpTls_EntSetup(MemCh *m, HostEnt *ent, Node *config){
 }
 
 HandlerDef *HttpTlsReq_DefMake(MemCh *m,
-        Span *steps, Node *ext, HostEnt *ent, Node *config){
+        Span *steps, Node *ext, Abstract *key, Node *config){
 
+    HostEnt *ent = Ifc(m, key, TYPE_HOST_ENT);
     HttpTls_EntSetup(m, ent, config);
     HandlerDef *def = HandlerDef_Make(m);
 

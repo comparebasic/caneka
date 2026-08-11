@@ -47,4 +47,4 @@ void HttpReq_SetHeader(HttpReq *req, Str *key, void *value);
 void HttpReq_RemoveHeader(HttpReq *req, Str *key);
 void HttpReq_Init(MemCh *m);
 HandlerDef *HttpReq_DefMake(MemCh *m,
-    Span *handlers, Node *ext, HostEnt *ent, Node *config);
+    Span *handlers, Node *ext, Abstract *key, Node *config);
