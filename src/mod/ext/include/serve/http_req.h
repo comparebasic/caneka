@@ -38,7 +38,7 @@ void HttpReq_Finalize(MemCh *m, Req *req, Serve *srv);
 
 status HttpReq_Error(MemCh *m, Req *req, ErrorMsg *msg);
 void HttpReq_ParseBody(HttpReq *req);
-void *HttpReq_SourceMake(MemCh *m, Serve *srv, HandlerDef *def);
+void *HttpReq_SourceMake(MemCh *m, Abstract *key, HandlerDef *def);
 void HttpReq_Setup(MemCh *m, Req *req);
 void HttpReq_Serve(MemCh *m, HttpReq *req, Serve *srv);
 void HttpReq_SetToRecv(HttpReq *hreq, Req *req);

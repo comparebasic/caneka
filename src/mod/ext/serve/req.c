@@ -63,6 +63,25 @@ status Req_Error(MemCh *m, Req *req, ErrorMsg *msg){
     return (ERROR|NOOP);
 }
 
+Req *Req_MakeFile(MemCh *m, HandlerDef *def, Buff *bf, void *source){
+    Req *req = MemCh_AllocOf(m, sizeof(Req), TYPE_REQ);
+    req->type.of = TYPE_REQ;
+
+    req->m = m;
+    req->def = def;
+    req->crit = ReqCrit_Make(m);
+    req->crit->pfd.fd = bf->pfd->fd;
+    req->source = source;
+
+    Iter_Init(&req->route, Span_Make(m));
+    Iter_AddSpan(&req->route, def->route);
+    if(def->setup != NULL){
+        def->setup(m, req);
+    }
+
+    return req;
+}
+
 Req *Req_Make(MemCh *m, HandlerDef *def, NetAddr *addr, i32 fd, void *source){
     Req *req = MemCh_AllocOf(m, sizeof(Req), TYPE_REQ);
     req->type.of = TYPE_REQ;
@@ -76,7 +95,9 @@ Req *Req_Make(MemCh *m, HandlerDef *def, NetAddr *addr, i32 fd, void *source){
 
     Iter_Init(&req->route, Span_Make(m));
     Iter_AddSpan(&req->route, def->route);
-    def->setup(m, req);
+    if(def->setup != NULL){
+        def->setup(m, req);
+    }
 
     return req;
 }

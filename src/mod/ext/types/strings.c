@@ -60,6 +60,8 @@ static char *extTypeStrings[] = {
     "TYPE_HTTP_REQ",
     "TYPE_IP4_ADDRESS",
     "TYPE_IP6_ADDRESS",
+    "TYPE_UNIX_ADDRESS",
+    "TYPE_CMD_FILE",
     "_TYPE_CORE_END",
     "_APP_BOUNDRY_START",
     "TYPE_RBL_MARK",
@@ -232,6 +234,7 @@ static char *extTypeStrings[] = {
     "CASH_JUMP",
     "CASH_END",
     "_CASH_END",
+    "LINE_CONTENT",
     "_TYPE_EXT_END",
     NULL
 };

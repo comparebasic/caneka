@@ -15,7 +15,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
     Time_Now(&srv->q->time.present);
 
     i64 timeout = 0;
-    if(srv->q->it.p->nvalues == 0){
+    if(srv->q->it.p->nvalues <= srv->metrics.fixed){
         timeout = TCP_ZERO_REQ_DELAY;
     }
 
@@ -50,7 +50,7 @@ static void ServeTcp_AcceptPoll(Serve *srv){
                         memcpy(&addr->net.ip4addr, &cliaddr, sizeof(cliaddr));
 
                         Req *req = Req_Make(rm,
-                            def, addr, new_fd, def->extra(m, srv, def));
+                            def, addr, new_fd, def->extra(rm, (Abstract *)ent, def));
                         req->idx = Queue_Add(srv->q, req, req->crit);
                         rm->owner = req;
                         Time_Now(&req->metrics.start);
@@ -125,11 +125,18 @@ void Serve_AddEndpoint(Serve *srv, Abstract *key, HandlerDef *def){
         Buff *bf = (Buff *)key;
 
         struct pollfd *pfd = PfdSpan_GetNextPfd(srv->pfds);
+        pfd->events = RECV_FLAGS;
         if(bf->pfd != NULL){
             memcpy(pfd, bf->pfd, sizeof(struct pollfd));
         }
         bf->pfd = pfd;
-        /* setup request for file in Q */
+
+        MemCh *rm = MemCh_Make();
+        Req *req = Req_MakeFile(rm, def, bf, def->extra(rm, (Abstract *)bf, def));
+        req->idx = Queue_Add(srv->q, req, req->crit);
+        rm->owner = req;
+        Time_Now(&req->metrics.start);
+        srv->metrics.fixed++;
     }
 
     Hashed *h = Hashed_Make(srv->m, key);

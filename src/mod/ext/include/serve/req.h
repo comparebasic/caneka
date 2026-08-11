@@ -23,6 +23,7 @@ typedef struct req {
 void Req_SetFd(Req *req, i32 fd);
 void Req_Handle(MemCh *m, Req *req, struct serve *srv);
 Req *Req_Make(MemCh *m, HandlerDef *def, struct netaddr *addr, i32 fd, void *source);
+Req *Req_MakeFile(MemCh *m, HandlerDef *def, Buff *bf, void *source);
 void Req_SetRoute(MemCh *m, Req *req, struct serve *srv);
 void Req_StepHandled(MemCh *m, Req *req, struct serve *srv);
 status Req_Error(MemCh *m, Req *req, ErrorMsg *msg);

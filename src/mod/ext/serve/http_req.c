@@ -134,11 +134,7 @@ void HttpReq_ReadToRbl(MemCh *m, Req *req, Serve *srv){
     HttpReq *hreq = (HttpReq *)req->source;
 
     if((hreq->rbl->type.state & (SUCCESS|ERROR)) == 0){
-        if(req->def->capsule != NULL){
-            req->def->capsule->readTo(hreq->cap);
-        }else{
-            Buff_ReadAmount(hreq->in, SERVE_READ_SIZE);
-        }
+        Buff_ReadAmount(hreq->in, SERVE_READ_SIZE);
 
         if((hreq->in->type.state & NOOP) == 0){
             Roebling_Run(hreq->rbl);
@@ -270,7 +266,7 @@ void HttpReq_SetToResponse(HttpReq *hreq, Req *req){
     req->type.state |= HTTP_REQ_RESPONSE;
 }
 
-void *HttpReq_SourceMake(MemCh *m, Serve *srv, HandlerDef *def){
+void *HttpReq_SourceMake(MemCh *m, Abstract *key, HandlerDef *def){
     HttpReq *hreq = MemCh_AllocOf(m, sizeof(HttpReq), TYPE_HTTP_REQ);
     hreq->type.of = TYPE_HTTP_REQ;
     hreq->m = m;

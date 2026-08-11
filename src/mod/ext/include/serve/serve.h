@@ -24,6 +24,7 @@ typedef struct serve {
         util served;
         util error;
         util total;
+        util fixed;
     } metrics;
 } Serve;
 

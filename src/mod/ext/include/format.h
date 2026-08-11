@@ -6,3 +6,4 @@
 #include "format/cash.h"
 #include "format/url.h"
 #include "format/http.h"
+#include "format/nl.h"
