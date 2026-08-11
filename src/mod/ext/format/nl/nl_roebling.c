@@ -20,17 +20,7 @@ static status start(MemCh *m, Roebling *rbl){
 static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
     Iter *it = (Iter *)rbl->dest;
-
-    i32 idx = -1;
-    if(it->p->nvalues > 0 && (it->type.state & END) == 0){
-        idx = it->idx;
-    }
-
-    Iter_Add(it, v);
-
-    if(idx >= 0){
-        Iter_GetByIdx(it, idx);
-    }
+    Iter_Push(it, v);
 
     return ZERO;
 }
