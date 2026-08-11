@@ -2,8 +2,17 @@
 #include <caneka.h>
 
 static inline status Roebling_RunMatches(Roebling *rbl){
+    void *ar[] = {
+        rbl->curs,
+        rbl->curs->v,
+        NULL
+    };
+    Out("RunMatches @ -> @^0\n", ar);
+
     Debug_Push(rbl->m, rbl);
     while((Cursor_NextByte(rbl->curs) & END) == 0){
+        printf("NextByte\n");
+        fflush(stdout);
         Guard_Incr(rbl->m, &rbl->guard, RBL_GUARD_MAX, FUNCNAME, FILENAME, LINENUMBER);
 
         Type_SetFlag((Abstract *)&rbl->matchIt, SPAN_OP_GET);
@@ -154,6 +163,8 @@ status Roebling_Dispatch(Roebling *rbl, Match *mt){
 }
 
 status Roebling_RunCycle(Roebling *rbl){
+    printf("RunCycle\n");
+    fflush(stdout);
     Debug_Push(rbl->m, rbl->curs);
     if(rbl->parseIt.p->nvalues == 0){
         Fatal(rbl->m, FUNCNAME, FILENAME, LINENUMBER,

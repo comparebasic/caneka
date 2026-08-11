@@ -9,6 +9,7 @@ static status Cursor_SetStr(Cursor *curs){
     if(curs->it.type.state & SUCCESS){
         Str *s = (Str *)curs->it.value;
         if(s != NULL){
+            curs->start = s->bytes;
             curs->ptr = s->bytes;
             curs->end = s->bytes+(s->length-1);
             curs->type.state |= PROCESSING;
@@ -349,6 +350,8 @@ status Cursor_PrevByte(Cursor *curs){
 }
 
 status Cursor_NextByte(Cursor *curs){
+    printf("Cursor_NextByte\n");
+    fflush(stdout);
     curs->type.state &= ~CURSOR_STR_BOUNDRY;
     if((curs->type.state & PROCESSING) == 0){
         curs->it.idx = 0;
@@ -403,6 +406,29 @@ status Cursor_Add(Cursor *curs, Str *s){
     }
     curs->it.type.state &= ~LAST;
     return r;
+}
+
+status Cursor_Update(Cursor *curs){
+    MemCh *m = curs->v->p->m;
+    if(curs->type.state & END){
+        Str *s = Iter_GetByIdx(&curs->it, curs->it.idx);
+        i64 delta = curs->ptr - curs->start;
+        void *ar[] = {
+            s,
+            I64_Wrapped(m, curs->end - curs->ptr),
+            I64_Wrapped(m, delta),
+            NULL
+        };
+        Out("^y.S & of total:$ delta:$^0\n", ar);
+
+        if(curs->end - curs->ptr < (i64)s->length){
+            Cursor_SetStr(curs);
+            curs->ptr += delta;
+            curs->type.state &= ~END;
+            return MORE;
+        }
+    }
+    return NOOP;
 }
 
 status Cursor_Reset(Cursor *curs){

@@ -14,15 +14,19 @@ void *CmdFile_SourceMake(MemCh *m, Abstract *key, HandlerDef *def){
 
 void CmdFile_HandleInput(MemCh *m, Req *req, Serve *srv){
     CmdFile *cmd = (CmdFile *)req->source;
-    printf("HandleInput\n");
-    fflush(stdout);
 
     if((cmd->rbl->type.state & ERROR) == 0){
+        void *ar[] = {
+            cmd->in,
+            cmd->rbl->curs,
+            NULL
+        };
+        Out("^g.In @ -> @^0\n", ar);
+
         Buff_ReadAmount(cmd->in, SERVE_READ_SIZE);
-        printf("Poll %d\n", poll(cmd->in->pfd, 1, 0));
 
         if((cmd->in->type.state & NOOP) == 0){
-            cmd->rbl->curs->type.state &= ~END;
+            Cursor_Update(cmd->rbl->curs);
             Roebling_Run(cmd->rbl);
         }
     }

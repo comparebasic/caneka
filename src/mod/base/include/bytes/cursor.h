@@ -33,3 +33,4 @@ status Cursor_RFillStr(Cursor *curs, Str *s);
 i64 Cursor_Pos(Cursor *curs);
 status Cursor_Reset(Cursor *curs);
 status Cursor_Remaining(Cursor *curs, struct buff *bf);
+status Cursor_Update(Cursor *curs);
