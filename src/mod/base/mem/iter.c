@@ -159,6 +159,7 @@ static status Iter_Query(Iter *it){
             return Iter_AddWithGaps(it);
         }
         it->idx = it->p->max_idx+1;
+        it->type.state &= ~END;
     }
 
     i8 dimsNeeded = 0;
@@ -597,17 +598,11 @@ status Iter_ExpandTo(Iter *it, i32 idx){
 
 status Iter_Push(Iter *it, void *value){
     i32 idx = it->idx;
-    Iter_Add(it, value);
-    Iter_GetByIdx(it, it->idx);
-    if((it->type.state & (END|PROCESSING)) == END){
-        it->type.state &= ~END;
+    if(it->type.state & END){
+        idx--;
     }
-
-    void *ar[] = {
-        it,
-        NULL
-    };
-    Out("^p.Iter_Push @^0\n", ar);
+    Iter_Add(it, value);
+    Iter_GetByIdx(it, idx);
 
     return it->type.state;
 }

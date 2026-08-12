@@ -31,6 +31,7 @@ status Inet_Tests(MemCh *gm);
 status Host_Tests(MemCh *m);
 status Silt_Tests(MemCh *m);
 status Json_Tests(MemCh *m);
+status NetAddr6_Tests(MemCh *m);
 #ifdef CNKOPT_FREEBSD
 status SysQuery_Tests(MemCh *m);
 #endif
@@ -240,6 +241,12 @@ static TestSet ExtTests[] = {
         "Queue Scale Tests",
         QueueScale_Tests,
         "Queue testing adding and removing Queue items over time.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "ipv6 tests",
+        NetAddr6_Tests,
+        "Testig parsing and storage of ipv6 addresses",
         FEATURE_COMPLETE,
     },
     {

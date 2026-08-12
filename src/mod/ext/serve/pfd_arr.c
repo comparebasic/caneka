@@ -15,10 +15,6 @@ i32 PfdSpan_Poll(Span *p, i32 timeout){
         PfdArr *arr = Iter_Get(&it);
         available += poll(arr->pfds, arr->length, timeout);
     }
-    /*
-    printf("available %d\n", available);
-    fflush(stdout);
-    */
     return available;
 }
 
@@ -35,8 +31,6 @@ struct pollfd *PfdSpan_GetNextPfd(Span *p){
 
     struct pollfd *pfd = arr->pfds+arr->length;
     arr->length++;
-    printf("Added Endpoint %d/%d\n", p->nvalues-1, arr->length);
-    fflush(stdout);
 
     return pfd;
 }

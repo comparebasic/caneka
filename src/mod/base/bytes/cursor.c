@@ -43,8 +43,6 @@ status Cursor_Remaining(Cursor *curs, Buff *bf){
         if((curs->it.type.state & (LAST|END)) == 0){
             while((Iter_Next(&curs->it) & END) == 0){
                 Str *s = Iter_Get(&curs->it);
-                void *ar[] = {s, NULL};
-                Out("^p.Adding @^0\n", ar);
                 Buff_Add(bf, s);
             }
         }
@@ -350,8 +348,6 @@ status Cursor_PrevByte(Cursor *curs){
 }
 
 status Cursor_NextByte(Cursor *curs){
-    printf("Cursor_NextByte\n");
-    fflush(stdout);
     curs->type.state &= ~CURSOR_STR_BOUNDRY;
     if((curs->type.state & PROCESSING) == 0){
         curs->it.idx = 0;
@@ -413,14 +409,6 @@ status Cursor_Update(Cursor *curs){
     if(curs->type.state & END){
         Str *s = Iter_GetByIdx(&curs->it, curs->it.idx);
         i64 delta = curs->ptr - curs->start;
-        void *ar[] = {
-            s,
-            I64_Wrapped(m, curs->end - curs->ptr),
-            I64_Wrapped(m, delta),
-            NULL
-        };
-        Out("^y.S & of total:$ delta:$^0\n", ar);
-
         if(curs->end - curs->ptr < (i64)s->length){
             Cursor_SetStr(curs);
             curs->ptr += delta;

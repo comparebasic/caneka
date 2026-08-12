@@ -8,7 +8,6 @@ void *CmdFile_SourceMake(MemCh *m, Abstract *key, HandlerDef *def){
     cmd->in = bf;
     Iter_Init(&cmd->it, Span_Make(m));
     cmd->rbl = NlParser_Make(m, &cmd->it, Cursor_Make(m, bf->v));
-    cmd->rbl->type.state |= DEBUG;
     return cmd;
 }
 
@@ -16,13 +15,6 @@ void CmdFile_HandleInput(MemCh *m, Req *req, Serve *srv){
     CmdFile *cmd = (CmdFile *)req->source;
 
     if((cmd->rbl->type.state & ERROR) == 0){
-        void *ar[] = {
-            cmd->in,
-            cmd->rbl->curs,
-            NULL
-        };
-        Out("^g.In @ -> @^0\n", ar);
-
         Buff_ReadAmount(cmd->in, SERVE_READ_SIZE);
 
         if((cmd->in->type.state & NOOP) == 0){
@@ -40,10 +32,9 @@ void CmdFile_HandleInput(MemCh *m, Req *req, Serve *srv){
             void *ar[] = {
                 I32_Wrapped(m, cmd->it.idx),
                 Iter_Get(&cmd->it),
-                cmd->rbl,
                 NULL
             };
-            Out("^g.Cmd recieved $: @^0\n   @", ar);
+            Out("^g.Cmd recieved $: @^0\n", ar);
         }
     }
 }

@@ -52,11 +52,6 @@ void HostEnt_OpenTcp(MemCh *m, HostEnt *ent){
 
     ent->pfd->events = POLLIN;
     ent->pfd->revents = 0;
-
-    if(ent->type.state & DEBUG){
-        void *ar[] = {ent, NULL};
-        Out("^p.HostEnt is open: @^0\n", ar);
-    }
 }
 
 HostEnt *HostEnt_FromName(MemCh *m, Str *name, Str *service){

@@ -52,7 +52,7 @@ status HttpQuery_Tests(MemCh *m){
     status r = READY;
 
     HttpReq *hreq = (HttpReq *)HttpReq_SourceMake(MemCh_Make(), NULL, NULL);
-    Req *req = Req_Make(m, NULL, hreq);
+    Req *req = Req_Make(m, NULL, NULL, 0, hreq);
     HttpReq_SetToRecv(hreq, req);
 
     Str *content = S(hreq->in->m, 

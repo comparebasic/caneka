@@ -89,10 +89,6 @@ void Serveneka_Serve(MemCh *m, Node *config){
 
     Serveneka_Init(m);
 
-    args[0] = config;
-    args[1] = NULL;
-    Out("^p.Config: $^0\n", args);
-
     Span *path = Span_Make(m);
     Span_Add(path, K(m, "endpoints"));
 
@@ -104,9 +100,6 @@ void Serveneka_Serve(MemCh *m, Node *config){
     while((Iter_Next(&it) & END) == 0){
         Node *nd = Iter_Get(&it);
         Table *props = Span_Get(nd, INST_PROPIDX_CHILDREN);
-        args[0] = props;
-        args[1] = NULL;
-        Out("^y.Endpoint @^0\n", args);
 
         StrVec *handlerKey = Table_Get(props, K(m, "handler")); 
         Node *ext = NULL;
@@ -138,14 +131,6 @@ void Serveneka_Serve(MemCh *m, Node *config){
             if(key != NULL && def != NULL){
                 Serve_AddEndpoint(srv, key, def);
             }
-
-            void *ar[] = {
-                ifc,
-                key,
-                def,
-                NULL
-            };
-            Out("^y.    Ifc @\n  @ -> @\n^0\n", ar);
         }
     }
 

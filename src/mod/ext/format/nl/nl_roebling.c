@@ -21,7 +21,6 @@ static status Capture(Roebling *rbl, word captureKey, StrVec *v){
     MemCh *m = rbl->m;
     Iter *it = (Iter *)rbl->dest;
     Iter_Push(it, v);
-
     return ZERO;
 }
 

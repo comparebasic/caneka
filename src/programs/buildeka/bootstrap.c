@@ -83,6 +83,7 @@ char *buildTests[] = {
     "base",
     "ext",
     "inter",
+    "crypto@third/openssl",
     NULL
 };
 

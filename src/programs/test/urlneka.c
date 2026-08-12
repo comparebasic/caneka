@@ -74,8 +74,8 @@ i32 main(int argc, char **argv){
 
     MemCh *rm = MemCh_Make();
     HttpReq *hreq = (HttpReq *)HttpReq_SourceMake(rm, NULL, NULL);
-    Req *req = Req_Make(rm, NULL, hreq);
-    HttpReq_SetToResponse(hreq, req, bf->pfd->fd);
+    Req *req = Req_Make(rm, NULL, NULL, -1, hreq);
+    HttpReq_SetToResponse(hreq, req);
     while((req->type.state & (SUCCESS|ERROR)) == 0){
         HttpReq_ReadToRbl(req->m, req, NULL);
     }
@@ -83,7 +83,7 @@ i32 main(int argc, char **argv){
 
 #ifdef CNKOPT_CRYPTO
     Str *sha = Str_DigestAlloc(m);
-    Buff *body = Ifc(m, req->body, TYPE_BUFF);
+    Buff *body = Ifc(m, hreq->body, TYPE_BUFF);
     StrVec_ToSha256(m, body->v, (digest*)sha->bytes);
     sha->length = DIGEST_SIZE;
     Str *hex = Str_ToHex(m, sha);

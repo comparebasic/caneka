@@ -131,12 +131,6 @@ TlsCtx *TlsCtx_Make(MemCh *m, StrVec *cert, StrVec *key){
         ctx->type.state |= ERROR;
         SSL_CTX_free(tlsCtx);
         return NULL;
-    }else{
-        void *ar[] = {
-            cert,
-            NULL
-        };
-        Out("^y.Cert loaded $^0\n", ar);
     }
 
     ret = SSL_CTX_use_PrivateKey_file(tlsCtx, Ifc(m, key, TYPE_CSTR), SSL_FILETYPE_PEM);
@@ -146,12 +140,6 @@ TlsCtx *TlsCtx_Make(MemCh *m, StrVec *cert, StrVec *key){
         ctx->type.state |= ERROR;
         SSL_CTX_free(tlsCtx);
         return NULL;
-    }else{
-        void *ar[] = {
-            key,
-            NULL
-        };
-        Out("^y.Key loaded $^0\n", ar);
     }
 
 
@@ -160,15 +148,7 @@ TlsCtx *TlsCtx_Make(MemCh *m, StrVec *cert, StrVec *key){
             key, cert, NULL
         };
         Error(m, FUNCNAME, FILENAME, LINENUMBER, "Error cert and key dont match: $ -> $", ar);
-    }else{
-        void *ar[] = {
-            key,
-            cert,
-            NULL
-        };
-        Out("^y.Cert and Key match $ -> $^0\n", ar);
     }
-
 
     SSL_CTX_set_min_proto_version(tlsCtx, TLS1_2_VERSION);
     ctx->tlsCtx = tlsCtx;
