@@ -87,6 +87,17 @@ char *buildTests[] = {
     NULL
 };
 
+char *buildTestsNoCrypto[] = {
+    "./dist/bin/buildeka",
+    "--src",
+    "src/programs/test",
+    "--option",
+    "base",
+    "ext",
+    "inter",
+    NULL
+};
+
 char *buildWebServer[] = {
     "./dist/bin/buildeka",
     "--src",
@@ -150,6 +161,7 @@ char *runWebServerNoCrypto[] = {
 char *menuKeys[] = {
     "buildeka-only",
     "run-tests",
+    "run-tests-no-crypto",
     "build-only",
     "clean",
     "clean-doc",
@@ -167,11 +179,12 @@ char *menuKeys[] = {
 char *menuOptions[] = {
     "Buildeka - build the builder program only",
     "Tests - build and RUN",
+    "Tests - build and RUN without OpenSSL",
     "Caneka (core) - build the core modules for caneka",
     "Clean (the ./build directory)",
     "Clean Docs (the docs ./dist/doc/html/ directory)",
     "Clineka - build the command line tool",
-    "Webserver - build only - without TLS",
+    "Webserver - build only - without TLS (OpenSSL)",
     "Webserver - build only",
     "WebServer - build and RUN",
     "Pyneka - build the python module",
@@ -429,6 +442,10 @@ int main(int argc, char *argv[]){
         runcmd[0] = NULL;
     }else if(compareCstr("run-tests", choice)){
         runcmd[0] = buildTests;
+        runcmd[1] = runTests;
+        runcmd[2] = NULL;
+    }else if(compareCstr("run-tests-no-crypto", choice)){
+        runcmd[0] = buildTestsNoCrypto;
         runcmd[1] = runTests;
         runcmd[2] = NULL;
     }else if(compareCstr("build-only", choice)){

@@ -41,7 +41,6 @@ void HttpReq_ParseBody(HttpReq *req);
 void *HttpReq_SourceMake(MemCh *m, Abstract *key, HandlerDef *def);
 void HttpReq_Setup(MemCh *m, Req *req);
 void HttpReq_Serve(MemCh *m, HttpReq *req, Serve *srv);
-void HttpReq_SetToRecv(HttpReq *hreq, Req *req);
 void HttpReq_SetToResponse(HttpReq *hreq, Req *req);
 void HttpReq_SetHeader(HttpReq *req, Str *key, void *value);
 void HttpReq_RemoveHeader(HttpReq *req, Str *key);

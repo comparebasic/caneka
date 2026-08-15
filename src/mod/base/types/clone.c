@@ -10,6 +10,16 @@ status Clone_Init(MemCh *m){
         Lookup *lk = CloneLookup;
         r |= Lookup_Add(m, lk, TYPE_STR, (void *)Str_Clone);
         r |= Lookup_Add(m, lk, TYPE_WRAPPED, (void *)Single_Clone);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_PTR, (void *)Single_Clone);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_UTIL, (void *)Single_Clone);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_I64, (void *)Single_Clone);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_U32, (void *)Single_Clone);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_I32, (void *)Single_Clone);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_WORD, (void *)Single_Clone);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_I16, (void *)Single_Clone);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_BYTE, (void *)Single_Clone);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_I8, (void *)Single_Clone);
+        r |= Lookup_Add(m, lk, TYPE_WRAPPED_FUNC, (void *)Single_Clone);
         r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Clone);
         r |= Lookup_Add(m, lk, TYPE_SPAN, (void *)Span_Clone);
         r |= Lookup_Add(m, lk, TYPE_STRVEC, (void *)StrVec_Clone);
@@ -25,6 +35,7 @@ void *Clone(MemCh *m, void *_a){
     if(a == NULL){
         return NULL;
     }
+
     Maker mk = (Maker)Lookup_Get(CloneLookup, Ifc_GetRoot(a->type.of));
     if(mk != NULL){
        return mk(m, a);

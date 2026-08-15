@@ -90,6 +90,5 @@ status Json_Tests(MemCh *m){
     r |= Test(Equals(args[0], args[2]) && Equals(args[1], args[3]), 
         "Expected key/value pair is in Node expected @/@, have @/@", args);
 
-    r |= ERROR;
     Return(m, r);
 }

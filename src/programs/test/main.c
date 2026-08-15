@@ -98,27 +98,33 @@ i32 main(int argc, char **argv){
 #endif
 
 #ifdef CNKOPT_EXT
-    suite = TestSuite_Make(m, S(m, "Caneka ext"), ExtTests);
-    r |= Test_Runner(m, suite);
-    pass += suite->pass;
-    fail += suite->fail;
-    skip += suite->skip;
+    if((r & ERROR) == 0){
+        suite = TestSuite_Make(m, S(m, "Caneka ext"), ExtTests);
+        r |= Test_Runner(m, suite);
+        pass += suite->pass;
+        fail += suite->fail;
+        skip += suite->skip;
+    }
 #endif
 
 #ifdef CNKOPT_CRYPTO
-    suite = TestSuite_Make(m, S(m, "Caneka crypto"), CryptoTests);
-    r |= Test_Runner(m, suite);
-    pass += suite->pass;
-    fail += suite->fail;
-    skip += suite->skip;
+    if((r & ERROR) == 0){
+        suite = TestSuite_Make(m, S(m, "Caneka crypto"), CryptoTests);
+        r |= Test_Runner(m, suite);
+        pass += suite->pass;
+        fail += suite->fail;
+        skip += suite->skip;
+    }
 #endif
 
 #ifdef CNKOPT_INTER
-    suite = TestSuite_Make(m, S(m, "Caneka inter"), InterTests);
-    r |= Test_Runner(m, suite);
-    pass += suite->pass;
-    fail += suite->fail;
-    skip += suite->skip;
+    if((r & ERROR) == 0){
+        suite = TestSuite_Make(m, S(m, "Caneka inter"), InterTests);
+        r |= Test_Runner(m, suite);
+        pass += suite->pass;
+        fail += suite->fail;
+        skip += suite->skip;
+    }
 #endif
 
     args[0] = I32_Wrapped(m, pass),

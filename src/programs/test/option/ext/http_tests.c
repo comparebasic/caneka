@@ -53,7 +53,7 @@ status HttpQuery_Tests(MemCh *m){
 
     HttpReq *hreq = (HttpReq *)HttpReq_SourceMake(MemCh_Make(), NULL, NULL);
     Req *req = Req_Make(m, NULL, NULL, 0, hreq);
-    HttpReq_SetToRecv(hreq, req);
+    HttpReq_Setup(m, req);
 
     Str *content = S(hreq->in->m, 
         "{\"email\": \"fancy.pantsy@example.com\", \"first-name\": \"Fantsy\"}");

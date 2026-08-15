@@ -78,17 +78,20 @@ static status NetAddr_Print(Buff *bf, void *a, cls type, word flags){
         args[1] = Ip4_ToStr(m, (quad )addr->net.ip4addr.sin_addr.s_addr);
         args[2] = I32_Wrapped(m, ntohs(addr->net.ip4addr.sin_port));
         args[3] = NULL;
+        return Fmt(bf, "$=$:$", args);
     }else if(addr->type.of == TYPE_NET_ADDR6){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Ipv6 not yet supported ", NULL);
-        return ERROR;
+        args[0] = S(m, "ip6");
+        args[1] = Ip6_ToStr(m, 
+            Str_Ref(m, (byte *)&addr->net.ip6addr.sin6_addr, 16, 16, STRING_BINARY));
+        args[2] = I32_Wrapped(m, ntohs(addr->net.ip4addr.sin_port));
+        args[3] = NULL;
+        return Fmt(bf, "$=[$]:$", args);
     }else{
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Unknown address type", NULL);
         return ERROR;
     }
 
-    return Fmt(bf, "$=$:$", args);
 }
 
 static status Serve_Print(Buff *bf, void *a, cls type, word flags){

@@ -1,6 +1,9 @@
 #include <external.h>
 #include <caneka.h> 
 
+Str *Ip6_ToStr(MemCh *m, Str *ref){
+    return Str_ToHex(m, ref);
+}
 
 Str *Ip4_ToStr(MemCh *m, quad ip4){
     byte *ib = (byte *)&ip4;

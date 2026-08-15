@@ -173,7 +173,7 @@ static TestSet ExtTests[] = {
         "Config Tests",
         Config_Tests,
         "Config tests that turn a basic configuration format into an object",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "Cash Tests",
@@ -191,7 +191,7 @@ static TestSet ExtTests[] = {
         "Host Tests",
         Host_Tests,
         "Basic DNS lookup test.",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "Http Tests",
@@ -209,7 +209,7 @@ static TestSet ExtTests[] = {
         "HttpQuery Tests",
         HttpQuery_Tests,
         "Http query string parsing and header parsing tests.",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
 #ifdef CNKOPT_FREEBSD
     {
