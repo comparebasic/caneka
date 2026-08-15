@@ -35,19 +35,38 @@ static void ServeTcp_AcceptPoll(Serve *srv){
             Hashed *h = Iter_Get(&srv->endPointIt);
             HostEnt *ent = (HostEnt *)h->key;
             HandlerDef *def = (HandlerDef *)h->value;
-            if(ent->type.of == TYPE_HOST_ENT){
-                struct sockaddr_in cliaddr;
-                socklen_t len = sizeof(cliaddr);
+            struct sockaddr_in cliaddr4;
+            struct sockaddr_in6 cliaddr6;
+            socklen_t len = 0;
+            if(ent->type.of == TYPE_HOST_ENT && ent->addr != NULL){
+                void *cliaddr = NULL;
+                if(ent->addr->type.of == TYPE_NET_ADDR4){
+                    cliaddr = &cliaddr4; 
+                    len = sizeof(cliaddr4);
+                }else if(ent->addr->type.of == TYPE_NET_ADDR4){
+                    cliaddr = &cliaddr6; 
+                    len = sizeof(cliaddr6);
+                }
+
+                sizeof(cliaddr);
                 i32 max = 16;
                 while(max-- > 0){
-                    i32 new_fd = accept(ent->pfd->fd, (struct sockaddr*)&cliaddr, &len);
+                    i32 new_fd = accept(ent->pfd->fd, (struct sockaddr*)cliaddr, &len);
                     if(new_fd > 0){
                         fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
                         MemCh *rm = MemCh_Make();
                         NetAddr *addr = NetAddr_Make4(m);
-                        cliaddr.sin_port = ntohs(cliaddr.sin_port); 
-                        memcpy(&addr->net.ip4addr, &cliaddr, sizeof(cliaddr));
+
+                        if(ent->addr->type.of == TYPE_NET_ADDR4){
+                            struct sockaddr_in *cli = (struct sockaddr_in *)cliaddr;
+                            cli->sin_port = ntohs(cli->sin_port); 
+                            memcpy(&addr->net.ip4addr, cliaddr, len);
+                        }else if(ent->addr->type.of == TYPE_NET_ADDR6){
+                            struct sockaddr_in6 *cli = (struct sockaddr_in6 *)cliaddr;
+                            cli->sin6_port = ntohs(cli->sin6_port); 
+                            memcpy(&addr->net.ip6addr, cliaddr, len);
+                        }
 
                         Req *req = Req_Make(rm,
                             def, addr, new_fd, def->extra(rm, (Abstract *)ent, def));

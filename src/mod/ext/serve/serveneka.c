@@ -5,20 +5,24 @@ static Node *extStatic = NULL;
 static Span *handlersStatic = NULL;
 
 Abstract *EndPointKey_From(MemCh *m, Table *props){
-    if(Table_Get(props, K(m, "ip4")) != NULL){
-        StrVec *ip4Str = Table_Get(props, K(m, "ip4"));
-        Single *port = Table_Get(props, K(m, "port"));
-        NetAddr *addr = NetAddr_Make4(m);
-        NetAddr_SetFromStr4(m, addr, Ifc(m, ip4Str, TYPE_STR));
-        NetAddr_SetPort(m, addr, port->val.i);
+    StrVec *ip4Str = Table_Get(props, K(m, "ip4"));
+    StrVec *ip6Str = Table_Get(props, K(m, "ip6"));
+    if(ip4Str != NULL || ip6Str != NULL){
 
+        Single *port = Table_Get(props, K(m, "port"));
+        NetAddr *addr = NULL;
+        if(ip6Str != NULL){
+            addr = NetAddr_Make6(m);
+            NetAddr_SetFromStr6(m, addr, Ifc(m, ip6Str, TYPE_STR));
+        }else{
+            addr = NetAddr_Make4(m);
+            NetAddr_SetFromStr4(m, addr, Ifc(m, ip4Str, TYPE_STR));
+        }
+
+        NetAddr_SetPort(m, addr, port->val.i);
         HostEnt *ent = HostEnt_Make(m, addr);
 
         return (Abstract *)ent;
-    }else if(Table_Get(props, K(m, "ip6")) != NULL){
-        printf("make ip6\n");
-        fflush(stdout);
-        return NULL;
     }else if(Table_Get(props, K(m, "file")) != NULL){
         StrVec *fname = Table_Get(props, K(m, "file"));
         Buff *bf = Buff_Make(m, ZERO);

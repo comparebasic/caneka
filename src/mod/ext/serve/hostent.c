@@ -2,6 +2,12 @@
 #include <caneka.h>
 
 void HostEnt_OpenTcp(MemCh *m, HostEnt *ent){
+    void *ar[] = {
+        ent,
+        NULL
+    };
+    Out("^y.Attempting to bind to @^0\n", ar);
+
     if(ent->addr == NULL){
         ent->type.state |= ERROR;
         void *ar[] = {ent, NULL};

@@ -164,14 +164,9 @@ char *menuKeys[] = {
     "run-tests-no-crypto",
     "build-only",
     "clean",
-    "clean-doc",
-    "build-cli",
     "build-webserver-no-crypto",
     "build-webserver",
     "build-run-webserver",
-    "build-pyneka",
-    "read-documentation",
-    "all",
     "invalid",
     NULL
 };
@@ -182,14 +177,9 @@ char *menuOptions[] = {
     "Tests - build and RUN without OpenSSL",
     "Caneka (core) - build the core modules for caneka",
     "Clean (the ./build directory)",
-    "Clean Docs (the docs ./dist/doc/html/ directory)",
-    "Clineka - build the command line tool",
-    "Webserver - build only - without TLS (OpenSSL)",
+    "Webserver - build only - without TLS (no OpenSSL)",
     "Webserver - build only",
     "WebServer - build and RUN",
-    "Pyneka - build the python module",
-    "Documentation - show website url",
-    "All - build Tests/Clineka/Webserver",
     NULL
 };
 
