@@ -42,46 +42,49 @@ void NetAddr_SetFromStr6(MemCh *m, NetAddr *addr, Str *s){
     Str *s6 = Str_Make(m, sizeof(util)*2);
     s6->type.state |= STRING_BINARY;
     
+    memset(&addr->net.ip6addr.sin6_addr, 0, IP6_ALLOC);
     byte *ptr = (byte *)&addr->net.ip6addr.sin6_addr;
     byte *sec = ptr;
     byte *b = s->bytes;
     byte *end = s->bytes+s->length-1;
     Str *ref = Str_Ref(m, s->bytes, 0, s->length, STRING_CONST);
+
+    i32 zstart = 0;
+    i32 zend = 0;
+
     while(b <= end){
-        if(*b != ':' || b == end){
+        if(*b != ':'){
             ref->length++;
         }
 
-        if(*b == ':'){
+        if(*b == ':' || b == end){
             if(ref->length == 0){
-                void *ar[] = {
-                    ref,
-                    NULL
-                };
-                Out("^y.Skip @^0\n", ar);
+                zstart = zend;
             }else{
-                ptr = sec+2;
                 void *ar[] = {
                     ref,
                     NULL
                 };
-                Out("^y.Section Found @^0\n", ar);
+                Out("Ref @^0\n", ar);
+
+                zend++;
+                ptr = sec+1;
                 while(ref->length){
                     byte c = ref->bytes[ref->length-1];
                     *ptr = c >= 'a' ?  
-                        ((c - 'a') + 10) << 4:
-                        (c - '0') << 4;
+                            c - 'a' + 10:
+                            c - '0';
                     Str_Decr(ref, 1);
                     if(ref->length){
                         c = ref->bytes[ref->length-1];
                         *ptr |= c >= 'a' ?  
-                            c - 'a' + 10:
-                            c - '0';
+                            ((c - 'a') + 10) << 4:
+                            (c - '0') << 4;
                         Str_Decr(ref, 1);
                     }
                     ptr--;
                 }
-                sec += 4;
+                sec += 2;
             }
             ref->bytes = b+1;
             ref->alloc -= (ref->length+1);
@@ -91,7 +94,12 @@ void NetAddr_SetFromStr6(MemCh *m, NetAddr *addr, Str *s){
         b++;
     }
 
-    /*
-    net->net.ip4addr.sin_addr.s_addr = Str_ToIp4(m, s);
-    */
+    printf("ZStart %d Zend %d\n", zstart, zend);
+
+    if(zstart != 0 || zend != 8){
+        ptr = (byte *)&addr->net.ip6addr.sin6_addr;
+        i32 length = (zend-zstart)*2;
+        memmove(ptr+(IP6_ALLOC-length), ptr+(zstart*2), length);
+        memset(ptr+(zstart*2), 0, length);
+    }
 }

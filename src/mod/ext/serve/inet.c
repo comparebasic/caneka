@@ -2,7 +2,37 @@
 #include <caneka.h> 
 
 Str *Ip6_ToStr(MemCh *m, Str *ref){
-    return Str_ToHex(m, ref);
+    Str *s = Str_ToHex(m, ref);
+    Str *ip6s = Str_Make(m, IP6_STR_ALLOC);
+    boolean skipping = FALSE;
+
+    Str *seg = Str_Ref(m, s->bytes, 4, 4, ZERO);
+    for(i32 i = 0; i < 8; i++){
+        byte *start = seg->bytes;
+        while(seg->length && seg->bytes[0] == '0'){
+            Str_Incr(seg, 1);
+        }
+        if(seg->length == 0){
+            if(!skipping){
+                skipping = TRUE;
+            }
+            goto next;
+        }else{
+            if(skipping){
+                skipping = FALSE;
+                Str_Add(ip6s, (byte *)":", 1);
+            }
+            Str_AddStr(ip6s, seg);
+        }
+        if(i < 7){
+            Str_Add(ip6s, (byte *)":", 1);
+        }
+next:
+        seg->bytes = start+4;
+        seg->length = 4;
+    }
+
+    return ip6s;
 }
 
 Str *Ip4_ToStr(MemCh *m, quad ip4){

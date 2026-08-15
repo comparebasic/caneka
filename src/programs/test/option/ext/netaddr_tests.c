@@ -11,7 +11,7 @@ status NetAddr6_Tests(MemCh *m){
 
     NetAddr *addr = NetAddr_Make6(m);
 
-    Str *s = S(m, "ab129:01:124c:1234");
+    Str *s = S(m, "ab10:01:12c2:1233:1004:2005:6:7000");
     NetAddr_SetFromStr6(m, addr, s);
     args[0] = s;
     args[1] = addr;
@@ -39,7 +39,7 @@ status NetAddr6_Tests(MemCh *m){
     args[2] = NULL;
     Out("@ -> @^0\n", args);
 
-    s = S(m, "0124::3:12");
+    s = S(m, "0124:1:::3:12");
     NetAddr_SetFromStr6(m, addr, s);
     args[0] = s;
     args[1] = addr;

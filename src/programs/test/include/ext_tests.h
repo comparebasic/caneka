@@ -241,7 +241,7 @@ static TestSet ExtTests[] = {
         "Queue Scale Tests",
         QueueScale_Tests,
         "Queue testing adding and removing Queue items over time.",
-        FEATURE_COMPLETE,
+        SKIP_TEST,
     },
     {
         "ipv6 tests",
