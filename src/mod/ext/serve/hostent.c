@@ -16,7 +16,11 @@ void HostEnt_OpenTcp(MemCh *m, HostEnt *ent){
         return;
     }
 
-    ent->pfd->fd = socket(AF_INET, SOCK_STREAM, 0);
+    if(ent->addr->type.of == TYPE_NET_ADDR6){
+        ent->pfd->fd = socket(AF_INET6, SOCK_STREAM, 0);
+    }else{
+        ent->pfd->fd = socket(AF_INET, SOCK_STREAM, 0);
+    }
     if (fcntl(ent->pfd->fd, F_SETFL, O_NONBLOCK) == -1) {
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
             "openPortToFd setting nonblock", NULL);
@@ -31,13 +35,21 @@ void HostEnt_OpenTcp(MemCh *m, HostEnt *ent){
 		return;
 	}
 
-	if(bind(ent->pfd->fd,
-                (struct sockaddr*)&ent->addr->net.ip4addr,
-                sizeof(ent->addr->net.ip4addr))
-            != 0){
-        ent->type.state |= ERROR;
+    void *sin_addr = NULL;
+    socklen_t len = 0;
+    if(ent->addr->type.of == TYPE_NET_ADDR6){
+        sin_addr = &ent->addr->net.ip6addr;
+        len = sizeof(ent->addr->net.ip6addr);
+    }else{
+        sin_addr = &ent->addr->net.ip4addr;
+        len = sizeof(ent->addr->net.ip4addr);
+    }
+
+	if(bind(ent->pfd->fd, (struct sockaddr*)sin_addr, len) != 0){
+        void *ar[] = {ent, NULL};
         Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER,
-            "openPortToFd binding", NULL);
+            "openPortToFd binding: @", ar);
+        ent->type.state |= ERROR;
 		return;
     }
 

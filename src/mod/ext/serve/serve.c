@@ -40,12 +40,12 @@ static void ServeTcp_AcceptPoll(Serve *srv){
             socklen_t len = 0;
             if(ent->type.of == TYPE_HOST_ENT && ent->addr != NULL){
                 void *cliaddr = NULL;
-                if(ent->addr->type.of == TYPE_NET_ADDR4){
-                    cliaddr = &cliaddr4; 
-                    len = sizeof(cliaddr4);
-                }else if(ent->addr->type.of == TYPE_NET_ADDR4){
+                if(ent->addr->type.of == TYPE_NET_ADDR6){
                     cliaddr = &cliaddr6; 
                     len = sizeof(cliaddr6);
+                }else if(ent->addr->type.of == TYPE_NET_ADDR4){
+                    cliaddr = &cliaddr4; 
+                    len = sizeof(cliaddr4);
                 }
 
                 sizeof(cliaddr);
