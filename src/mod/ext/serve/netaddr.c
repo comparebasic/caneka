@@ -61,12 +61,6 @@ void NetAddr_SetFromStr6(MemCh *m, NetAddr *addr, Str *s){
             if(ref->length == 0){
                 zstart = zend;
             }else{
-                void *ar[] = {
-                    ref,
-                    NULL
-                };
-                Out("Ref @^0\n", ar);
-
                 zend++;
                 ptr = sec+1;
                 while(ref->length){
@@ -93,8 +87,6 @@ void NetAddr_SetFromStr6(MemCh *m, NetAddr *addr, Str *s){
 
         b++;
     }
-
-    printf("ZStart %d Zend %d\n", zstart, zend);
 
     if(zstart != 0 || zend != 8){
         ptr = (byte *)&addr->net.ip6addr.sin6_addr;

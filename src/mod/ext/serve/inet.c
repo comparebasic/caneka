@@ -15,21 +15,21 @@ Str *Ip6_ToStr(MemCh *m, Str *ref){
         if(seg->length == 0){
             if(!skipping){
                 skipping = TRUE;
+                Str_Add(ip6s, (byte *)":", 1);
             }
-            goto next;
         }else{
-            if(skipping){
-                skipping = FALSE;
+            skipping = FALSE;
+            if(i > 0){
                 Str_Add(ip6s, (byte *)":", 1);
             }
             Str_AddStr(ip6s, seg);
         }
-        if(i < 7){
-            Str_Add(ip6s, (byte *)":", 1);
-        }
-next:
         seg->bytes = start+4;
         seg->length = 4;
+    }
+
+    if(skipping){
+        Str_Add(ip6s, (byte *)":", 1);
     }
 
     return ip6s;
