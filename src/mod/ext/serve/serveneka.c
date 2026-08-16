@@ -21,6 +21,7 @@ Abstract *EndPointKey_From(MemCh *m, Table *props){
 
         NetAddr_SetPort(m, addr, port->val.i);
         HostEnt *ent = HostEnt_Make(m, addr);
+        HostEnt_WipeClient(m, ent);
 
         return (Abstract *)ent;
     }else if(Table_Get(props, K(m, "file")) != NULL){

@@ -72,6 +72,51 @@ void HostEnt_OpenTcp(MemCh *m, HostEnt *ent){
     ent->pfd->revents = 0;
 }
 
+HostEnt *HostEnt_FromClient(MemCh *m, HostEnt *ent){
+    return HostEnt_Make(m, Clone(m, ent->client.addr));
+}
+
+void HostEnt_WipeClient(MemCh *m, HostEnt *ent){
+    ent->client.fd = -1;
+    if(ent->client.addr == NULL){
+        if(ent->addr != NULL){
+            if(ent->addr->type.of == TYPE_NET_ADDR4){
+                ent->client.addr = NetAddr_Make4(m);
+            }else if(ent->addr->type.of == TYPE_NET_ADDR6){
+                ent->client.addr = NetAddr_Make6(m);
+            }
+        }
+    }else{
+        cls typeOf = ent->client.addr->type.of;
+        memset(ent->client.addr, 0, sizeof(NetAddr));
+        ent->client.addr->type.of = typeOf;
+        NetAddr_Setup(m, ent->client.addr);
+    }
+}
+
+status HostEnt_Accept(MemCh *m, HostEnt *ent){
+    struct sockaddr *cliaddr = NULL; 
+    socklen_t len = 0;
+    ent->client.fd = -1;
+    if(ent->addr->type.of == TYPE_NET_ADDR4){
+        cliaddr = (struct sockaddr *)&ent->client.addr->net.ip4addr;
+        len = sizeof(ent->client.addr->net.ip4addr);
+    }else if(ent->addr->type.of == TYPE_NET_ADDR6){
+        cliaddr = (struct sockaddr *)&ent->client.addr->net.ip6addr;
+        len = sizeof(ent->client.addr->net.ip6addr);
+    }
+
+    if(len){
+        ent->client.fd = accept(ent->pfd->fd, cliaddr, &len);
+    }
+
+    if(ent->client.fd > 0){
+        return SUCCESS;
+    }
+
+    return NOOP;
+}
+
 HostEnt *HostEnt_FromName(MemCh *m, Str *name, Str *service){
     struct addrinfo *info;
     if(getaddrinfo(Str_Cstr(m, name), Str_Cstr(m, service), NULL, &info) != 0){

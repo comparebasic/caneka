@@ -36,6 +36,7 @@ void Serve_LogFinalized(Serve *srv, Req *req);
 struct pollfd *Serve_TcpGetPollFd(Req *req);
 void Serve_AddEndpoint(Serve *srv, Abstract *key, HandlerDef *def);
 void Serve_Serve(Serve *srv);
+void Serve_IfcInit(MemCh *m);
 void Serve_Init(MemCh *m);
 
 Serve *Serve_Make(MemCh *m);

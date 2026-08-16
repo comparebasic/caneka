@@ -39,6 +39,13 @@ void *Clone(MemCh *m, void *_a){
     Maker mk = (Maker)Lookup_Get(CloneLookup, Ifc_GetRoot(a->type.of));
     if(mk != NULL){
        return mk(m, a);
+    }else{
+        IfcMap *ifc = Ifc_Get(a, a->type.of);
+        if(ifc != NULL){
+            Abstract *new = MemCh_AllocOf(m, ifc->size, ifc->typeOf); 
+            memcpy(new, a, ifc->size);
+            return new;
+        }
     }
     void *args[] = {
         Type_ToStr(m, a->type.of),

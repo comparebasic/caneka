@@ -35,38 +35,16 @@ static void ServeTcp_AcceptPoll(Serve *srv){
             Hashed *h = Iter_Get(&srv->endPointIt);
             HostEnt *ent = (HostEnt *)h->key;
             HandlerDef *def = (HandlerDef *)h->value;
-            struct sockaddr_in cliaddr4;
-            struct sockaddr_in6 cliaddr6;
-            socklen_t len = 0;
             if(ent->type.of == TYPE_HOST_ENT && ent->addr != NULL){
-                void *cliaddr = NULL;
-                if(ent->addr->type.of == TYPE_NET_ADDR6){
-                    cliaddr = &cliaddr6; 
-                    len = sizeof(cliaddr6);
-                }else if(ent->addr->type.of == TYPE_NET_ADDR4){
-                    cliaddr = &cliaddr4; 
-                    len = sizeof(cliaddr4);
-                }
-
-                sizeof(cliaddr);
                 i32 max = 16;
                 while(max-- > 0){
-                    i32 new_fd = accept(ent->pfd->fd, (struct sockaddr*)cliaddr, &len);
-                    if(new_fd > 0){
+                    if(HostEnt_Accept(m, ent) & SUCCESS){
+                        i32 new_fd = ent->client.fd;
                         fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
                         MemCh *rm = MemCh_Make();
-                        NetAddr *addr = NetAddr_Make4(m);
-
-                        if(ent->addr->type.of == TYPE_NET_ADDR4){
-                            struct sockaddr_in *cli = (struct sockaddr_in *)cliaddr;
-                            cli->sin_port = ntohs(cli->sin_port); 
-                            memcpy(&addr->net.ip4addr, cliaddr, len);
-                        }else if(ent->addr->type.of == TYPE_NET_ADDR6){
-                            struct sockaddr_in6 *cli = (struct sockaddr_in6 *)cliaddr;
-                            cli->sin6_port = ntohs(cli->sin6_port); 
-                            memcpy(&addr->net.ip6addr, cliaddr, len);
-                        }
+                        NetAddr *addr = Clone(rm, ent->client.addr);
+                        HostEnt_WipeClient(m, ent);
 
                         Req *req = Req_Make(rm,
                             def, addr, new_fd, def->extra(rm, (Abstract *)ent, def));
@@ -201,9 +179,27 @@ Serve *Serve_Make(MemCh *m){
     return srv;
 }
 
+void Serve_IfcInit(MemCh *m){
+    Lookup_Add(m, IfcLookup, TYPE_NET_ADDR6, 
+        IfcMap_Make(m,
+            TYPE_NET_ADDR6,
+            ZERO,
+            ZERO,
+            sizeof(NetAddr),
+            NULL));
+    Lookup_Add(m, IfcLookup, TYPE_NET_ADDR4, 
+        IfcMap_Make(m,
+            TYPE_NET_ADDR4,
+            ZERO,
+            ZERO,
+            sizeof(NetAddr),
+            NULL));
+}
+
 void Serve_Init(MemCh *m){
     if(services == NULL){
         services = Table_Make(m);
+        Serve_IfcInit(m);
         Table_Set(services, S(m, "http"), I32_Wrapped(m, 80));
         Table_Set(services, S(m, "https"), I32_Wrapped(m, 443));
         Lookup_Add(m, HashLookup, TYPE_HOST_ENT, (void *)HostEnt_Hash);

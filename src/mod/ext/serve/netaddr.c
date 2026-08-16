@@ -4,8 +4,16 @@
 NetAddr *NetAddr_Make4(MemCh *m){
     NetAddr *addr = MemCh_AllocOf(m, sizeof(NetAddr), TYPE_NET_ADDR4);
     addr->type.of = TYPE_NET_ADDR4;
-    addr->net.ip4addr.sin_family = AF_INET;
+    NetAddr_Setup(m, addr);
     return addr;
+}
+
+NetAddr *NetAddr_Setup(MemCh *m, NetAddr *addr){
+    if(addr->type.of == TYPE_NET_ADDR4){
+        addr->net.ip4addr.sin_family = AF_INET;
+    }else if(addr->type.of == TYPE_NET_ADDR6){
+        addr->net.ip6addr.sin6_family = AF_INET6;
+    }
 }
 
 void NetAddr_SetFromStr4(MemCh *m, NetAddr *net, Str *s){
@@ -26,7 +34,7 @@ void NetAddr_SetPort(MemCh *m, NetAddr *net, i32 port){
 NetAddr *NetAddr_Make6(MemCh *m){
     NetAddr *addr = MemCh_AllocOf(m, sizeof(NetAddr), TYPE_NET_ADDR6);
     addr->type.of = TYPE_NET_ADDR6;
-    addr->net.ip6addr.sin6_family = AF_INET6;
+    NetAddr_Setup(m, addr);
     return addr;
 }
 
