@@ -18,34 +18,22 @@ i32 main(int argc, char **argv){
     }
 
     Caneka_Init(m);
-    Inter_Init(m);
     Core_Direct(m, 1, 2);
-    DebugStack_Push(NULL, 0);
 
     CliArgs *cli = CliArgs_Make(argc, argv);
+    Debug_Push(m, cli);
 
     Str *helpKey = K(m, "help");
     Str *noColorKey = K(m, "no-color");
-    Str *inFileKey = K(m, "in");
-    Str *outFileKey = K(m, "out");
-    Str *configKey = K(m, "config");
-    Str *licenceKey = K(m, "licence");
-    Str *versionKey = K(m, "version");
+    Str *dirKey = K(m, "dir");
+    Str *outDirKey = K(m, "out-dir");
 
     Args_Add(cli, helpKey, NULL, ARG_OPTIONAL, Sv(m, "Show this help message."));
 
     Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL,
         Sv(m, "Skip ansi color sequences in output."));
-    Args_Add(cli, inFileKey, NULL, ARG_OPTIONAL,
-        Sv(m, "File input"));
-    Args_Add(cli, outFileKey, NULL, ARG_OPTIONAL,
-        Sv(m, "File output"));
-    Args_Add(cli, configKey, NULL, ARG_OPTIONAL,
-        Sv(m, "Derive actions to take from a *.config file."));
-    Args_Add(cli, licenceKey, NULL, ARG_OPTIONAL,
-        Sv(m, "Show the licences used in this software"));
-    Args_Add(cli, versionKey, NULL, ARG_OPTIONAL,
-        Sv(m, "Show the version of this software"));
+    Args_Add(cli, dirKey, S(m, "src"), ARG_DEFAULT, Sv(m, "Source directory"));
+    Args_Add(cli, outDirKey, S(m, "dist/doc") , ARG_DEFAULT, Sv(m, "Source directory"));
 
     CliArgs_Parse(cli);
 
@@ -58,92 +46,18 @@ i32 main(int argc, char **argv){
         return 1;
     }
 
-    Str *configPath = CliArgs_Get(cli, configKey);
-    NodeObj *config = NULL;
-    if(configPath == NULL){
-        Out("^y.No config specified, exiting.^0\n", NULL);
-        code = 1;
-    }else{
-        Str *path = IoUtil_GetAbsPath(m, configPath);
-        config = Config_FromPath(m, path);
+    Str *dirPath = CliArgs_Get(cli, dirKey);
+    Str *outDirPath = CliArgs_Get(cli, outDirKey);
 
-        StrVec *root = NULL;
-        StrVec *fmtRoot = NULL;
-        StrVec *cRoot = NULL;
-        StrVec *outDir = NULL;
-        WwwNav *nav = NULL;
+    StrVec *dir = IoUtil_GetAbsVec(m, dirPath);
+    StrVec *outDir = IoUtil_GetAbsVec(m, outDirPath);
 
-        NodeObj *out = Inst_ByPath(config,
-            Sv(m, "out")->p, NULL, SPAN_OP_GET, NULL);
-
-        outDir = IoUtil_AbsVec(m, Inst_Att(out, K(m, "dir")));
-        NodeObj *pageObj = Inst_ByPath(out, Sv(m, "page")->p, NULL, SPAN_OP_GET, NULL);
-
-        StrVec *headerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "header")));
-        StrVec *childrenPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "children")));
-        StrVec *footerPath = IoUtil_AbsVec(m, Inst_Att(pageObj, K(m, "footer")));
-
-        NodeObj *in = Inst_ByPath(config, Sv(m, "in")->p, NULL, SPAN_OP_GET, NULL);
-
-        Table *dirTbl = Table_Make(m);
-        Inst_ChAttsAdd(in, K(m, "dir"), dirTbl);
-        Span *files = Span_Make(m);
-        Doc_Gather(dirTbl, files);
-
-        nav = Inst_Make(m, TYPE_WWW_NAV);
-        Table *coordTbl = Table_Make(m);
-        Inst_SetAtt(nav, K(m, "coords"), coordTbl);
-        Doc_GenNav(config, files, nav);
-
-        Iter2d *it2d = Iter2d_Make(m, nav);
-        for(;(Iter2d_State(it2d) & END) == 0; Iter2d_InstNext(it2d)){
-            Abstract *a = Iter2d_Get(it2d);
-            if(a != NULL){
-                if(a->type.of == TYPE_WWW_NAV){
-                    WwwNav *item = (WwwNav *)a;
-                    StrVec *name = Seel_Get(item, K(m, "name"));
-                    if(!Empty(name) && !Equals(name, S(m, "README"))
-                             && !Equals(name, S(m, "Inc"))){
-
-                        MemCh *tm = MemCh_Make();
-                        WwwPage *page = Inst_Make(tm, TYPE_WWW_PAGE);
-                        Doc_GenPage(page, headerPath, childrenPath, footerPath);
-
-                        Iter *navIt = Iter_Make(tm, NULL);
-                        Span *crd = Table_Get(coordTbl, name);
-                        NestSel_Init(navIt, nav, crd);
-                        Seel_Set(page, S(tm, "nav"), navIt); 
-
-                        StrVec *out = StrVec_Copy(tm, outDir);
-                        StrVec_AddVec(out, Inst_Att(item, K(tm, "out-path")));
-
-                        Seel_Set(page, S(tm, "name"), name);
-
-                        void *ar[] = {
-                            name,
-                            Inst_Att(item, K(tm, "fpath")),
-                            out, 
-                            NULL
-                        };
-                        Out("^p.Generating @ $ -> $^0\n", ar);
-                        Doc_FileOut(page, item, out);
-
-                        MemCh_Free(tm);
-                    }
-                }else{
-                    void *ar[] = {
-                        a,
-                        outDir,
-                        NULL
-                    };
-                    Out("^y.? @^0\noutDir @\n", ar);
-                }
-            }
-        }
-    }
+    Node *ctx = Inst_Make(m, TYPE_NODE);
+    Inst_SetChild(ctx, S(m, "dir"), dir);
+    Inst_SetChild(ctx, S(m, "outDir"), dir);
+    Doc_GenNav(ctx);
 
     CliArgs_Free(cli);
 
-    DebugStack_Pop();
     return code;
 }

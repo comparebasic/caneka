@@ -158,6 +158,18 @@ char *runWebServerNoCrypto[] = {
     NULL
 };
 
+char *buildDoc[] = {
+    "./dist/bin/buildeka",
+    "--src",
+    "src/programs/doc",
+    NULL
+};
+
+char *runDocGen[] = {
+    "./build/bin/doc",
+    NULL
+};
+
 char *menuKeys[] = {
     "buildeka-only",
     "run-tests",
@@ -167,6 +179,8 @@ char *menuKeys[] = {
     "build-webserver-no-crypto",
     "build-webserver",
     "build-run-webserver",
+    "build-and-run-doc",
+    "gen-doc",
     "invalid",
     NULL
 };
@@ -180,6 +194,8 @@ char *menuOptions[] = {
     "Webserver - build only - without TLS (no OpenSSL)",
     "Webserver - build only",
     "WebServer - build and RUN",
+    "Build Doc and Generate Documentation",
+    "Generate Documentation",
     NULL
 };
 
@@ -493,14 +509,13 @@ int main(int argc, char *argv[]){
         runcmd[0] = buildWebServer;
         runcmd[1] = runWebServer;
         runcmd[2] = NULL;
-    }else if(compareCstr("read-documentation", choice)){
-        printf("  Documentation can be found at https://caneka.org\n");
-        exit(1);
-    }else if(compareCstr("all", choice)){
-        runcmd[0] = buildTests;
-        runcmd[1] = buildCli;
-        runcmd[2] = buildWebServer;
-        runcmd[3] = NULL;
+    }else if(compareCstr("build-and-run-doc", choice)){
+        runcmd[0] = buildDoc;
+        runcmd[1] = runDocGen;
+        runcmd[2] = NULL;
+    }else if(compareCstr("gen-doc", choice)){
+        runcmd[0] = runDocGen;
+        runcmd[1] = NULL;
     }else if(compareCstr("oops", choice)){
         printf("%s%s%s", GREEN, "  Ok, See you next time!\n", NORMAL_COLOR);
         exit(1);

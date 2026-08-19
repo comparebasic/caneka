@@ -1,6 +1,35 @@
 #include <external.h>
 #include <caneka.h>
 
+Span *IoPath_ToInstPath(MemCh *m, StrVec *path){
+    status r = ZERO;
+    Span *p = Span_Make(m);
+    Iter it;
+    Iter_Init(&it, path->p);
+    while((Iter_Next(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        if(s->type.state & MORE){
+            /* no action */
+        }else if((r & LAST) || s->type.state & LAST){
+            r |= LAST;
+            Abstract *a = Span_Get(p, p->max_idx);
+            if(a->type.of == TYPE_STR){
+                StrVec *v = StrVec_From(m, (Str *)a);
+                StrVec_Add(v, s);
+                Span_Set(p, p->max_idx, v);
+            }else if(a->type.of == TYPE_STRVEC){
+                StrVec_Add((StrVec *)a, s);
+            }else{
+                Error(m, FUNCNAME, FILENAME, LINENUMBER, "Expected Str or StrVec", NULL);
+                return NULL;
+            }
+        }else{
+            Span_Add(p, s);
+        }
+    }
+    return p;
+}
+
 void Inst_IterInitChild(Iter *it, Inst *inst, Span *path){
     Node *child = Inst_GetByPath(inst, path);
     void *ar[] = {
@@ -75,6 +104,14 @@ void *Inst_GetChild(Inst *inst, void *key){
     return Table_Get(children, key);
 }
 
+i32 Inst_SetChild(Inst *inst, void *key, void *value){
+    if(inst == NULL){
+        return -1;
+    }
+    Table *children = (Table *)Span_Get(inst, INST_PROPIDX_CHILDREN);
+    return Table_Set(children, key, value);
+}
+
 void *Inst_GetNthChild(Inst *inst, i32 nth){
     if(inst == NULL){
         return NULL;
@@ -114,7 +151,7 @@ void *Inst_ByPath(Span *inst, Span *path, void *value, word op, Span *coords){
                 Hashed *h = Table_SetHashed(children, key, value); 
                 if(coords != NULL){
                     Span_Set(coords,
-                        coordIdx, I32_Wrapped(coords->m, h->orderIdx));
+                        coordIdx, I32_Wrapped(coords->m, h->idx));
                     coordIdx++;
                 }
                 Return(inst->m, value);
@@ -122,6 +159,7 @@ void *Inst_ByPath(Span *inst, Span *path, void *value, word op, Span *coords){
                 Return(inst->m, child);
             }
         }else{
+            i32 idx = 0;
             Span *children = Span_Get(current, INST_PROPIDX_CHILDREN);
             Abstract *child;
             if(key->type.of == TYPE_WRAPPED_I32){
@@ -129,10 +167,10 @@ void *Inst_ByPath(Span *inst, Span *path, void *value, word op, Span *coords){
             }else{
                 Hashed *h = Table_GetHashed(children, key);
                 child = h != NULL ? h->value : NULL;
+                idx = h != NULL ? h->idx : idx;
             }
 
             if(op == SPAN_OP_SET){
-                i32 idx = 0;
                 if(child == NULL){
                     Inst *new = Inst_Make(inst->m, typeOf);
                     if(key->type.of == TYPE_WRAPPED_I32){
@@ -140,7 +178,7 @@ void *Inst_ByPath(Span *inst, Span *path, void *value, word op, Span *coords){
                         Span_Set(children, idx, new);
                     }else{
                         Hashed *h = Table_SetHashed(children, key, new); 
-                        idx = h->orderIdx;
+                        idx = h->idx;
                     }
                     current = new;
                 }else if(child->type.of == typeOf){
@@ -153,6 +191,7 @@ void *Inst_ByPath(Span *inst, Span *path, void *value, word op, Span *coords){
                         " conflict, cannot insert into $", args);
                     break;
                 }
+
                 if(coords != NULL){
                     Span_Set(coords,
                         coordIdx, I32_Wrapped(coords->m, idx));

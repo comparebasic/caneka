@@ -205,7 +205,9 @@ void Serve_Init(MemCh *m){
         Lookup_Add(m, HashLookup, TYPE_HOST_ENT, (void *)HostEnt_Hash);
         Lookup_Add(m, EqualsLookup, TYPE_HOST_ENT, (void *)HostEnt_Equals);
         ServeProtoTable = Table_Make(m);
+#ifdef CNKOPT_CRYPTO
         Table_Set(ServeProtoTable, S(m, "https"), Func_Wrapped(m, HttpTlsReq_DefMake, ZERO));
+#endif
         Table_Set(ServeProtoTable, S(m, "http"), Func_Wrapped(m, HttpReq_DefMake, ZERO));
         Table_Set(ServeProtoTable, S(m, "cmd-file"), Func_Wrapped(m, CmdFile_DefMake, ZERO));
 

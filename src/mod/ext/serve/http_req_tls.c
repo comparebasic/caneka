@@ -1,6 +1,7 @@
 #include <external.h>
 #include <caneka.h>
 
+#ifdef CNKOPT_CRYPTO
 
 void HttpReq_TlsReadToRbl(MemCh *m, Req *req, Serve *srv){
     HttpReq *hreq = (HttpReq *)req->source;
@@ -100,3 +101,5 @@ HandlerDef *HttpTlsReq_DefMake(MemCh *m,
     def->ext = ext;
     return def;
 }
+
+#endif

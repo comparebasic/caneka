@@ -13,9 +13,10 @@ static byte _buff[STR_DEFAULT];
 
 Span *FilePathSep = NULL;
 
-static status fileHasExt(MemCh *m, void *_file, void *source){
+static status fileHasExt(MemCh *m, void *_file, void *_sel){
     Str *file = _file;
-    Span *exts = (Span *)Ifc(m, source, TYPE_SPAN);
+    DirSel *sel = _sel;
+    Span *exts = (Span *)Ifc(m, sel->source, TYPE_SPAN);
     Iter it;
     Iter_Init(&it, exts);
     while((Iter_Next(&it) & END) == 0){

@@ -195,8 +195,9 @@ status StrVec_Incr(StrVec *v, i64 amount){
     Iter_Init(&it, v->p);
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)Iter_Get(&it);
-        if(s->length > amount){
+        if(s->length > amount && amount > 0){
             Str *n = Str_Clone(v->p->m, s);
+            s->type.state = s->type.state;
             Str_Incr(n, amount);
             Span_Add(p, n);
             amount = 0;
