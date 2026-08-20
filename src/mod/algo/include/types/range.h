@@ -1,0 +1,8 @@
+enum ext_types {
+    _TYPE_ALGO_START = _TYPE_EXT_STRUCT_END,
+    TYPE_NGRAM,
+    TYPE_NGRAM_REC,
+    TYPE_MEDI_TREE,
+    TYPE_LATIN_TREE,
+    _TYPE_ALGO_END,
+};

@@ -61,6 +61,7 @@ status Buff_Pipe(Buff *to, Buff *from);
 status Buff_PosAbs(Buff *bf, i64 position);
 status Buff_Pos(Buff *bf, i64 position);
 status Buff_PosEnd(Buff *bf);
+i64 Buff_GetPos(Buff *bf);
 
 Buff *Buff_From(MemCh *m, StrVec *v);
 Buff *Buff_Make(MemCh *m, word flags);
