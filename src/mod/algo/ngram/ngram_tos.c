@@ -48,7 +48,7 @@ status NGram_PrintFromStart(Buff *bf, NGram *ng){
     }
 
     Buff_PosAbs(ng->bf, pos);
-    Fmt(bf, ">\n^0", NULL);
+    return Fmt(bf, ">\n^0", NULL);
 }
 
 status NGram_TosInit(MemCh *m){

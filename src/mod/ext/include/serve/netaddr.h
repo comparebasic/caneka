@@ -11,4 +11,4 @@ void NetAddr_SetFromStr6(MemCh *m, NetAddr *net, Str *s);
 void NetAddr_SetPort(MemCh *m, NetAddr *net, i32 port);
 NetAddr *NetAddr_Make4(MemCh *m);
 NetAddr *NetAddr_Make6(MemCh *m);
-NetAddr *NetAddr_Setup(MemCh *m, NetAddr *addr);
+void NetAddr_Setup(MemCh *m, NetAddr *addr);

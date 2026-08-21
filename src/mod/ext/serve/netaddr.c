@@ -8,7 +8,7 @@ NetAddr *NetAddr_Make4(MemCh *m){
     return addr;
 }
 
-NetAddr *NetAddr_Setup(MemCh *m, NetAddr *addr){
+void NetAddr_Setup(MemCh *m, NetAddr *addr){
     if(addr->type.of == TYPE_NET_ADDR4){
         addr->net.ip4addr.sin_family = AF_INET;
     }else if(addr->type.of == TYPE_NET_ADDR6){
