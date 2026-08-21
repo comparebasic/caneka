@@ -8,9 +8,14 @@
 #define TEST_MEM_MAX_CEILING 512
 
 enum test_types {
-    _TYPE_TEST_START = _TYPE_CANEKA_CORE_END,
+    _TYPE_TEST_START = _NEXT_RANGE_START,
     TYPE_TEST_SUITE,
+    _TYPE_TEST_END,
 };
+
+#undef _NEXT_RANGE_START
+#define _NEXT_RANGE_START _TYPE_TEST_END
+
 
 enum test_status {
     SECTION_LABEL = 1 << 8,

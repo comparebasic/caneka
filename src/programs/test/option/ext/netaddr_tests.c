@@ -11,7 +11,7 @@ status NetAddr6_Tests(MemCh *m){
 
     NetAddr *addr = NetAddr_Make6(m);
 
-    Str *s = S(m, "ab10:01:12c2:1233:1004:2005:6:7000");
+    Str *s = S(m, "ab10:1:12c2:1233:1004:2005:6:7000");
     NetAddr_SetFromStr6(m, addr, s);
     args[0] = s;
     args[1] = Ip6_ToStr(m, 
@@ -41,7 +41,7 @@ status NetAddr6_Tests(MemCh *m){
     r |= Test(Equals(args[0], args[1]),
         "Ip6 address is properly set from string @ -> @ of @^0", args);
 
-    s = S(m, "0124::12");
+    s = S(m, "124::12");
     NetAddr_SetFromStr6(m, addr, s);
     args[0] = s;
     args[1] = Ip6_ToStr(m, 
@@ -51,7 +51,7 @@ status NetAddr6_Tests(MemCh *m){
     r |= Test(Equals(args[0], args[1]), 
         "Ip6 address is properly set from string @ -> @ of @^0", args);
 
-    s = S(m, "0124:1::3:12");
+    s = S(m, "124:1::3:12");
     NetAddr_SetFromStr6(m, addr, s);
     args[0] = s;
     args[1] = Ip6_ToStr(m, 

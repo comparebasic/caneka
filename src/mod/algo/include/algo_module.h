@@ -1,6 +1,7 @@
-#ifndef EXT_MODULE_H
-#define EXT_MODULE_H
+#ifndef ALGO_MODULE_H
+#define ALGO_MODULE_H
 
+#include "types.h"
 #include "ngram.h"
 
 #endif

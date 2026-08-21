@@ -13,6 +13,9 @@
 #ifdef CNKOPT_INTER
     #include "inter_tests.h"
 #endif
+#ifdef CNKOPT_ALGO
+    #include "algo_tests.h"
+#endif
 #ifdef CNKOPT_CRYPTO
     #include "cryto_tests.h"
 #endif

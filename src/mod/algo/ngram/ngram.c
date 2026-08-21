@@ -7,6 +7,6 @@ NGram *NGram_Make(MemCh *m,  Buff *bf, i16 stride, void *source){
     ng->objRange.range = stride;
     ng->bf = bf;
     ng->source = source;
-    ng->s = Str_Make(m, sizeof(NRec) * stride);
+    ng->s = Str_Make(m, sizeof(util) + (sizeof(NVal) * stride));
     return ng;
 }

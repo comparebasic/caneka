@@ -1,8 +1,11 @@
-enum ext_types {
-    _TYPE_ALGO_START = _TYPE_EXT_STRUCT_END,
+enum algo_types {
+    _TYPE_ALGO_START = _NEXT_RANGE_START,
     TYPE_NGRAM,
     TYPE_NGRAM_REC,
     TYPE_MEDI_TREE,
     TYPE_LATIN_TREE,
     _TYPE_ALGO_END,
 };
+
+#undef _NEXT_RANGE_START
+#define _NEXT_RANGE_START _TYPE_ALGO_END

@@ -83,6 +83,7 @@ char *buildTests[] = {
     "base",
     "ext",
     "inter",
+    "algo",
     "crypto@third/openssl",
     NULL
 };
@@ -400,7 +401,7 @@ read:
 }
 
 int main(int argc, char *argv[]){
-    char *cmd[12];
+    char *cmd[13];
     char **runcmd[4];
     int showMenu = 0;
 

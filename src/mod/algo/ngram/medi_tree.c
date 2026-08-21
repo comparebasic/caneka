@@ -1,44 +1,59 @@
 #include <external.h>
 #include <caneka.h>
 
+
 NGram *MediTree_Make(MemCh *m, Buff *bf){
     return NGram_Make(m, bf, 4, NULL);
 }
 
-void MediTree_Add(MemCh *m, Ngram *ng, i32 value){
-    ng->type.state = NGRAM_AMMEND;
-    return MediTree_Query(m, ng, value);
+void MediTree_Add(MemCh *m, NGram *ng, i32 value, util meaning){
+    ng->type.state |= NGRAM_AMMEND;
+    return MediTree_Query(m, ng, value, meaning);
 }
 
-i32 MediTree_Find(MemCh *m, Ngram *ng, i32 value){
+util MediTree_Find(MemCh *m, NGram *ng, i32 value){
     ng->type.state &= ~NGRAM_AMMEND;
-    MediTree_Query(m, ng, value);
+    MediTree_Query(m, ng, value, 0);
     if(ng->type.state & SUCCESS){
-        return ng->value;
+        return ng->meaning;
     }
+    return -1;
 }
 
-void MediTree_Query(MemCh *m, Ngram *ng, i32 value){
-    ng->type.state &= ~(SUCCESS|NOOP|NGRAM_FOUND);
-    ng->s->length = 0;
-    NRec toWrite = {0, 0};
-    status r = READY;
+void MediTree_Query(MemCh *m, NGram *ng, i32 value, util meaning){
+    if(ng->type.state & DEBUG){
+        void *ar[] = {
+            I32_Wrapped(m, value),
+            I32_Wrapped(m, meaning),
+            NULL
+        };
+        Out("MediTree_Query $/$^0\n", ar);
+    }
 
+    i64 pos = 0;
+    i32 npos = 0;
+    i32 idx = 0;
+    i32 amount = 1;
+    util *current = NULL;
+    NVal *val = NULL;
+    NVal *fl = NULL;
+    NVal *cl = NULL;
+
+    ng->type.state &= ~(SUCCESS|NOOP|NGRAM_FOUND);
+    Buff_PosAbs(ng->bf, 0);
 
     if(Buff_IsEmpty(ng->bf)){
-        toWrite.value = value;
-        toWrite.addr = 0;
-        Buff_Add(ng->bf, &toWrite);
-        toWrite.value = 0;
-        Buff_Add(ng->bf, &toWrite);
-        Buff_Add(ng->bf, &toWrite);
-        Buff_Add(ng->bf, &toWrite);
-        ng->type.state |= SUCCESS;
-        return;
+        idx = -1;
+        goto rec;
     }
     
-    while((r & (SUCCESS|ERROR)) == 0){
-        ReadToStr(ng->bf, ng->s);
+    while((ng->type.state & (SUCCESS|ERROR|NOOP)) == 0){
+
+        amount = 1;
+        pos = Buff_GetPos(ng->bf);
+        ng->s->length = 0;
+        Buff_ReadToStr(ng->bf, ng->s);
+
         if(ng->s->length != ng->s->alloc){
             ng->type.state |= ERROR;
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -46,71 +61,159 @@ void MediTree_Query(MemCh *m, Ngram *ng, i32 value){
             break;
         }
 
-        NRec *val = ((NRec *)ng->s->bytes)+MEDI_VALUE;
-        NRec *fl = ((NRec *)ng->s->bytes)+MEDI_FLOOR;
-        NRec *med = ((NRec *)ng->s->bytes)+MEDI_MEDIAN;
-        NRec *cl = ((NRec *)ng->s->bytes)+MEDI_CEILING;
+        current = (util *)ng->s->bytes;
+        val = (NVal *)(ng->s->bytes+sizeof(util));
+        fl = val+1;
+        cl = val+(ng->objRange.range-1);
+
+        if(ng->type.state & DEBUG){
+            void *ar[] = {
+                I32_Wrapped(m, val->value),
+                NULL
+            };
+            Out("    -> $^0\n", ar);
+        }
 
         if(value == val->value){
-            ng->addr = val->addr;
+            if(ng->type.state & DEBUG){
+                void *ar[] = {
+                    I32_Wrapped(m, val->value),
+                    Util_Wrapped(m, *current),
+                    NULL
+                };
+                Out("  <- $/$^0\n", ar);
+            }
+
+            ng->value = val->value;
+            ng->meaning = *current;
+
             ng->type.state |= SUCCESS;
-        }else if(value < fl->value){
-            if(ng->type.state & NGRAM_AMMEND){
-                i64 pos = Buff_GetPos(ng->buff);
-                Buff_PosEnd(ng->bf);
-                Buff_Add(ng->bf, ng->s);
-                i64 npos = Buff_GetPos(ng->buff);
-                Buff_PosAbs(ng->bf, pos);
-                toWrite.value = value;
-                toWrite.addr = 0;
-                Buff_Add(ng->bf, &toWrite);
-                toWrite.value = fl->value;
-                toWrite.addr = npos;
-                Buff_Add(ng->bf, &toWrite);
+        }else if(value < val->value){
+            printf("    lt\n");
+            fflush(stdout);
+            idx = 0;
+            goto swap;
+        }else if(cl->addr == 0 && fl->addr == 0){
+            printf("    gt val %d blank %d\n", value, val->value);
+            fflush(stdout);
+            idx = ng->objRange.range-1;
+            amount = ng->objRange.range-1;
+            goto rec;
+        }else if(value > cl->value){
+            printf("    gt cl %d vs %d\n", value, cl->value);
+            fflush(stdout);
+            if(ng->objRange.range > 2){
+                idx = ng->objRange.range-2;
+                amount = 2;
             }else{
-                ng->type.state |= NOOP;
+                idx = ng->objRange.range-1;
             }
-        }else if(med->value == 0){
-            if(ng->type.state & NGRAM_AMMEND){
-                i64 pos = Buff_GetPos(ng->buff);
-                toWrite.value = value;
-                toWrite.addr = 0;
-                Buff_PosEnd(ng->bf);
-                Buff_Add(ng->bf, &toWrite);
-                toWrite.value = 0;
-                toWrite.addr = 0;
-                Buff_Add(ng->bf, &toWrite);
-                Buff_Add(ng->bf, &toWrite);
-                Buff_Add(ng->bf, &toWrite);
-                Buff_PosAbs(ng->bf, pos+(sizeof(NRec)*MEDI_MEDIAN));
-                toWrite.value = value;
-                toWrite.addr = (i32)pos;
-                Buff_Add(ng->bf, &toWrite);
-                Buff_Add(ng->bf, &toWrite);
-                ng->type.state |= SUCCESS;
-            }else{
-                ng->type.state |= NOOP;
-            }
-        }else if(value < med->value){
-            Buff_PosAbs(ng->bf, fl->addr);
-        }else if(value < cl->value){
-            Buff_PosAbs(ng->bf, med->addr);
+            goto rec;
         }else{
-            if(ng->type.state & NGRAM_AMMEND){
-                i64 pos = Buff_GetPos(ng->buff);
-                Buff_PosEnd(ng->bf);
-                toWrite.value = value;
-                toWrite.addr = 0;
-                Buff_Add(ng->bf, &toWrite);
-                i64 npos = Buff_GetPos(ng->buff);
-                Buff_PosAbs(ng->bf, pos+sizeof(NRec)*MEDI_CEILING);
-                toWrite.value = value;
-                toWrite.addr = npos;
-                Buff_Add(ng->bf, &toWrite);
-                ng->type.state |= SUCCESS;
-            }else{
-                ng->type.state |= NOOP;
+            for(i32 i = ng->objRange.range-1; i > 0; i--){
+                printf("    nth%d\n", i);
+                fflush(stdout);
+                NVal *rec = val+i;
+                if(rec->value == 0){
+                    idx = i;
+                    goto rec;
+                }else if(value < rec->value){
+                    if(i == 1){
+                        idx = i;
+                        goto swap;
+                    }else{
+                        rec--;
+                        if(rec->addr == 0){
+                            idx = i-1;
+                            goto rec;
+                        }else{
+                            if(pos == rec->addr){
+                                Error(m, FUNCNAME, FILENAME, LINENUMBER, 
+                                    "Circular link", NULL);
+                                ng->type.state |= ERROR;
+                                break;
+                            }
+                            Buff_PosAbs(ng->bf, rec->addr);
+                            /* break here, continue outer loop */
+                            break;
+                        }
+                    }
+                }
+                rec--;
             }
         }
     }
+
+swap:
+    if((ng->type.state & NGRAM_AMMEND) == 0){
+        ng->type.state |= NOOP;
+        return;
+    }
+    printf("  swap with %d\n", val->value);
+    fflush(stdout);
+
+    /* copy meaning and val records */
+    Buff_PosEnd(ng->bf);
+    npos = Buff_GetPos(ng->bf);
+    Buff_AddBytes(ng->bf, (byte *)current, sizeof(util));
+    Buff_AddBytes(ng->bf, (byte *)val, sizeof(NVal));
+    for(i32 i = 1; i < ng->objRange.range; i++){
+        NVal zeros = {0,0};
+        Buff_AddBytes(ng->bf, (byte *)&zeros, sizeof(NVal));
+    }
+
+    /* update link */
+    Buff_PosAbs(ng->bf, NVal_Coord(pos, idx));
+    Buff_AddBytes(ng->bf, (byte *)&value, sizeof(i32));
+    Buff_AddBytes(ng->bf, (byte *)&npos, sizeof(i32));
+
+    /* update  meaning and value */
+    Buff_PosAbs(ng->bf, pos);
+    Buff_AddBytes(ng->bf, (byte *)&meaning, sizeof(util));
+    Buff_AddBytes(ng->bf, (byte *)&value, sizeof(i32));
+    i32 addr = 0;
+    Buff_AddBytes(ng->bf, (byte *)&addr, sizeof(i32));
+
+    ng->type.state |= SUCCESS;
+    return;
+
+rec:
+    if((ng->type.state & NGRAM_AMMEND) == 0){
+        ng->type.state |= NOOP;
+        return;
+    }
+    printf("  rec %d\n", value);
+    fflush(stdout);
+
+    Buff_PosEnd(ng->bf);
+    npos = Buff_GetPos(ng->bf);
+    Buff_AddBytes(ng->bf, (byte *)&meaning, sizeof(util));
+    Buff_AddBytes(ng->bf, (byte *)&value, sizeof(i32));
+    i32 z = (i32)pos;
+    Buff_AddBytes(ng->bf, (byte *)&pos, sizeof(i32));
+    for(i32 i = 1; i < ng->objRange.range; i++){
+        NVal zeros = {0,0};
+        Buff_AddBytes(ng->bf, (byte *)&zeros, sizeof(NVal));
+    }
+
+    if(idx >= 0){
+        printf("Linking @%ld nth%d value of %d x%d\n", pos, idx, value, amount);
+        fflush(stdout);
+
+        idx -= amount;
+        if(idx < 0){
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Cannot set NVals of indexes below 0", NULL);
+            ng->type.state |= ERROR;
+        }
+
+        Buff_PosAbs(ng->bf, NVal_Coord(pos, idx));
+        while(amount-- > 0){
+            Buff_AddBytes(ng->bf, (byte *)&value, sizeof(i32));
+            Buff_AddBytes(ng->bf, (byte *)&npos, sizeof(i32));
+        }
+    }
+
+    ng->type.state |= SUCCESS;
+    return;
 }

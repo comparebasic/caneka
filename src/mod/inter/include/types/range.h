@@ -4,6 +4,9 @@ enum inter_range {
 };
 
 enum inter_obj_range {
-    _TYPE_INTER_OBJ_START = _EXT_OBJECT_END,
+    _TYPE_INTER_OBJ_START = _NEXT_RANGE_START,
     _TYPE_INTER_OBJ_END,
 };
+
+#undef _NEXT_RANGE_START
+#define _NEXT_RANGE_START _TYPE_INTER_END
