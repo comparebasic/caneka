@@ -21,7 +21,6 @@ status NGram_PrintFromStart(Buff *bf, NGram *ng){
 
             util *meaning = (util *)ng->s->bytes;
             NVal *val = (NVal *)(ng->s->bytes+sizeof(util));
-            NVal *cl = val+(ng->objRange.range-1);
 
             args[0] = I64_Wrapped(m, current);
             args[1] = Util_Wrapped(m, *meaning);
@@ -30,8 +29,10 @@ status NGram_PrintFromStart(Buff *bf, NGram *ng){
             for(i32 i = 0; i < ng->objRange.range; i++){
                 if(val->addr == 0 && val->value == 0){
                     Buff_AddBytes(bf, (byte *)" ", 1);
+                    val++;
                     continue;
                 }
+
                 args[0] = I32_Wrapped(m, i);
                 args[1] = I32_Wrapped(m, val->value);
                 args[2] = I32_Wrapped(m, val->addr);
@@ -47,7 +48,7 @@ status NGram_PrintFromStart(Buff *bf, NGram *ng){
     }
 
     Buff_PosAbs(ng->bf, pos);
-    Fmt(bf, ">^0", NULL);
+    Fmt(bf, ">\n^0", NULL);
 }
 
 status NGram_TosInit(MemCh *m){

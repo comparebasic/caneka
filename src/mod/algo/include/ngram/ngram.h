@@ -1,4 +1,4 @@
-#define NVal_Coord(pos, idx) ((pos)+sizeof(util)+(sizeof(NVal)*idx))
+#define NVal_Coord(pos, idx) ((pos)+sizeof(util)+(sizeof(NVal)*(idx)))
 
 enum ngram_states {
     NGRAM_VALUE = 1 << 8,
