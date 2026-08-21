@@ -1,6 +1,7 @@
-#define MEDI_FLOOR 0
-#define MEDI_MEDIAN 1
-#define MEDI_CEILING 2
+#define MEDI_VALUE 0
+#define MEDI_FLOOR 1 
+#define MEDI_MEDIAN 2 
+#define MEDI_CEILING 3
 
 NGram *MediTree_Make(MemCh *m, Buff *bf);
 void MediTree_Add(MemCh *m, Ngram *ng, i32 value);

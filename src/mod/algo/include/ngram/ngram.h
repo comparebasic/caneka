@@ -6,14 +6,14 @@ enum ngram_states {
 };
 
 typedef struct ngram_rec {
-    Type type;
     i32 value;
+    i32 addr;
 } NRec;
 
 typedef struct ngram {
     Type type;
     RangeType objRange;
-    i32 value;
+    i32 addr;
     Buff *bf;
     Str *s;
     void *source;
