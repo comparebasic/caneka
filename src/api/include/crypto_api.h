@@ -7,7 +7,7 @@
 #define SIGNATURE_SIZE 96
 
 enum crypto_range {
-    _TYPE_CRYPTO_START = _TYPE_EXT_END,
+    _TYPE_CRYPTO_START = _NEXT_RANGE_START,
     TYPE_ECKEY,
     TYPE_ECKEY_PUB,
     TYPE_TLS_CTX,
@@ -15,6 +15,9 @@ enum crypto_range {
     TYPE_TLS_CAPSULE,
     _TYPE_CRYPTO_END,
 };
+
+#undef _NEXT_RANGE_START
+#define _NEXT_RANGE_START _TYPE_CRYPTO_END
 
 typedef struct crypto_tls_ctx {
     Type type;

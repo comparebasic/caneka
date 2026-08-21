@@ -127,6 +127,16 @@ i32 main(int argc, char **argv){
     }
 #endif
 
+#ifdef CNKOPT_ALGO
+    if((r & ERROR) == 0){
+        suite = TestSuite_Make(m, S(m, "Caneka algo"), AlgoTests);
+        r |= Test_Runner(m, suite);
+        pass += suite->pass;
+        fail += suite->fail;
+        skip += suite->skip;
+    }
+#endif
+
     args[0] = I32_Wrapped(m, pass),
     args[1] = I32_Wrapped(m, fail),
     args[2] = I32_Wrapped(m, skip),

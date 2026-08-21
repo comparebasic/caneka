@@ -738,6 +738,14 @@ status Buff_Pos(Buff *bf, i64 position){
     return Buff_posFrom(bf, position, SEEK_CUR);
 }
 
+i64 Buff_GetPos(Buff *bf){
+    if((bf->type.state & (BUFF_SOCKET|BUFF_FD)) != 0 && bf->pfd != NULL){
+        return lseek(bf->pfd->fd, 0, SEEK_CUR);
+    }
+
+    return -1;
+}
+
 status Buff_PosEnd(Buff *bf){
     return Buff_posFrom(bf, 0, SEEK_END);
 }

@@ -3,6 +3,7 @@ exec=content-fetch.c
 exec=urlneka.c
 option=crypto
 option=runtime
+option=algo
 option=inter
 option=ext
 option=base

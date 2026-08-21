@@ -1,5 +1,5 @@
 enum ext_types {
-    _TYPE_EXT_START = _TYPE_BASE_END,
+    _TYPE_EXT_START = _NEXT_RANGE_START,
     TYPE_SEEL,
     TYPE_NEST_SEL,
     TYPE_INST_ITER,
@@ -241,3 +241,6 @@ enum ext_types {
     _EXT_OBJECT_END,
     _TYPE_EXT_END,
 };
+
+#undef _NEXT_RANGE_START
+#define _NEXT_RANGE_START _TYPE_EXT_END
