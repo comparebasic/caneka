@@ -3,7 +3,9 @@
 
 
 NGram *MediTree_Make(MemCh *m, Buff *bf){
-    return NGram_Make(m, bf, 4, NULL);
+    NGram *ng = NGram_Make(m, bf, 4, NULL);
+    ng->s = Str_Make(m, sizeof(util) + (sizeof(NVal) * ng->objRange.range));
+    return ng;
 }
 
 void MediTree_Add(MemCh *m, NGram *ng, i32 value, util meaning){

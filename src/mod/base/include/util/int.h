@@ -1,3 +1,5 @@
+#define MASK_24B 0x0FFF
+
 typedef struct int_pair {
     i32 a;
     i32 b;
