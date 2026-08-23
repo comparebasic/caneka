@@ -8,9 +8,11 @@
 #include "encode.h"
 #include "debug.h"
 #include "io.h"
+#include "inst.h"
 #include "sequence.h"
 #include "util.h"
 #include "termio.h"
 #include "parser.h"
+#include "format.h"
 
 #endif

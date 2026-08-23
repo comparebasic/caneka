@@ -3,6 +3,7 @@
 
 static Str **buffLabels = NULL;
 static Str **dirSelLabels = NULL;
+static Str **fileLabels = NULL;
 
 char *Buff_WhenceChars(i64 whence){
     if(whence == SEEK_SET){
@@ -135,6 +136,20 @@ status Io_InitLabels(MemCh *m, Lookup *lk){
         Lookup_Add(m, lk, TYPE_DIR_SELECTOR, (void *)dirSelLabels);
         r |= SUCCESS;
     }
+    if(fileLabels == NULL){
+        fileLabels = (Str **)Arr_Make(m, 17);
+        fileLabels[9] = Str_CstrRef(m, "STRVEC");
+        fileLabels[10] = Str_CstrRef(m, "APPEND");
+        fileLabels[11] = Str_CstrRef(m, "FROM_FD");
+        fileLabels[12] = Str_CstrRef(m, "TO_FD");
+        fileLabels[13] = Str_CstrRef(m, "ASYNC");
+        fileLabels[14] = Str_CstrRef(m, "SOCKET");
+        fileLabels[15] = Str_CstrRef(m, "BUFFER");
+        fileLabels[16] = Str_CstrRef(m, "CREATE");
+        Lookup_Add(m, lk, TYPE_FILE, (void *)fileLabels);
+        r |= SUCCESS;
+    }
+    return r;
     return r;
 }
 

@@ -27,6 +27,7 @@ enum build_types {
     BUILD_CHOICE = 1 << 12,
     BUILD_INCLUDE = 1 << 13,
     BUILD_SHARED = 1 << 14,
+    BUILD_SUB_DEP = 1 << 15,
 };
 
 typedef struct executable {

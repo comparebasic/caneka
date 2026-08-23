@@ -1,5 +1,5 @@
 #include <external.h>
-#include <caneka.h>
+#include "base_module.h"
 
 Span *IoPath_ToInstPath(MemCh *m, StrVec *path){
     status r = ZERO;

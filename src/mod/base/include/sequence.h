@@ -11,3 +11,4 @@
 #include "sequence/sequence_maps.h"
 #include "sequence/sequence_eq.h"
 #include "sequence/shelf.h"
+#include "sequence/node.h"

@@ -110,16 +110,6 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
     Table *deps = Table_Get(sel->meta, K(m, "dep"));
 
     ctx->current.staticlibs = Span_Make(m);
-    Table *modlist = Table_Make(m);
-
-    Iter it;
-    Iter_Init(&it, Table_Ordered(m, deps));
-    while((Iter_Prev(&it) & END) == 0){
-        Hashed *h = Iter_Get(&it);
-        Table_Set(modlist, h->key, h->value);
-    }
-
-    Table_Set(modlist, key, Table_Get(sel->meta, K(m, "path")));
     if(deps != NULL){
         Iter it;
         StrVec *srcIncPath = StrVec_Copy(m, ctx->src);
@@ -220,7 +210,21 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
     }
 
-    BuildCtx_GenIncFlags(ctx, modlist, Table_Get(sel->meta, K(m, "api")), NULL);
+    /*
+    Table *modlist = Table_Make(m);
+
+    Iter it;
+    Iter_Init(&it, Table_Ordered(m, deps));
+    while((Iter_Prev(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        Table_Set(modlist, h->key, h->value);
+    }
+
+    Table_Set(modlist, key, Table_Get(sel->meta, K(m, "path")));
+    */
+
+    BuildCtx_GenIncFlags(ctx,
+        ctx->input.dependencies, Table_Get(sel->meta, K(m, "api")), NULL);
 
     StrVec *libTarget = Table_Get(sel->meta, K(m, "target"));
     if(libTarget){

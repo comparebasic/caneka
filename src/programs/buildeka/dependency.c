@@ -53,7 +53,7 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     void *args[5];
     MemCh *m = ctx->m;
 
-    if(ctx->type.state & DEBUG){
+    if(1 || ctx->type.state & DEBUG){
         void *ar[] = {key, NULL}; 
         Out("^b.Parsing Key @^0.\n", ar);
     }
@@ -110,7 +110,16 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
         }
 
         ctx->input.totalModules->val.i++;
-        Table_Set(ctx->input.dependencies, key, sel);
+
+
+        if((ctx->type.state & BUILD_SUB_DEP) == 0){
+            void *ar[] = {
+                key,
+                NULL
+            };
+            Out("^c.Setting Dep @^0\n", ar);
+            Table_Set(ctx->input.dependencies, key, sel);
+        }
         Table_Set(sel->meta, S(m, "path"), name);
 
         if(Time_Greater(&sel->time, &ctx->modified)){

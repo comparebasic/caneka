@@ -1,5 +1,5 @@
 #include <external.h>
-#include <caneka.h>
+#include "base_module.h"
 
 Lookup *SeelLookup = NULL;
 Lookup *SeelOrdLookup = NULL;

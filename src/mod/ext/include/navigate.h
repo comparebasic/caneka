@@ -1,4 +1,3 @@
-#include "navigate/node.h"
 #include "navigate/compare.h"
 #include "navigate/queue.h"
 #include "navigate/slotter.h"

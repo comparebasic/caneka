@@ -1,5 +1,5 @@
 #include <external.h>
-#include <caneka.h>
+#include "base_module.h"
 
 static PatCharDef leadDef[] = {
     {PAT_MANY, '\t', '\t'},

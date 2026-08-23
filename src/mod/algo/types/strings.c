@@ -3,6 +3,8 @@
 
 static char *algoTypeStrings[] = {
     "_TYPE_ALGO_START",
+    "TYPE_BINSEG_CTX",
+    "TYPE_BINSEG_HEADER",
     "TYPE_NGRAM",
     "TYPE_NGRAM_REC",
     "_TYPE_ALGO_END",
