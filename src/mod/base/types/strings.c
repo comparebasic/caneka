@@ -149,11 +149,22 @@ char *Type_ToChars(cls type){
     return "unknown";
 }
 
+static char *instStrings[] = {
+    "INSTANCE",
+    "NODE",
+    "_BASE_INST_END",
+    NULL
+};
+
+
 Str *Type_ToStr(MemCh *m, cls type){
     char *cstr = Type_ToChars(type);
     return Str_CstrRef(m, cstr);
 }
 
 status DebugTypeStrings_Init(MemCh *m){
-    return Lookup_Add(m, TypeStringRanges, _TYPE_ZERO, (void *)baseTypeStrings);
+    status r = READY;
+    r |=  Lookup_Add(m, TypeStringRanges, _TYPE_ZERO, (void *)baseTypeStrings);
+    r |=  Lookup_Add(m, TypeStringRanges, TYPE_INSTANCE, (void *)instStrings);
+    return r;
 }

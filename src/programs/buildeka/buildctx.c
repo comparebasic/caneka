@@ -15,6 +15,26 @@ status BuildCtx_Build(BuildCtx *ctx){
     MemCh *m = ctx->m;
     Debug_Push(m, ctx);
 
+    StrVec *configPath = StrVec_From(m, Span_Get(ctx->input.sources, 0));
+    StrVec_Add(configPath, S(m, "/build.json"));
+
+    Node *config = Json_FromPath(m, configPath); 
+    if(config == NULL){
+        void *ar[] = {
+            configPath,
+            NULL
+        };
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "build.json file not found \\@$", ar);
+    }
+
+    void *ar[] = {
+        config,
+        NULL
+    };
+    Out("^y.Building @^0\n", ar);
+    exit(1);
+
     Time_Now(&ctx->start);
 
     BuildCtx_GenAllIncSpan(ctx);

@@ -12,7 +12,6 @@ status Caneka_Init(MemCh *m){
     Caneka_InitBase(m);
 
     ExtTypes_ToSInit(m);
-    Seel_Init(m);
     ExtTypeStrings_Init(m);
     Parser_Init(m);
     Persist_Init(m);
@@ -23,7 +22,6 @@ status Caneka_Init(MemCh *m){
     Serve_TosInit(m);
     Serve_Init(m);
     Uri_ToSInit(m, ToStreamLookup);
-    Node_ClsInit(m);
     IterApi_Init(m);
     Cash_ToSInit(m, ToStreamLookup);
     Etag_ClsInit(m);

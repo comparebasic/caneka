@@ -1,5 +1,5 @@
 #include <external.h>
-#include <caneka.h>
+#include "base_module.h"
 
 status Node_ClsInit(MemCh *m){
     status r = READY;

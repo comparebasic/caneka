@@ -30,6 +30,8 @@ status Caneka_InitBase(MemCh *m){
     Path_Init(md);
     IoUtils_Init(m);
     Exact_Init(m);
+    Seel_Init(m);
+    Node_ClsInit(m);
     Stash_Init(m);
     Core_Direct(m, 1, 2);
     return r;

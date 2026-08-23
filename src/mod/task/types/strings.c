@@ -200,8 +200,6 @@ static char *extTypeStrings[] = {
 };
 
 static char *extTypeInstectStrings[] = {
-    "TYPE_INSTANCE",
-    "TYPE_NODE",
     "TYPE_HTTP_CONFIG",
     "TYPE_ETAG",
     "_EXT_OBJECT_END",
@@ -211,6 +209,6 @@ static char *extTypeInstectStrings[] = {
 status ExtTypeStrings_Init(MemCh *m){
     status r = READY;
     r |=  Lookup_Add(m, TypeStringRanges, _TYPE_EXT_START, (void *)extTypeStrings);
-    r |=  Lookup_Add(m, TypeStringRanges, TYPE_INSTANCE, (void *)extTypeInstectStrings);
+    r |=  Lookup_Add(m, TypeStringRanges, _TYPE_EXT_INST_START, (void *)extTypeInstectStrings);
     return r;
 }
