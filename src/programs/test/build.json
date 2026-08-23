@@ -1,0 +1,9 @@
+{
+    "exec": ["main.c", "content-fetch.c", "urlneka.c"],
+    "dependency":[
+        {"base": "implied-option"},
+        {"task": "option"},
+        {"algo": "option"},
+        {"crypto": "option"}
+    ]
+}
