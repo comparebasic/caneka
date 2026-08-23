@@ -2,7 +2,7 @@
 #include <caneka.h>
 
 static char *extTypeStrings[] = {
-    "_TYPE_EXT_START",
+    "_TYPE_EXT_START = _NEXT_RANGE_START",
     "TYPE_SEEL",
     "TYPE_NEST_SEL",
     "TYPE_INST_ITER",
@@ -16,30 +16,12 @@ static char *extTypeStrings[] = {
     "TYPE_FETCHER",
     "TYPE_FETCH_TARGET",
     "TYPE_FETCH_FUNC",
-    "TYPE_CLASS_DEF",
-    "TYPE_SNIP",
-    "TYPE_SNIPSPAN",
-    "TYPE_ROEBLING",
-    "TYPE_PATMATCH",
-    "TYPE_PATCHAR",
-    "TYPE_PATCHARDEF",
-    "TYPE_IOCTX",
     "TYPE_PERMISSION",
-    "TYPE_AUTH",
-    "TYPE_RELATION",
-    "TYPE_MEMPAIR",
     "TYPE_FILE",
-    "TYPE_SPOOL",
-    "TYPE_TRANSP_CTX",
-    "TYPE_TRANSP_FILE",
-    "TYPE_TOKENIZE",
-    "TYPE_TARGET",
-    "TYPE_SOURCE",
     "TYPE_BINSEG_CTX",
     "TYPE_BINSEG_HEADER",
     "TYPE_CAPSULE",
     "TYPE_CAPSULE_DEF",
-    "TYPE_FILEDB",
     "TYPE_QUEUE",
     "TYPE_QUEUE_CRIT",
     "TYPE_SLOTTER",
@@ -236,7 +218,7 @@ static char *extTypeStrings[] = {
     "CASH_END",
     "_CASH_END",
     "LINE_CONTENT",
-    "_TYPE_EXT_END",
+    "_TYPE_EXT_STRUCT_END",
     NULL
 };
 
@@ -244,6 +226,7 @@ static char *extTypeInstectStrings[] = {
     "TYPE_INSTANCE",
     "TYPE_NODE",
     "TYPE_HTTP_CONFIG",
+    "TYPE_ETAG",
     "_EXT_OBJECT_END",
     NULL
 };

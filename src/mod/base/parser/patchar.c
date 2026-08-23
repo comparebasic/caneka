@@ -1,5 +1,5 @@
 #include <external.h>
-#include <caneka.h>
+#include "base_module.h"
 
 static i64 PatChar_continueFromStr(MemCh *m, Str *s, Str *ps, word flags){
     byte *b = s->bytes;

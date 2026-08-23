@@ -1,5 +1,5 @@
 #include <external.h>
-#include <caneka.h>
+#include "base_module.h"
 
 static inline status Roebling_RunMatches(Roebling *rbl){
     Debug_Push(rbl->m, rbl);
@@ -379,7 +379,7 @@ Roebling *Roebling_Make(MemCh *m, Cursor *curs, RblCaptureFunc capture, void *so
     rbl->curs = curs;
     Span *p = Span_Make(m);
     Iter_Init(&rbl->parseIt, p);
-    rbl->marks = Lookup_Make(m, _TYPE_CORE_END); 
+    rbl->marks = Lookup_Make(m, ZERO); 
     rbl->markLabels = Lookup_Make(m, ZERO); 
     if(curs != NULL && (curs->type.state & PROCESSING) == 0){
         Cursor_Setup(rbl->curs, curs->v);

@@ -94,6 +94,12 @@ static char *baseTypeStrings[] = {
     "TYPE_CLI_STATUS",
     "TYPE_CLI_ARGS",
     "TYPE_FMT_LINE",
+    "TYPE_PATMATCH",
+    "TYPE_PATCHAR",
+    "TYPE_PATCHARDEF",
+    "TYPE_SNIP",
+    "TYPE_SNIPSPAN",
+    "TYPE_ROEBLING",
     "_TYPE_BASE_END",
     NULL
 };

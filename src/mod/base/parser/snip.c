@@ -1,5 +1,5 @@
 #include <external.h>
-#include <caneka.h>
+#include "base_module.h"
 
 StrVec *StrVec_Snip(MemCh *m, Span *sns, Cursor *_curs){
     Debug_Push(m, sns);

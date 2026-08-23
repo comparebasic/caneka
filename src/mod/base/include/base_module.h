@@ -11,5 +11,6 @@
 #include "sequence.h"
 #include "util.h"
 #include "termio.h"
+#include "parser.h"
 
 #endif

@@ -1,5 +1,5 @@
 #include <external.h>
-#include <caneka.h>
+#include "base_module.h"
 
 static char *matchFlagChars = "EXPMNICGKOSLDTU__";
 
@@ -8,7 +8,6 @@ static char *snipChars = "_________CGBUKST__";
 static Str **snipLabels = NULL;
 static Str **roeblingLabels = NULL;
 static Str **matchLabels = NULL;
-static Str **tokenizeLabels = NULL;
 
 static status _PatChar_print(Buff *bf, void *a, cls type, word flags){
     PatCharDef *pat = (PatCharDef *)a;
@@ -244,40 +243,11 @@ status Parser_InitLabels(MemCh *m, Lookup *lk){
         r |= SUCCESS;
     }
 
-    if(tokenizeLabels == NULL){
-        tokenizeLabels = (Str **)Arr_Make(m, 17);
-        tokenizeLabels[9] = Str_CstrRef(m, "TOKEN_SEPERATE");
-        tokenizeLabels[10] = Str_CstrRef(m, "TOKEN_OUTDENT");
-        tokenizeLabels[11] = Str_CstrRef(m, "TOKEN_INLINE");
-        tokenizeLabels[12] = Str_CstrRef(m, "TOKEN_BY_TYPE");
-        tokenizeLabels[13] = Str_CstrRef(m, "TOKEN_ATTR_KEY");
-        tokenizeLabels[14] = Str_CstrRef(m, "TOKEN_ATTR_VALUE");
-        tokenizeLabels[15] = Str_CstrRef(m, "TOKEN_NO_COMBINE");
-        tokenizeLabels[16] = Str_CstrRef(m, "TOKEN_NO_CONTENT");
-        Lookup_Add(m, lk, TYPE_TOKENIZE, (void *)tokenizeLabels);
-        r |= SUCCESS;
-    }
-
     if(r == READY){
         r |= NOOP;
     }
 
     return r;
-}
-
-static status Tokenize_Print(Buff *bf, void *a, cls type, word flags){
-    Tokenize *tk = (Tokenize *)Ifc(bf->m, a, TYPE_TOKENIZE); 
-    if((flags & (DEBUG|MORE)) == 0){
-        return ToStream_NotImpl(bf, a, type, flags);
-    }else{
-        void *args[] = {
-            Type_StateVec(bf->m, tk->type.of, tk->type.state),
-            Type_ToStr(bf->m, tk->captureKey),
-            Type_ToStr(bf->m, tk->typeOf),
-            NULL
-        };
-        return Fmt(bf, "Tk<$ ^D.$^d./$>", args);
-    }
 }
 
 status Parser_ToSInit(MemCh *m, Lookup *lk){
@@ -288,7 +258,6 @@ status Parser_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_PATCHAR, (void *)PatChar_Print);
     r |= Lookup_Add(m, lk, TYPE_ROEBLING, (void *)Roebling_Print);
     r |= Lookup_Add(m, lk, TYPE_SNIPSPAN, (void *)SnipSpan_Print);
-    r |= Lookup_Add(m, lk, TYPE_TOKENIZE, (void *)Tokenize_Print);
     r |= Lookup_Add(m, lk, TYPE_SNIP, (void *)Snip_Print);
     return r;
 }

@@ -1,5 +1,5 @@
 #include <external.h>
-#include <caneka.h>
+#include "base_module.h"
 
 status Match_StrReplace(MemCh *m, Str *s, Str *new, Match *mt, i32 *_pos){
     status r = READY;

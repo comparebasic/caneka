@@ -6,7 +6,6 @@
     #include <crypto_api.h>
 #endif
 
-#include "parser.h"
 #include "persist.h"
 #include "navigate.h"
 #include "format.h"
