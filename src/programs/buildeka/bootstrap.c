@@ -81,8 +81,7 @@ char *buildTests[] = {
     "src/programs/test",
     "--option",
     "base",
-    "ext",
-    "inter",
+    "task",
     "algo",
     "crypto@third/openssl",
     NULL

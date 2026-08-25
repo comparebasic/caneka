@@ -3,6 +3,7 @@
 
 static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
+    /*
     MemCh *m = ctx->m;
     Debug_Push(m, key);
 
@@ -54,9 +55,12 @@ static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
     StrVec_AddChain(ctx->current.dest, args);
 
     Return(m, ZERO);
+    */
+    return ZERO;
 }
 
 static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
+    /*
     Debug_Push(ctx->m, key);
 
     status r = READY;
@@ -210,18 +214,6 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
 
     }
 
-    /*
-    Table *modlist = Table_Make(m);
-
-    Iter it;
-    Iter_Init(&it, Table_Ordered(m, deps));
-    while((Iter_Prev(&it) & END) == 0){
-        Hashed *h = Iter_Get(&it);
-        Table_Set(modlist, h->key, h->value);
-    }
-
-    Table_Set(modlist, key, Table_Get(sel->meta, K(m, "path")));
-    */
 
     BuildCtx_GenIncFlags(ctx,
         ctx->input.dependencies, Table_Get(sel->meta, K(m, "api")), NULL);
@@ -235,10 +227,13 @@ static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
     ctx->current.inc = inc;
 
     Return(ctx->m, r);
+    */
+    return ZERO;
 }
 
 static status skipRecent(BuildCtx *ctx, 
         StrVec *key, DirSel *sel){
+    /*
     Debug_Push(ctx->m, key);
 
     MemCh *m = ctx->m;
@@ -261,9 +256,12 @@ static status skipRecent(BuildCtx *ctx,
     }
 
     Return(ctx->m, ZERO);
+    */
+    return ZERO;
 }
 
 static status buildShared(BuildCtx *ctx, StrVec *key, DirSel *sel){
+    /*
     MemCh *m = ctx->m;
     Debug_Push(m, key);
 
@@ -311,9 +309,12 @@ static status buildShared(BuildCtx *ctx, StrVec *key, DirSel *sel){
     }
 
     Return(m, ZERO);
+    */
+    return ZERO;
 }
 
 static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSel *sel){
+    /*
     MemCh *m = ctx->m;
     Debug_Push(m, key);
 
@@ -335,7 +336,6 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSel *sel){
         StrVec *v = Iter_Get(&it);
         Str *fname = Span_Get(v->p, v->p->max_idx);
         if(Table_Get(execs, fname) != NULL){
-            /* handled below */
             continue;
         }
 
@@ -397,9 +397,12 @@ static status buildSupporting(BuildCtx *ctx, StrVec *key, DirSel *sel){
     }
 
     Return(m, ZERO);
+    */
+    return ZERO;
 }
 
 static status buildExec(BuildCtx *ctx, StrVec *key, DirSel *sel){
+    /*
     MemCh *m = ctx->m;
     Debug_Push(m, ZERO);
 
@@ -449,10 +452,13 @@ static status buildExec(BuildCtx *ctx, StrVec *key, DirSel *sel){
     }
 
     Return(m, ZERO);
+    */
+    return ZERO;
 }
 
 status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     status r = READY;
+    /*
     MemCh *m = ctx->m;
     Debug_Push(m, name);
 
@@ -502,5 +508,13 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     Table_Set(sel->meta, S(m, "completed"), Time_Wrapped(m, &now));
 
     Return(m, r);
+    */
+    return r;
 }
 
+BuildModule *BuildModule_Make(MemCh *m, StrVec *name){
+    BuildModule *md = MemCh_AllocOf(m, sizeof(BuildModule), TYPE_BUILD_MODULE);
+    md->type.of = TYPE_BUILD_MODULE;
+    md->name = name;
+    return md;
+}

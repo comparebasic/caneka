@@ -15,31 +15,14 @@ status BuildCtx_Build(BuildCtx *ctx){
     MemCh *m = ctx->m;
     Debug_Push(m, ctx);
 
-    StrVec *configPath = StrVec_From(m, Span_Get(ctx->input.sources, 0));
-    StrVec_Add(configPath, S(m, "/build.json"));
-
-    Node *config = Json_FromPath(m, configPath); 
-    if(config == NULL){
-        void *ar[] = {
-            configPath,
-            NULL
-        };
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "build.json file not found \\@$", ar);
-    }
-
-    void *ar[] = {
-        config,
-        NULL
-    };
-    Out("^y.Building @^0\n", ar);
+    BuildCtx_Config(ctx);
     exit(1);
+    /*
 
     Time_Now(&ctx->start);
 
     BuildCtx_GenAllIncSpan(ctx);
 
-    /* build dependencies */
     Iter it;
     Iter_Init(&it, ctx->input.sources);
     while((Iter_Next(&it) & END) == 0){
@@ -55,7 +38,6 @@ status BuildCtx_Build(BuildCtx *ctx){
         Out("^p.Ctx after dependencies &^0\n", args);
     }
 
-    /* build libs */
     ctx->input.countModules->val.i = 0;
     StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
     Iter_Init(&it, Table_Ordered(m, ctx->input.dependencies));
@@ -73,9 +55,10 @@ status BuildCtx_Build(BuildCtx *ctx){
         }
     }
 
-    /* build execs */
 
     Return(m, r);
+    */
+    return ZERO;
 }
 
 BuildCtx *BuildCtx_Make(MemCh *m){
@@ -86,6 +69,7 @@ BuildCtx *BuildCtx_Make(MemCh *m){
 
     ctx->dir = StrVec_Make(m);
     ctx->src = StrVec_Make(m);
+    ctx->deps = Table_Make(m);
 
     ctx->current.target = StrVec_Make(m);
     ctx->current.targetName = StrVec_Make(m);
@@ -100,7 +84,6 @@ BuildCtx *BuildCtx_Make(MemCh *m){
     ctx->input.sources = Span_Make(m);
     ctx->input.objects = Span_Make(m);
     ctx->input.gens = Span_Make(m);
-    ctx->input.dependencies = Table_Make(m);
 
     ctx->tools.cc = S(m, _gen_CC);
     ctx->tools.ccVersion = Str_FromI64(m, (i64)_gen_CC_VERSION);

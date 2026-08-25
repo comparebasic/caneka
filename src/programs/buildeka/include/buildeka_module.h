@@ -6,6 +6,8 @@
 #include "detect.h"
 #include <base_module.h>
 
+#include "types/range.h"
+
 enum cli_name_idx {
     BUILIDER_CLI_LIBFILENAME = 0,
     BUILIDER_CLI_ACTION,
@@ -50,6 +52,14 @@ typedef struct gen_config {
     char **args;
 } GenConfig;
 
+typedef struct build_module {
+    Type type;
+    StrVec *name;
+    StrVec *target;
+    StrVec *targetName;
+    DirSel *sel;
+} BuildModule;
+
 typedef struct buildctx {
     Type type;
     MemCh *m;
@@ -57,7 +67,11 @@ typedef struct buildctx {
     struct timespec modified;
     StrVec *dir;
     StrVec *src;
+    Table *options;
+    Table *deps;
+    Node *config;
     struct {
+        StrVec *key;
         StrVec *name;
         StrVec *target;
         StrVec *targetName;
@@ -65,7 +79,6 @@ typedef struct buildctx {
         StrVec *source;
         StrVec *dest;
         StrVec *binDest;
-        Hashed *depKv;
         Span *staticlibs;
         Span *liblist;
         Span *inc;
@@ -78,18 +91,10 @@ typedef struct buildctx {
         Span *libs;
         Span *staticLibs;
         Span *sources;
-        Table *options;
         Span *objects;
         Span *gens;
         StrVec *srcPrefix;
-        Table *dependencies;
         Span *libDirs;
-        Single *totalSources;
-        Single *countSources;
-        Single *totalModules;
-        Single *countModules;
-        Single *totalModuleSources;
-        Single *countModuleSources;
     } input;
     struct {
         Str *cc;
@@ -97,10 +102,24 @@ typedef struct buildctx {
         Str *ar;
     } tools;
     struct {
+        Single *totalSources;
+        Single *countSources;
+        Single *totalModules;
+        Single *countModules;
+        Single *totalModuleSources;
+        Single *countModuleSources;
+    } metrics;
+    struct {
         CliStatus *cli;
         BuildCliFields fields;
     } cli;
 } BuildCtx;
+
+void BuildCtx_Config(BuildCtx *ctx);
+status BuildCtx_Build(BuildCtx *ctx);
+
+BuildModule *BuildModule_Make(MemCh *m, StrVec *name);
+
 
 status BuildCtx_Log(BuildCtx *ctx);
 void BuildCtx_SetQuiet(boolean quiet);
@@ -125,7 +144,7 @@ StrVec *BuildCtx_DestFromSrc(BuildCtx *ctx,
 
 status BuildCtx_ToSInit(MemCh *m);
 
-status BuildCtx_Build(BuildCtx *ctx);
 BuildCtx *BuildCtx_Make(MemCh *m);
+
 
 #endif

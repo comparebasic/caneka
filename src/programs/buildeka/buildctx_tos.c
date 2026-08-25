@@ -1,6 +1,16 @@
 #include <external.h>
 #include "buildeka_module.h"
 
+
+status BuildModule_Print(Buff *bf, void *a, cls type, word flags){
+    BuildModule *md = (BuildModule *)a;
+    void *ar[] = {
+        md->name,
+        md->sel,
+    };
+    return Fmt(bf, "BuildModule<@ @>", ar);
+}
+
 status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
     BuildCtx *ctx = (BuildCtx *)Ifc(bf->m, a, TYPE_BUILDCTX);
     MemCh *m = bf->m;
@@ -24,7 +34,8 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             ctx->input.objects,
             ctx->input.gens,
             ctx->input.srcPrefix,
-            Table_Ordered(bf->m, ctx->input.dependencies),
+            Table_Ordered(bf->m, ctx->options),
+            Table_Ordered(bf->m, ctx->deps),
             NULL
         };
         return Fmt(bf, "BuildCtx<@ $\n"
@@ -32,7 +43,8 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             "  tools: cc:$/$ ar:$\n"
             "  target: @\n      name:@\n      source:@\n      dest:@\n"
             "  input: inc:@ cflags:@ libs:@ sources:@ objects:@ gens:@, srcPrefix:@\n"
-            "    dependencies: @\n"
+            "    options: @\n"
+            "    deps: @\n"
             ">", args);
     }else{
         void *args[] = {
@@ -48,6 +60,8 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             ctx->current.source,
             ctx->current.dest,
             ctx->input.buildDir,
+            Table_Ordered(bf->m, ctx->options),
+            ctx->deps,
             NULL
         };
         return Fmt(bf, "BuildCtx<@ $\n"
@@ -55,12 +69,16 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             "  tools: cc:@/$ ar:@\n"
             "  target: @ name:@ source:@ dest:@\n"
             "  buildDir: @\n"
+            "    options: @\n"
+            "    deps: @\n"
             ">", args);
     }
+    return ZERO;
 }
 
 status BuildCtx_ToSInit(MemCh *m){
     status r = READY;
     r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILDCTX, (void *)BuildCtx_Print);
+    r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILD_MODULE, (void *)BuildModule_Print);
     return r;
 }

@@ -12,7 +12,7 @@ status BuildCtx_Log(BuildCtx *ctx){
         void *args[7];
         if(ctx->type.state & SUCCESS){
             args[0] = ctx->cli.fields.current[BUILIDER_CLI_LIBFILENAME];
-            args[1] = ctx->input.totalModules,
+            args[1] = ctx->metrics.totalModules,
             args[2] = NULL;
             Out("Static Library Complete $ $ modules", args);
         }else if(ctx->type.state & ERROR){
@@ -29,19 +29,19 @@ status BuildCtx_Log(BuildCtx *ctx){
                 };
                 Out(" for $ $ $\n", _args);
             }else{
-                args[0] = ctx->input.countModuleSources;
-                args[1] = ctx->input.totalModuleSources;
-                args[2] = ctx->input.countModules;
-                args[3] = ctx->input.totalModules;
-                args[4] = ctx->input.countSources;
-                args[5] = ctx->input.totalSources;
+                args[0] = ctx->metrics.countModuleSources;
+                args[1] = ctx->metrics.totalModuleSources;
+                args[2] = ctx->metrics.countModules;
+                args[3] = ctx->metrics.totalModules;
+                args[4] = ctx->metrics.countSources;
+                args[5] = ctx->metrics.totalSources;
                 args[6] = NULL;
                 Out("$/$ of module $/$ total $/$", args);
                 Out(" for $\n    $ $ -> $\n", ctx->cli.fields.current);
             }
         }else{
-            args[0] = ctx->input.countModules;
-            args[1] = ctx->input.totalModules;
+            args[0] = ctx->metrics.countModules;
+            args[1] = ctx->metrics.totalModules;
             args[2] = NULL;
             Out("Module $ of $:", args);
             Out("$ $ $ -> $\n", ctx->cli.fields.current);

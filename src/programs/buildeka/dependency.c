@@ -3,6 +3,7 @@
 
 Span *BuildCtx_ToModDeclare(MemCh *m, Str *s){
     Span *declare = Span_Make(m);
+    /*
     byte *b = s->bytes;
     byte *end = s->bytes+s->length-1;
     Str *shelf = Str_Make(m, STR_DEFAULT);
@@ -30,26 +31,14 @@ Span *BuildCtx_ToModDeclare(MemCh *m, Str *s){
         }
     }
 
+    */
     return declare;
-}
-
-Table *BuildCtx_GenOptionsTable(BuildCtx *ctx, Span *p){
-    Table *tbl = Table_Make(ctx->m);
-    Iter it;
-    Iter_Init(&it, p);
-    while((Iter_Next(&it) & END) == 0){
-        Str *s = Iter_Get(&it);
-        Span *p = BuildCtx_ToModDeclare(ctx->m, s);
-        Str *label = Span_Get(p, BUILD_MOD_DECLARE_LABEL);
-        Str *value = Span_Get(p, BUILD_MOD_DECLARE_VALUE);
-        Table_Set(tbl, label, value);
-    }
-    return tbl;
 }
 
 status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
     Debug_Push(ctx->m, path);
 
+    /*
     void *args[5];
     MemCh *m = ctx->m;
 
@@ -222,4 +211,6 @@ status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path){
 
     StrVec_PopTo(ctx->current.source, anchor);
     Return(ctx->m, ZERO);
+    */
+    return ZERO;
 }

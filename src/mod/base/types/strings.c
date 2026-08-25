@@ -45,7 +45,6 @@ static char *baseTypeStrings[] = {
     "_TYPE_ABSTRACT_BEGIN",
     "ABSTRACT",
     "ERROR_MSG",
-    "BUILDCTX",
     "RANGE",
     "BOOK",
     "BOOK_STATS",
@@ -84,6 +83,7 @@ static char *baseTypeStrings[] = {
     "ITER",
     "ITINERARY",
     "SEEL",
+    "IDENT"
     "GUARD",
     "HKEY",
     "PROCDETS",

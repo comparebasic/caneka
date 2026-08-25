@@ -6,8 +6,8 @@ status BuildCli_RenderStatus(MemCh *m, void *a){
     BuildCtx *ctx = (BuildCtx *)Ifc(m, cli->source, TYPE_BUILDCTX);
 
     i32 width = ctx->cli.cli->cols;
-    float total = (float)ctx->input.totalSources->val.i;
-    float count = (float)ctx->input.countSources->val.i;
+    float total = (float)ctx->metrics.totalSources->val.i;
+    float count = (float)ctx->metrics.countSources->val.i;
     float colsFloat = (float)width;
 
     float progress = ceil((count/total) * colsFloat);
@@ -35,7 +35,7 @@ status BuildCli_SetupComplete(BuildCtx *ctx){
     FmtLine *ln = Span_Get(ctx->cli.cli->lines, 0);
     ln->fmt = "^g.Completed ^D.$^d. sources^0.";
     ln->args = Arr_Make(ctx->m, 2);
-    ln->args[0] = ctx->input.totalSources;
+    ln->args[0] = ctx->metrics.totalSources;
 
     ln = Span_Get(ctx->cli.cli->lines, 1);
     ln->fmt = "^g.Sources ^D.$^d.^0.";
@@ -62,8 +62,8 @@ status BuildCli_SetupStatus(BuildCtx *ctx){
     void **arr = NULL;
 
     arr = Arr_Make(m, 2);
-    arr[0] = ctx->input.countSources;
-    arr[1] = ctx->input.totalSources;
+    arr[0] = ctx->metrics.countSources;
+    arr[1] = ctx->metrics.totalSources;
     Span_Add(ctx->cli.cli->lines, 
         FmtLine_Make(m, "^y.Source $ of $^0", arr));
 

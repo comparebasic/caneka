@@ -1,6 +1,7 @@
 #include "buildctx.c"
 #include "buildctx_tos.c"
 #include "cli.c"
+#include "config.c"
 #include "dependency.c"
 #include "logout.c"
 #include "module.c"

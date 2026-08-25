@@ -86,19 +86,19 @@ i32 main(int argc, char **argv){
     ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
     ctx->dir = StrVec_Copy(m, ctx->input.buildDir);
     ctx->src = CliArgs_GetAbsPath(cli, srcPrefixKey);
+    ctx->options = CliArgs_Get(cli, optionsKey);
     ctx->current.source = CliArgs_GetAbsPath(cli, srcPrefixKey);
     ctx->current.liblist = Span_Make(m);
     ctx->input.sources = CliArgs_Get(cli, srcKey);
     ctx->input.srcPrefix = prefix;
     ctx->input.srcPrefix->type.state |= STRVEC_NOSHRINK;
-    ctx->input.totalSources = I32_Wrapped(m, 0);
-    ctx->input.countSources = I32_Wrapped(m, 0);
-    ctx->input.totalModules = I32_Wrapped(m, 0);
-    ctx->input.countModules = I32_Wrapped(m, 0);
-    ctx->input.totalModuleSources = I32_Wrapped(m, 0);
-    ctx->input.countModuleSources = I32_Wrapped(m, 0);
-    Table *options = BuildCtx_GenOptionsTable(ctx, CliArgs_Get(cli, optionsKey));
-    ctx->input.options = options;
+
+    ctx->metrics.totalSources = I32_Wrapped(m, 0);
+    ctx->metrics.countSources = I32_Wrapped(m, 0);
+    ctx->metrics.totalModules = I32_Wrapped(m, 0);
+    ctx->metrics.countModules = I32_Wrapped(m, 0);
+    ctx->metrics.totalModuleSources = I32_Wrapped(m, 0);
+    ctx->metrics.countModuleSources = I32_Wrapped(m, 0);
 
     Iter it;
     Iter_Init(&it, ctx->input.sources);
