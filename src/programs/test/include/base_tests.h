@@ -226,7 +226,7 @@ static TestSet BaseTests[] = {
         FEATURE_COMPLETE,
     },
     {
-        "Time",
+        "Time_Tests",
         Time_Tests,
         "Time tests for converstion between unix syscalls and struct timespec and ApproxTime.",
         FEATURE_COMPLETE,

@@ -6,12 +6,12 @@
 static struct timespec _throttle = {0, 1000000};
 
 void Time_Sub(struct timespec *ts, struct timespec *sub){
-    ts->tv_sec -= sub->tv_sec;
-    ts->tv_nsec -= sub->tv_nsec;
-    if(ts->tv_nsec < 0){
+    if(ts->tv_nsec < sub->tv_nsec){
         ts->tv_sec--;
         ts->tv_nsec += 1000000000;
     }
+    ts->tv_sec -= sub->tv_sec;
+    ts->tv_nsec -= sub->tv_nsec;
 }
 
 void Time_Add(struct timespec *ts, struct timespec *add){

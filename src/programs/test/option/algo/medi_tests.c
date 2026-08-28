@@ -23,8 +23,6 @@ status MediTree_Tests(MemCh *m){
         idx++;
     }
 
-    NGram_PrintFromStart(OutStream, medi);
-
     idx = 0;
     while(vals[idx] > 0){
         args[0] = I64_Wrapped(m, vals[idx]);
