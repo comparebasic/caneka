@@ -32,6 +32,7 @@ status Host_Tests(MemCh *m);
 status Silt_Tests(MemCh *m);
 status Json_Tests(MemCh *m);
 status NetAddr6_Tests(MemCh *m);
+status Serve_Tests(MemCh *m);
 #ifdef CNKOPT_FREEBSD
 status SysQuery_Tests(MemCh *m);
 #endif
@@ -246,7 +247,13 @@ static TestSet ExtTests[] = {
     {
         "ipv6 tests",
         NetAddr6_Tests,
-        "Testig parsing and storage of ipv6 addresses",
+        "Testig parsing and storage of ipv6 addresses.",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Serve_Tests",
+        Serve_Tests,
+        "Testig basic server request/response functionality.",
         FEATURE_COMPLETE,
     },
     {
