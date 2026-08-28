@@ -173,30 +173,28 @@ char *runDocGen[] = {
 
 char *menuKeys[] = {
     "buildeka-only",
-    "run-tests",
-    "run-tests-no-crypto",
-    "build-only",
     "clean",
+    "build-only",
+    "no-crypto-run-tests",
+    "run-tests",
     "build-webserver-no-crypto",
     "build-webserver",
     "build-run-webserver",
     "build-and-run-doc",
-    "gen-doc",
     "invalid",
     NULL
 };
 
 char *menuOptions[] = {
     "Buildeka - build the builder program only",
-    "Tests - build and RUN",
-    "Tests - build and RUN without OpenSSL",
-    "Caneka (core) - build the core modules for caneka",
     "Clean (the ./build directory)",
+    "Caneka (core) - build the core modules for caneka",
+    "Tests - build and RUN without OpenSSL",
+    "Tests - build and RUN",
     "Webserver - build only - without TLS (no OpenSSL)",
     "Webserver - build only",
     "WebServer - build and RUN",
-    "Build Doc and Generate Documentation",
-    "Generate Documentation",
+    "Build the Doc program and generate documentation",
     NULL
 };
 
@@ -451,7 +449,7 @@ int main(int argc, char *argv[]){
         runcmd[0] = buildTests;
         runcmd[1] = runTests;
         runcmd[2] = NULL;
-    }else if(compareCstr("run-tests-no-crypto", choice)){
+    }else if(compareCstr("no-crypto-run-tests", choice)){
         runcmd[0] = buildTestsNoCrypto;
         runcmd[1] = runTests;
         runcmd[2] = NULL;
