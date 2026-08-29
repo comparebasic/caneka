@@ -313,6 +313,62 @@ status Path_SpaceAnnotate(MemCh *m, StrVec *v){
     return Path_Annotate(m, v, spacePathSeps);
 }
 
+status Path_Check(MemCh *m, void *_a, Span *sep){
+    Abstract *a = (Abstract *)_a;
+    if(a == NULL){
+        return NOOP;
+    }
+
+    Iter it;
+    Iter sepIt;
+
+    if(a->type.of == TYPE_STR){
+        Str *s = (Str *)a;
+        byte *ptr = s->bytes;
+        byte *last = s->bytes+s->length-1;
+        while(TRUE){
+            Iter_Init(&sepIt, sep);
+            while((Iter_Next(&sepIt) & END) == 0){
+                Single *sg = (Single *)Iter_Get(&sepIt);
+                if(*ptr == sg->val.b){
+                    return SUCCESS;
+                }
+            }
+            if(ptr == last){
+                break;
+            }
+            ptr++;
+        }
+
+    }else if(a->type.of == TYPE_STRVEC){
+        StrVec *v = (StrVec *)a;
+        Iter_Init(&it, v->p);
+        while((Iter_Next(&it) & END) == 0){
+            Str *s = (Str *)Iter_Get(&it);
+            if(s->length == 0){
+                continue;
+            }
+            byte *ptr = s->bytes;
+            byte *last = s->bytes+s->length-1;
+            while(TRUE){
+                Iter_Init(&sepIt, sep);
+                while((Iter_Next(&sepIt) & END) == 0){
+                    Single *sg = (Single *)Iter_Get(&sepIt);
+                    if(*ptr == sg->val.b){
+                        return SUCCESS;
+                    }
+                }
+                if(ptr == last){
+                    break;
+                }
+                ptr++;
+            }
+        }
+    }
+
+    return NOOP;
+}
+
 status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     if(v->type.state & STRVEC_NOSHRINK){
         Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,

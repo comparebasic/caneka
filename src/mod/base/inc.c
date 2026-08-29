@@ -39,6 +39,7 @@
 #include "./sequence/table.c"
 #include "./sequence/table_utils.c"
 #include "./sequence/path.c"
+#include "./sequence/ident.c"
 #include "./sequence/node.c"
 #include "./parser/match.c"
 #include "./parser/match_replace.c"

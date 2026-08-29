@@ -83,7 +83,7 @@ static char *baseTypeStrings[] = {
     "ITER",
     "ITINERARY",
     "SEEL",
-    "IDENT"
+    "IDENT",
     "GUARD",
     "HKEY",
     "PROCDETS",

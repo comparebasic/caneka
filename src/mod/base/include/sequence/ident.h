@@ -1,9 +1,11 @@
 typedef struct ident {
     Type type;
-    Str *name;
-    Str *value;
-    Str *domain;
-}
+    Abstract *name;
+    Abstract *value;
+    Abstract *domain;
+} Ident;
 
 Ident *Ident_Make(MemCh *m);
-Ident *Ident_FromVec(MemCh *m
+Ident *Ident_FromVec(MemCh *m, StrVec *v);
+status Ident_Init(MemCh *m);
+status Ident_Check(MemCh *m, void *a);

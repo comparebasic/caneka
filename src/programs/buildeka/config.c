@@ -17,10 +17,18 @@ void BuildCtx_Config(BuildCtx *ctx){
             "build.json file not found \\@$", ar);
     }
 
+    Iter it;
+    Iter_Init(&it, ctx->options);
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *a = Iter_Get(&it);
+        if(Ident_Check(m, a) & SUCCESS){
+            Iter_Set(&it, Ident_FromVec(m, Ifc(m, a, TYPE_STRVEC)));
+        }
+    }
+
     ctx->deps = Table_Make(m);
     Table *deps = Node_KvFromChild(config, K(m, "dependency")); 
 
-    Iter it;
     Iter_Init(&it, deps);
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);

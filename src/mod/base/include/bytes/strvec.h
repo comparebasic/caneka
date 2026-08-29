@@ -7,7 +7,6 @@ enum strvec_flags {
 
 typedef struct strvec {
     Type type;
-    i32 anchor;
     i64 total;
     Span *p;
 } StrVec;
@@ -43,6 +42,4 @@ status Str_AddVec(Str *s, StrVec *v);
 i32 StrVec_AddChain(StrVec *v, void *args[]);
 status StrVec_Pop(StrVec *v);
 status StrVec_PopTo(StrVec *v, i32 idx);
-status StrVec_Anchor(StrVec *v);
-status StrVec_Return(StrVec *v);
 StrVec *StrVec_SubVec(MemCh *m, StrVec *v, i32 startIdx, i32 endIdx);

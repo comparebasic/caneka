@@ -34,7 +34,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             ctx->input.objects,
             ctx->input.gens,
             ctx->input.srcPrefix,
-            Table_Ordered(bf->m, ctx->options),
+            ctx->options,
             Table_Ordered(bf->m, ctx->deps),
             NULL
         };
@@ -60,7 +60,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             ctx->current.source,
             ctx->current.dest,
             ctx->input.buildDir,
-            Table_Ordered(bf->m, ctx->options),
+            ctx->options,
             ctx->deps,
             NULL
         };

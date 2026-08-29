@@ -1,6 +1,23 @@
 #include <external.h>
 #include "base_module.h"
 
+status Add_OrSpan(MemCh *m, void **ptr, void *value){
+    Abstract *a = *ptr;
+    if(a == NULL){
+        *ptr = (Abstract *)value;
+        return NOOP;
+    }else if (a->type.of == TYPE_SPAN){
+        Span_Add((Span *)a, value);
+        return ZERO;
+    }else{
+        Span *p = Span_Make(m);
+        Span_Add(p, a);
+        Span_Add(p, value);
+        *ptr = p;
+        return SUCCESS;
+    }
+}
+
 void Span_GetSetI32(Span *p, i32 idx, i32 value){
     Single *sg = Span_Get(p, idx);
     if(sg == NULL){

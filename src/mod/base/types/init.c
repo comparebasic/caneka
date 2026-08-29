@@ -28,6 +28,7 @@ status Caneka_InitBase(MemCh *m){
     Clone_Init(m);
     Equals_Init(m);
     Path_Init(md);
+    Ident_Init(m);
     IoUtils_Init(m);
     Exact_Init(m);
     Seel_Init(m);

@@ -91,38 +91,6 @@ status StrVec_Pop(StrVec *v){
     return SUCCESS;
 }
 
-status StrVec_Anchor(StrVec *v){
-    if(v->type.state & STRVEC_NOSHRINK){
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "StrVec has NOSHRINK flag but is being asked to potentially shrink", NULL);
-        return ERROR;
-    }
-    if(v->anchor == -1){
-        v->anchor = v->p->max_idx;
-        return ZERO;
-    }else{
-        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "StrVec already anchored @ at $", args);
-        return ERROR;
-    }
-}
-
-status StrVec_Return(StrVec *v){
-    if(v->type.state & STRVEC_NOSHRINK){
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "StrVec has NOSHRINK flag but is being asked to shrink", NULL);
-        return ERROR;
-    }
-    if(v->anchor == -1){
-        void *args[] = {v, I32_Wrapped(v->p->m, v->anchor), NULL};
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "StrVec not anchored @ at $", args);
-        return ERROR;
-    }
-    return StrVec_PopTo(v, v->anchor);
-}
-
 status StrVec_PopTo(StrVec *v, i32 idx){
     if(v->type.state & STRVEC_NOSHRINK){
         Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
@@ -546,6 +514,5 @@ StrVec *StrVec_Make(MemCh *m){
     StrVec *v = MemCh_Alloc(m, sizeof(StrVec));
     v->type.of = TYPE_STRVEC;
     v->p = Span_Make(m);
-    v->anchor = -1;
     return v;
 }
