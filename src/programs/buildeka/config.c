@@ -26,6 +26,12 @@ void BuildCtx_Config(BuildCtx *ctx){
         }
     }
 
+    void *_ar[] = {
+        ctx->options,
+        NULL
+    };
+    Out("^p.Processed options: @^0\n", _ar);
+
     ctx->deps = Table_Make(m);
     Table *deps = Node_KvFromChild(config, K(m, "dependency")); 
 

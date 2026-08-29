@@ -43,11 +43,11 @@ char *buildekaExamples = ""
     "\n"
     "    With OpenSsl for crypto (experimental):\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/test --option base ext inter crypto@third/openssl\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/test --option base ext inter crypto=openssl@third\x1b[0m\n"
     "\n"
     "    Build the \x1b[1mClineka\x1b[22m command line tool\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/clineka --option crypto@third/openssl\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/clineka --option crypto=openssl@third\x1b[0m\n"
     "\n"
     "    Build the \x1b[1mWebServer\x1b[22m (Serveneka)\n"
     "\n"
@@ -83,7 +83,7 @@ char *buildTests[] = {
     "base",
     "task",
     "algo",
-    "crypto@third/openssl",
+    "crypto=openssl@third",
     NULL
 };
 
@@ -103,7 +103,7 @@ char *buildWebServer[] = {
     "--src",
     "src/programs/serveneka",
     "--option",
-    "crypto@third/openssl",
+    "crypto=openssl@third",
     NULL
 };
 
@@ -123,7 +123,7 @@ char *buildCli[] = {
     "base",
     "ext",
     "inter",
-    "crypto@third/openssl",
+    "crypto=openssl@third",
     NULL
 };
 

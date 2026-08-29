@@ -14,14 +14,14 @@ status Ident_Check(MemCh *m, void *a){
 }
 
 Ident *Ident_FromVec(MemCh *m, StrVec *v){
+    status r = READY;
+
     Ident *ident = Ident_Make(m);
     Path_Annotate(m, v, identSeps);
 
-    status r = READY;
-
     Iter it;
     Iter_Init(&it, v->p);
-    while((Iter_Next(&it) && END) == 0){
+    while((Iter_Next(&it) & END) == 0){
         Str *s = Iter_Get(&it);
         if(s->type.state & NOOP){
             continue;
@@ -31,10 +31,16 @@ Ident *Ident_FromVec(MemCh *m, StrVec *v){
         }
 
         if(r & MORE){
+            printf("Adding Value\n");
+            fflush(stdout);
             Add_OrSpan(m, (void **)&ident->value, s);
         }else if(r & LAST){
+            printf("Adding domain\n");
+            fflush(stdout);
             Add_OrSpan(m, (void **)&ident->domain, s);
         }else{
+            printf("Adding name\n");
+            fflush(stdout);
             Add_OrSpan(m, (void **)&ident->name, s);
         }
     }

@@ -59,6 +59,29 @@ status Array_Print(Buff *bf, void *a, cls type, word flags){
     return SUCCESS;
 }
 
+status Ident_Print(Buff *bf, void *a, cls type, word flags){
+    MemCh *m = bf->m;
+    Ident *ident = (Ident *)a;
+    if(flags & (MORE|DEBUG)){
+        void *ar[] = {
+            Type_StateVec(m, ident->type.of, ident->type.state),
+            ident->name,
+            ident->value,
+            ident->domain,
+            NULL
+        };
+        return Fmt(bf, "Ident<@ @=@\\@@>", ar);
+    }else{
+        void *ar[] = {
+            ident->name,
+            ident->value,
+            ident->domain,
+            NULL
+        };
+        return Fmt(bf, "$=$\\@$", ar);
+    }
+}
+
 status Hashed_Print(Buff *bf, void *a, cls type, word flags){
     Hashed *h = (Hashed *)Ifc(bf->m, a, TYPE_HASHED);
     if(flags & DEBUG){
@@ -173,6 +196,7 @@ status Sequence_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_HASHED, (void *)Hashed_Print);
     r |= Lookup_Add(m, lk, TYPE_ARRAY, (void *)Array_Print);
     r |= Lookup_Add(m, lk, TYPE_CSTR_ARRAY, (void *)CstrArray_Print);
+    r |= Lookup_Add(m, lk, TYPE_IDENT, (void *)Ident_Print);
 
     r |= Lookup_Add(m, EmptyLookup, TYPE_TABLE, (void *)Table_Empty);
     return r;
