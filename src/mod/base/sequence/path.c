@@ -313,7 +313,7 @@ status Path_SpaceAnnotate(MemCh *m, StrVec *v){
     return Path_Annotate(m, v, spacePathSeps);
 }
 
-status Path_Check(MemCh *m, void *_a, Span *sep){
+status Path_Check(void *_a, Span *sep){
     Abstract *a = (Abstract *)_a;
     if(a == NULL){
         return NOOP;

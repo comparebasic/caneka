@@ -39,6 +39,18 @@ static void *CStr_Conv(MemCh *m, void *_a, IfcMap *imap){
     return Str_Cstr(m, (Str *)a);
 }
 
+static void *Ident_Conv(MemCh *m, void *_a, IfcMap *imap){
+    Abstract *a = (Abstract *)_a;
+    if(a->type.of == TYPE_STR && (Ident_Check(a) & SUCCESS)){
+        return Ident_FromVec(m, StrVec_From(m, (Str *)a));
+    }else if(a->type.of == TYPE_STRVEC && (Ident_Check(a) & SUCCESS)){
+        return Ident_FromVec(m, Clone(m, (StrVec *)a));
+    }
+    return NULL;
+}
+
+
+
 void Base_IfcInit(MemCh *m){
     Lookup_Add(m, IfcLookup, TYPE_STR, 
         IfcMap_Make(m,
@@ -62,6 +74,14 @@ void Base_IfcInit(MemCh *m){
             TYPE_STRVEC - TYPE_CSTR,
             -1,
             CStr_Conv));
+
+    Lookup_Add(m, IfcLookup, TYPE_IDENT,
+        IfcMap_Make(m,
+            TYPE_IDENT,
+            ZERO,
+            TYPE_IDENT - TYPE_STRVEC,
+            sizeof(Ident),
+            Ident_Conv));
 
     szType nonPolyTypes[] = {
         {TYPE_WRAPPED, sizeof(Single)},

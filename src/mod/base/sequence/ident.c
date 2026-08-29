@@ -9,8 +9,8 @@ Ident *Ident_Make(MemCh *m){
     return ident;
 }
 
-status Ident_Check(MemCh *m, void *a){
-    return Path_Check(m, a, identSeps);
+status Ident_Check(void *a){
+    return Path_Check(a, identSeps);
 }
 
 Ident *Ident_FromVec(MemCh *m, StrVec *v){
@@ -31,16 +31,10 @@ Ident *Ident_FromVec(MemCh *m, StrVec *v){
         }
 
         if(r & MORE){
-            printf("Adding Value\n");
-            fflush(stdout);
             Add_OrSpan(m, (void **)&ident->value, s);
         }else if(r & LAST){
-            printf("Adding domain\n");
-            fflush(stdout);
             Add_OrSpan(m, (void **)&ident->domain, s);
         }else{
-            printf("Adding name\n");
-            fflush(stdout);
             Add_OrSpan(m, (void **)&ident->name, s);
         }
     }

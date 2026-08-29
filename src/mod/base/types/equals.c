@@ -78,16 +78,20 @@ boolean Equals(void *_a, void *_b){
     }else{
         cls aTypeOf = Ifc_GetRoot(a->type.of);
         cls bTypeOf = Ifc_GetRoot(b->type.of);
-        if(aTypeOf != bTypeOf){
+        if(aTypeOf != bTypeOf && aTypeOf != b->type.of){
             void *args[] = {
                 Type_ToStr(ErrStream->m, aTypeOf),
                 Type_ToStr(ErrStream->m, bTypeOf),
                 NULL
             };
             Error(ErrStream->m, FUNCNAME, FILENAME, LINENUMBER, 
-                "Equals type mismatche $ vs $", args);
+                "Equals type mismatch $ vs $", args);
         }else{
             EqFunc func = (EqFunc)Lookup_Get(EqualsLookup, aTypeOf);
+            if(func == NULL){
+                func = (EqFunc)Lookup_Get(EqualsLookup, a->type.of);
+            }
+
             if(func == NULL){
                 void *args[] = {
                     Type_ToStr(ErrStream->m, aTypeOf),

@@ -8,4 +8,4 @@ typedef struct ident {
 Ident *Ident_Make(MemCh *m);
 Ident *Ident_FromVec(MemCh *m, StrVec *v);
 status Ident_Init(MemCh *m);
-status Ident_Check(MemCh *m, void *a);
+status Ident_Check(void *a);

@@ -21,21 +21,15 @@ void BuildCtx_Config(BuildCtx *ctx){
     Iter_Init(&it, ctx->options);
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
-        if(Ident_Check(m, a) & SUCCESS){
+        if(Ident_Check(a) & SUCCESS){
             Iter_Set(&it, Ident_FromVec(m, Ifc(m, a, TYPE_STRVEC)));
         }
     }
 
-    void *_ar[] = {
-        ctx->options,
-        NULL
-    };
-    Out("^p.Processed options: @^0\n", _ar);
-
     ctx->deps = Table_Make(m);
     Table *deps = Node_KvFromChild(config, K(m, "dependency")); 
 
-    Iter_Init(&it, deps);
+    Iter_Init(&it, Table_Ordered(m, deps));
     while((Iter_Next(&it) & END) == 0){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){

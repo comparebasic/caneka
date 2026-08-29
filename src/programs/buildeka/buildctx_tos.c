@@ -61,7 +61,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             ctx->current.dest,
             ctx->input.buildDir,
             ctx->options,
-            ctx->deps,
+            Table_Ordered(bf->m, ctx->deps),
             NULL
         };
         return Fmt(bf, "BuildCtx<@ $\n"

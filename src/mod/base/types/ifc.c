@@ -24,6 +24,11 @@ cls Ifc_GetRoot(cls typeOf){
         return TYPE_WRAPPED_UTIL;
     }else if(typeOf > _TYPE_WRAPPED_START && typeOf < _TYPE_WRAPPED_END){
         return TYPE_WRAPPED;
+    }else{
+        IfcMap *imap = Lookup_Get(IfcLookup, typeOf);
+        if(imap != NULL){
+            return typeOf - imap->offset.end; 
+        }
     }
     return typeOf;
 }
