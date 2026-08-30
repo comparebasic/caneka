@@ -3,6 +3,7 @@
 
 void BuildCtx_Config(BuildCtx *ctx){
     MemCh *m = ctx->m;
+    Debug_Push(m, ctx);
 
     StrVec *configPath = StrVec_From(m, Span_Get(ctx->input.sources, 0));
     StrVec_Add(configPath, S(m, "/build.json"));
@@ -63,4 +64,6 @@ void BuildCtx_Config(BuildCtx *ctx){
         NULL
     };
     Out("^y.Config @\n^c.@^0\n", ar);
+
+    ReturnVoid(m);
 }

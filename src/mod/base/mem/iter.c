@@ -289,8 +289,19 @@ static status _Iter_Prev(Iter *it){
         goto end;
     }
 
-    if((it->type.state & END) || (it->type.state & PROCESSING) == 0){
+    if(it->type.state & END || it->idx < 0){
         idx = it->idx = it->p->max_idx;
+        it->type.state &= ~(END|LAST);
+        it->type.state |= PROCESSING;
+
+        word fl = it->type.state & (SPAN_OP_REMOVE|FLAG_ITER_REVERSE);
+        it->type.state &= ~(fl);
+        Iter_Query(it);
+        it->type.state |= fl;
+
+        goto end;
+
+    }else if((it->type.state & PROCESSING) == 0){
         it->type.state &= ~(END|LAST);
         it->type.state |= PROCESSING;
 

@@ -254,6 +254,14 @@ void *CliArgs_Get(CliArgs *cli, void *key){
 
 StrVec *CliArgs_GetAbsPath(CliArgs *cli, void *key){
     Str *path = (Str *)Ifc(cli->m, CliArgs_Get(cli, key), TYPE_STR);
+
+    void *ar[] = {
+        path,
+        IoUtil_AbsVec(cli->m, StrVec_From(cli->m, path)),
+        NULL
+    };
+    Out("^p.@ -> @^0\n", ar);
+
     return IoUtil_AbsVec(cli->m, StrVec_From(cli->m, path));
 }
 

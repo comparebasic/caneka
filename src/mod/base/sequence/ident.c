@@ -21,6 +21,7 @@ status Ident_Check(void *a){
 
 Ident *Ident_FromVec(MemCh *m, StrVec *v){
     status r = READY;
+    Debug_Push(m, v);
 
     Ident *ident = Ident_Make(m);
     Path_Annotate(m, v, identSeps);
@@ -45,7 +46,7 @@ Ident *Ident_FromVec(MemCh *m, StrVec *v){
         }
     }
 
-    return ident;
+    Return(m, ident);
 }
 
 Ident *Ident_From(MemCh *m, void *name, void *value, void *domain){

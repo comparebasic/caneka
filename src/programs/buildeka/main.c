@@ -83,6 +83,13 @@ i32 main(int argc, char **argv){
 
     ctx->input.buildDir = CliArgs_GetAbsPath(cli, dirKey);
     ctx->input.buildDir->type.state |= STRVEC_NOSHRINK;
+
+    void *ar[] = {
+        ctx->input.buildDir,
+        NULL
+    };
+    Out("^y.buildDir @^0\n", ar);
+
     ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
     ctx->dir = StrVec_Copy(m, ctx->input.buildDir);
     ctx->src = CliArgs_GetAbsPath(cli, srcPrefixKey);

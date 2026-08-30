@@ -19,7 +19,7 @@ status BuildCtx_SetupModules(BuildCtx *ctx){
         }
     }
 
-    return r;
+    Return(m, r);
 }
 
 status BuildCtx_SetFlag(BuildCtx *ctx, StrVec *flag){
@@ -83,6 +83,8 @@ status BuildCtx_Build(BuildCtx *ctx){
 }
 
 BuildCtx *BuildCtx_Make(MemCh *m){
+    Debug_Push(m, NULL);
+
     BuildCtx *ctx = MemCh_AllocOf(m, sizeof(BuildCtx), TYPE_BUILDCTX);
     ctx->type.of = TYPE_BUILDCTX;
     ctx->m = MemCh_Make();
@@ -110,5 +112,5 @@ BuildCtx *BuildCtx_Make(MemCh *m){
     ctx->tools.ccVersion = Str_FromI64(m, (i64)_gen_CC_VERSION);
     ctx->tools.ar = S(m, _gen_AR);
 
-    return ctx;
+    Return(m, ctx);
 }
