@@ -9,6 +9,18 @@ Ident *Ident_Make(MemCh *m){
     return ident;
 }
 
+Str *Ident_NameStr(MemCh *m, Ident *ident){
+    return Span_HeadStr(ident->name);
+}
+
+Str *Ident_ValueStr(MemCh *m, Ident *ident){
+    return Span_HeadStr(ident->value);
+}
+
+Str *Ident_DomainStr(MemCh *m, Ident *ident){
+    return Span_HeadStr(ident->domain);
+}
+
 status Ident_Check(void *a){
     return Path_Check(a, identSeps);
 }

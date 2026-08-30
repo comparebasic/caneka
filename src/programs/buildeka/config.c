@@ -34,11 +34,19 @@ void BuildCtx_Config(BuildCtx *ctx){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
             if(Equals(h->value, K(m, "option")) || Equals(h->value, K(m, "implied option"))){
-                if(Span_Has(ctx->options, h->key) != -1){
-                    Table_Set(ctx->deps, h->key, BuildModule_Make(m, h->key));
+                i32 idx = Span_Has(ctx->options, h->key);
+                if(idx != -1){
+                    Abstract *opt = Span_Get(ctx->options, idx);
+                    BuildModule *md = NULL;
+                    if(opt->type.of == TYPE_IDENT){
+                        md = BuildModule_FromIdent(m, ctx, (Ident *)opt);
+                    }else{
+                        md = BuildModule_Make(m, ctx, h->key);
+                    }
+                    Table_Set(ctx->deps, h->key, md);
                 }
             }else{
-                Table_Set(ctx->deps, h->key, BuildModule_Make(m, h->key));
+                Table_Set(ctx->deps, h->key, BuildModule_Make(m, ctx, h->key));
             }
         }
     }

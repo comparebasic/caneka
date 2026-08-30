@@ -57,6 +57,7 @@ typedef struct build_module {
     StrVec *name;
     StrVec *target;
     StrVec *targetName;
+    StrVec *src;
     DirSel *sel;
 } BuildModule;
 
@@ -118,9 +119,6 @@ typedef struct buildctx {
 void BuildCtx_Config(BuildCtx *ctx);
 status BuildCtx_Build(BuildCtx *ctx);
 
-BuildModule *BuildModule_Make(MemCh *m, StrVec *name);
-
-
 status BuildCtx_Log(BuildCtx *ctx);
 void BuildCtx_SetQuiet(boolean quiet);
 
@@ -146,5 +144,7 @@ status BuildCtx_ToSInit(MemCh *m);
 
 BuildCtx *BuildCtx_Make(MemCh *m);
 
+BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name);
+BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident);
 
 #endif

@@ -6,9 +6,11 @@ status BuildModule_Print(Buff *bf, void *a, cls type, word flags){
     BuildModule *md = (BuildModule *)a;
     void *ar[] = {
         md->name,
+        md->target,
+        md->src,
         md->sel,
     };
-    return Fmt(bf, "BuildModule<@ @>", ar);
+    return Fmt(bf, "BuildModule<@/@ -> @ @>", ar);
 }
 
 status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){

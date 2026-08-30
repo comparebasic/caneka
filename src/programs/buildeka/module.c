@@ -1,64 +1,6 @@
 #include <external.h>
 #include "buildeka_module.h"
 
-static status setNames(BuildCtx *ctx, StrVec *key, DirSel *sel){
-
-    /*
-    MemCh *m = ctx->m;
-    Debug_Push(m, key);
-
-    void *args[6];
-    
-    Table *deps = Table_Get(ctx->input.dependencies, K(m, "dep"));
-    if(deps != NULL){
-        Abstract *a = Table_Get(deps, key);
-    }
-
-    ctx->current.name = StrVec_From(m, IoUtil_FnameStr(m, key));
-
-    ctx->current.targetName = StrVec_From(m,
-        StrVec_StrPrefixed(m,
-            S(m, "libcnk"), ctx->current.name));
-
-    Table *skips = Table_Get(sel->meta, K(m, "skip"));
-    Table *execs = Table_Get(sel->meta, K(m, "exec"));
-
-    StrVec *ext = IoPath(m, ".a");
-    if(ctx->type.state & BUILD_SHARED){
-       ext = IoPath(m, ".pic-a"); 
-    }
-
-    i32 libSourceTotal = sel->dest->nvalues;
-    if(skips != NULL){ libSourceTotal -= skips->nvalues; }
-    if(execs != NULL){ libSourceTotal -= execs->nvalues; }
-    if(libSourceTotal > 0){
-        ctx->current.target = StrVec_Copy(m, ctx->input.buildDir);
-        args[0] = IoUtil_PathSep(m);
-        args[1] = ctx->current.targetName;
-        args[2] = IoUtil_PathSep(m);
-        args[3] = ctx->current.targetName;
-        args[4] = ext;
-        args[5] = NULL;
-        StrVec_AddChain(ctx->current.target, args);
-
-        Table_Set(sel->meta, S(m, "target"), StrVec_Copy(m, ctx->current.target));
-    }else{
-        ctx->current.targetName = NULL;
-        ctx->current.target = NULL;
-    }
-
-    ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
-    args[0] = IoUtil_PathSep(m);
-    args[1] = ctx->current.targetName;
-    args[2] = IoUtil_PathSep(m);
-    args[3] = NULL;
-    StrVec_AddChain(ctx->current.dest, args);
-
-    Return(m, ZERO);
-    */
-    return ZERO;
-}
-
 static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
     /*
     Debug_Push(ctx->m, key);
@@ -512,9 +454,49 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     return r;
 }
 
-BuildModule *BuildModule_Make(MemCh *m, StrVec *name){
+BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
     BuildModule *md = MemCh_AllocOf(m, sizeof(BuildModule), TYPE_BUILD_MODULE);
     md->type.of = TYPE_BUILD_MODULE;
     md->name = name;
+
+    md->src = Clone(m, ctx->src);
+    IoUtil_AddVec(m, md->src, Sv(m, "mod"));
+    IoUtil_AddVec(m, md->src, md->name);
+
+    StrVec *target = Sv(m, "lib-cnk-");
+    StrVec_AddVec(target, Clone(m, md->name));
+    md->target = target;
+
+    md->src = Clone(m, ctx->dir);
+    IoUtil_AddVec(m, md->src, Sv(m, "lib"));
+    IoUtil_AddVec(m, md->src, target);
+    IoUtil_AddVec(m, md->src, target);
+    StrVec_AddVec(md->src, Sv(m, ".a"));
+    StrVec_AddVec(target, Sv(m, ".a"));
+
+    return md;
+}
+
+BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
+    BuildModule *md = MemCh_AllocOf(m, sizeof(BuildModule), TYPE_BUILD_MODULE);
+    md->type.of = TYPE_BUILD_MODULE;
+    md->name = StrVec_From(m, Ident_NameStr(m, ident));
+
+    md->src = Clone(m, ctx->src);
+    IoUtil_AddVec(m, md->src, Sv(m, "mod"));
+    IoUtil_AddVec(m, md->src, StrVec_From(m, Ident_DomainStr(m, ident)));
+    IoUtil_AddVec(m, md->src, StrVec_From(m, Ident_ValueStr(m, ident)));
+
+    StrVec *target = Sv(m, "lib-cnk-");
+    StrVec_AddVec(target, Clone(m, md->name));
+    md->target = target;
+
+    md->src = Clone(m, ctx->dir);
+    IoUtil_AddVec(m, md->src, Sv(m, "lib"));
+    IoUtil_AddVec(m, md->src, target);
+    IoUtil_AddVec(m, md->src, target);
+    StrVec_AddVec(md->src, Sv(m, ".a"));
+    StrVec_AddVec(target, Sv(m, ".a"));
+
     return md;
 }

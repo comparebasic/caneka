@@ -36,7 +36,7 @@ void *Clone(MemCh *m, void *_a){
         return NULL;
     }
 
-    Maker mk = (Maker)Lookup_Get(CloneLookup, Ifc_GetRoot(a->type.of));
+    Maker mk = (Maker)Lookup_Get(CloneLookup, a->type.of);
     if(mk != NULL){
        return mk(m, a);
     }else{

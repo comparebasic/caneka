@@ -1,6 +1,21 @@
 #include <external.h>
 #include "base_module.h"
 
+Str *Span_HeadStr(void *_a){
+    if(_a == NULL){
+        return NULL;
+    }
+
+    Abstract *a = (Abstract *)_a;
+    if(a->type.of == TYPE_STR){
+        return (Str *)a;
+    }else if(a->type.of == TYPE_SPAN){
+        return Span_Get((Span *)a, 0);
+    }
+
+    return NULL;
+}
+
 status Add_OrSpan(MemCh *m, void **ptr, void *value){
     Abstract *a = *ptr;
     if(a == NULL){
