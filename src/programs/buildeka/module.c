@@ -483,8 +483,11 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
     md->name = StrVec_From(m, Ident_NameStr(m, ident));
 
     md->src = Clone(m, ctx->src);
-    IoUtil_AddVec(m, md->src, Sv(m, "mod"));
-    IoUtil_AddVec(m, md->src, StrVec_From(m, Ident_DomainStr(m, ident)));
+    StrVec *domain = StrVec_From(m, Ident_DomainStr(m, ident));
+    if(!Equals(domain, K(m, "programs"))){
+        IoUtil_AddVec(m, md->src, Sv(m, "mod"));
+    }
+    IoUtil_AddVec(m, md->src, domain);
     IoUtil_AddVec(m, md->src, StrVec_From(m, Ident_ValueStr(m, ident)));
 
     StrVec *target = Sv(m, "lib-cnk-");

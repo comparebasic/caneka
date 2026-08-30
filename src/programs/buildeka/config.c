@@ -7,6 +7,7 @@ void BuildCtx_Config(BuildCtx *ctx){
     StrVec *configPath = StrVec_From(m, Span_Get(ctx->input.sources, 0));
     StrVec_Add(configPath, S(m, "/build.json"));
 
+
     Node *config = Json_FromPath(m, configPath); 
     if(config == NULL){
         void *ar[] = {
@@ -26,8 +27,9 @@ void BuildCtx_Config(BuildCtx *ctx){
         }
     }
 
-    ctx->deps = Table_Make(m);
     Table *deps = Node_KvFromChild(config, K(m, "dependency")); 
+
+    ctx->deps = Table_Make(m);
 
     Iter_Init(&it, Table_Ordered(m, deps));
     while((Iter_Next(&it) & END) == 0){
@@ -50,6 +52,10 @@ void BuildCtx_Config(BuildCtx *ctx){
             }
         }
     }
+    
+    Table_Set(ctx->deps,
+        Ident_NameStr(m, ctx->ident),
+        BuildModule_FromIdent(m, ctx, ctx->ident));
 
     void *ar[] = {
         config,

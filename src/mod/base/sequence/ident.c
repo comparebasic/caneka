@@ -3,12 +3,6 @@
 
 static Span *identSeps = NULL;
 
-Ident *Ident_Make(MemCh *m){
-    Ident *ident = MemCh_AllocOf(m, sizeof(Ident), TYPE_IDENT);
-    ident->type.of = TYPE_IDENT;
-    return ident;
-}
-
 Str *Ident_NameStr(MemCh *m, Ident *ident){
     return Span_HeadStr(ident->name);
 }
@@ -51,6 +45,20 @@ Ident *Ident_FromVec(MemCh *m, StrVec *v){
         }
     }
 
+    return ident;
+}
+
+Ident *Ident_From(MemCh *m, void *name, void *value, void *domain){
+    Ident *ident = Ident_Make(m);
+    ident->name = (Abstract *)name;
+    ident->value = (Abstract *)value;
+    ident->domain = (Abstract *)domain;
+    return ident;
+}
+
+Ident *Ident_Make(MemCh *m){
+    Ident *ident = MemCh_AllocOf(m, sizeof(Ident), TYPE_IDENT);
+    ident->type.of = TYPE_IDENT;
     return ident;
 }
 

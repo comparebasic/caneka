@@ -77,8 +77,8 @@ char *buildCaneka[] = {
 
 char *buildTests[] = {
     "./dist/bin/buildeka",
-    "--src",
-    "src/programs/test",
+    "--target",
+    "test@programs",
     "--option",
     "base",
     "task",

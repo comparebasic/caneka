@@ -68,6 +68,7 @@ typedef struct buildctx {
     struct timespec modified;
     StrVec *dir;
     StrVec *src;
+    Ident *ident;
     Table *options;
     Table *deps;
     Node *config;

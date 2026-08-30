@@ -20,6 +20,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
         void *args[] = {
             Type_StateVec(m, ctx->type.of, ctx->type.state),
             Time_ToStr(m, &ctx->modified),
+            ctx->ident,
             ctx->dir,
             ctx->src,
             ctx->tools.cc,
@@ -40,7 +41,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             Table_Ordered(bf->m, ctx->deps),
             NULL
         };
-        return Fmt(bf, "BuildCtx<@ $\n"
+        return Fmt(bf, "BuildCtx<@ @ $\n"
             "  dir:@\nsrc:@\n"
             "  tools: cc:$/$ ar:$\n"
             "  target: @\n      name:@\n      source:@\n      dest:@\n"
@@ -52,6 +53,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
         void *args[] = {
             Type_StateVec(m, ctx->type.of, ctx->type.state),
             Time_ToStr(m, &ctx->modified),
+            ctx->ident,
             ctx->dir,
             ctx->src,
             ctx->tools.cc,
@@ -66,7 +68,7 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             Table_Ordered(bf->m, ctx->deps),
             NULL
         };
-        return Fmt(bf, "BuildCtx<@ $\n"
+        return Fmt(bf, "BuildCtx<@ @ $\n"
             "  dir:@\nsrc:@\n"
             "  tools: cc:@/$ ar:@\n"
             "  target: @ name:@ source:@ dest:@\n"

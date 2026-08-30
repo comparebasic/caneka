@@ -28,7 +28,7 @@ i32 main(int argc, char **argv){
     Str *optionsKey = K(m, "option");
     Str *licenceKey = K(m, "licence");
     Str *versionKey = K(m, "version");
-    Str *srcKey = K(m, "src");
+    Str *targetKey = K(m, "target");
     Str *typeKey = K(m, "type");
     Str *dirKey = K(m, "dir");
     Str *libDirKey = K(m, "libDirs");
@@ -38,8 +38,8 @@ i32 main(int argc, char **argv){
     Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL,
         Sv(m, "Skip ansi color sequences in output."));
 
-    Args_Add(cli, srcKey, NULL, ARG_MULTIPLE,
-        Sv(m, "Source code files or directories to build."));
+    Args_Add(cli, targetKey, NULL, ARG_MULTIPLE,
+        Sv(m, "Target program or module to build."));
 
     Args_Add(cli, srcPrefixKey, S(m, "src"), ARG_DEFAULT,
         Sv(m, "Source code files prefix. The path before the module names."));
@@ -86,10 +86,11 @@ i32 main(int argc, char **argv){
     ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
     ctx->dir = StrVec_Copy(m, ctx->input.buildDir);
     ctx->src = CliArgs_GetAbsPath(cli, srcPrefixKey);
+    ctx->ident = Ident_FromVec(m, StrVec_From(m, CliArgs_Get(cli, targetKey)));
     ctx->options = CliArgs_Get(cli, optionsKey);
     ctx->current.source = CliArgs_GetAbsPath(cli, srcPrefixKey);
     ctx->current.liblist = Span_Make(m);
-    ctx->input.sources = CliArgs_Get(cli, srcKey);
+    ctx->input.sources = Span_Make(m);
     ctx->input.srcPrefix = prefix;
     ctx->input.srcPrefix->type.state |= STRVEC_NOSHRINK;
 
@@ -114,7 +115,7 @@ i32 main(int argc, char **argv){
 
     BuildCtx_Build(ctx);
 
-    args[0] = CliArgs_Get(cli, srcKey);
+    args[0] = CliArgs_Get(cli, targetKey);
     args[1] = CliArgs_Get(cli, dirKey);
     args[2] = NULL;
     Out("^g.Build succeeded $ -> ./$/bin/^0\n", args);

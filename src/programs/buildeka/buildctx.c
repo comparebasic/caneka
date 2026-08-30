@@ -1,6 +1,27 @@
 #include <external.h>
 #include "buildeka_module.h"
 
+status BuildCtx_SetupModules(BuildCtx *ctx){
+    status r = READY;
+    MemCh *m = ctx->m;
+    Debug_Push(m, ctx);
+    Iter it;
+    Iter_Init(&it, ctx->deps);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it); 
+        if(h != NULL){
+            void *ar[] = {
+                h->key,
+                h->value,
+                NULL
+            };
+            Out("^p.Gathering Deps^0\n", ar);
+        }
+    }
+
+    return r;
+}
+
 status BuildCtx_SetFlag(BuildCtx *ctx, StrVec *flag){
     if(Span_Has(ctx->input.cflags, flag) == -1){
         Span_Add(ctx->input.cflags, flag);
