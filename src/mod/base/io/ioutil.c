@@ -472,7 +472,7 @@ StrVec *IoUtil_BasePath(MemCh *m, StrVec *path){
     return StrVec_CopyTo(m, path, IoUtil_BasePathAnchor(path));
 }
 
-StrVec *IoUtil_AddDotPath(StrVec *path, StrVec *dot, Str *ext){
+status IoUtil_AddDotPath(StrVec *path, StrVec *dot, Str *ext){
     if(path == NULL){
         return ERROR;
     }
