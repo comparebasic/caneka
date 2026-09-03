@@ -10,7 +10,7 @@ status BuildModule_Print(Buff *bf, void *a, cls type, word flags){
         md->src,
         md->sel,
     };
-    return Fmt(bf, "BuildModule<@/@ -> @ @>", ar);
+    return Fmt(bf, "BuildModule<@/@ <- @ @>", ar);
 }
 
 status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){

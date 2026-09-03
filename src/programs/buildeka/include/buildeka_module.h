@@ -59,6 +59,8 @@ typedef struct build_module {
     StrVec *targetName;
     StrVec *src;
     DirSel *sel;
+    Node *config;
+    struct timespec latest;
 } BuildModule;
 
 typedef struct buildctx {
@@ -70,8 +72,8 @@ typedef struct buildctx {
     StrVec *src;
     Ident *ident;
     Table *options;
-    Table *deps;
-    Node *config;
+    Table *deps /*<BuildModule>*/;
+    BuildModule *mod;
     struct {
         StrVec *key;
         StrVec *name;
@@ -147,5 +149,6 @@ BuildCtx *BuildCtx_Make(MemCh *m);
 
 BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name);
 BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident);
+void BuildModule_Load(BuildCtx *ctx, BuildModule *md);
 
 #endif

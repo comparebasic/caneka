@@ -305,11 +305,11 @@ StrVec *Path_DotPath(MemCh *m, void *vs){
     return v;
 }
 
-status Path_DotAnnotate(MemCh *m, StrVec *v){
+StrVec *Path_DotAnnotate(MemCh *m, StrVec *v){
     return Path_Annotate(m, v, dotPathSeps);
 }
 
-status Path_SpaceAnnotate(MemCh *m, StrVec *v){
+StrVec *Path_SpaceAnnotate(MemCh *m, StrVec *v){
     return Path_Annotate(m, v, spacePathSeps);
 }
 
@@ -327,7 +327,7 @@ status Path_Check(void *_a, Span *sep){
         byte *ptr = s->bytes;
         byte *last = s->bytes+s->length-1;
         while(TRUE){
-            Iter_Init(&sepIt, sep);
+            sepIt.type.state = ZERO;
             while((Iter_Next(&sepIt) & END) == 0){
                 Single *sg = (Single *)Iter_Get(&sepIt);
                 if(*ptr == sg->val.b){
@@ -351,7 +351,7 @@ status Path_Check(void *_a, Span *sep){
             byte *ptr = s->bytes;
             byte *last = s->bytes+s->length-1;
             while(TRUE){
-                Iter_Init(&sepIt, sep);
+                sepIt.type.state = ZERO;
                 while((Iter_Next(&sepIt) & END) == 0){
                     Single *sg = (Single *)Iter_Get(&sepIt);
                     if(*ptr == sg->val.b){
@@ -369,21 +369,17 @@ status Path_Check(void *_a, Span *sep){
     return NOOP;
 }
 
-status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
-    if(v->type.state & STRVEC_NOSHRINK){
-        Error(v->p->m, FUNCNAME, FILENAME, LINENUMBER,
-            "IoUtil Annotate - StrVec has NOSHRINK flag but is being asked to shrink",
-                NULL);
-        return ERROR;
-    }
+StrVec *Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     status r = READY;
-    i64 total = v->total;
-    if(v == NULL){
-        return NOOP;
+    if(v == NULL || (v->type.state & STRVEC_PATH)){
+        return v;
     }
 
-    Span *p = Span_Clone(m, v->p);
-    Span_Wipe(v->p);
+    StrVec *v = StrVec_Make(m);
+
+    i64 total = v->total;
+    Span *p = v->p;
+
     v->total = 0;
 
     Iter it;
@@ -395,21 +391,15 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
         if(s->length == 0){
             continue;
         }
+        byte *ptr;
         byte *start = s->bytes;
-        byte *ptr = s->bytes;
         byte *last = s->bytes+s->length-1;
-        while(TRUE){
-            Iter_Init(&sepIt, sep);
+        for(ptr = start; ptr <= last; ptr++){
+            Single *ptrDebug = B_Wrapped(m, *ptr, ZERO, ZERO);
             while((Iter_Next(&sepIt) & END) == 0){
                 Single *sg = (Single *)Iter_Get(&sepIt);
                 if(*ptr == sg->val.b){
                     i16 length = ptr-start;
-                    if(length < 0 || length > STR_MAX){
-                        Error(p->m, FUNCNAME, FILENAME, LINENUMBER,
-                            "Error cannot have a negative length of a string",
-                        NULL);
-                        return ERROR;
-                    }
                     if(length > 0){
                         Str *sn = Str_Ref(m, start, length, length, ZERO);
                         StrVec_Add(v, sn);
@@ -422,21 +412,11 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
                     r |= SUCCESS;
                 }
             }
-            if(ptr == last){
-                break;
-            }
-            ptr++;
         }
         if(start <= last){
             i16 length = last-start+1;
             StrVec_Add(v, Str_Ref(m, start, length, length, ZERO));
         }
-    }
-
-    if(r == READY){
-        r |= NOOP;
-    }else{
-        v->type.state |= STRVEC_PATH;
     }
 
     if(v->total != total){
@@ -448,7 +428,8 @@ status Path_Annotate(MemCh *m, StrVec *v, Span *sep){
         r |= ERROR;
     }
 
-    return r;
+    v->type.state |= STRVEC_PATH;
+    return v;
 }
 
 i32 Path_FlagLastIdx(StrVec *path, status flags){

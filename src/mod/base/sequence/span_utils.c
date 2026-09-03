@@ -171,7 +171,6 @@ Span *Span_Clone(MemCh *m, Span *p){
     Iter it;
     Iter_Init(&it, p);
     Span *p2 = Span_Make(m);
-    int i = 0;
     while((Iter_Next(&it) & END) == 0){
         void *value = Iter_Get(&it);
         if(value != NULL){

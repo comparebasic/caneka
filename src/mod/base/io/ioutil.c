@@ -201,14 +201,12 @@ StrVec *IoPath(MemCh *m, char *cstr){
 /* deprecated use IoPath_FromStr */
 StrVec *IoPath_From(MemCh *m, Str *s){
     StrVec *v = StrVec_From(m, s);
-    IoUtil_Annotate(m, v);
-    return v;
+    return IoUtil_Annotate(m, v);
 }
 
 StrVec *IoPath_FromStr(MemCh *m, Str *s){
     StrVec *v = StrVec_From(m, s);
-    IoUtil_Annotate(m, v);
-    return v;
+    return IoUtil_Annotate(m, v);
 }
 
 status IoPath_Descendent(StrVec *orig, StrVec *compare){
@@ -240,8 +238,7 @@ status IoPath_Descendent(StrVec *orig, StrVec *compare){
 
 StrVec *IoPath_FromVec(MemCh *m, StrVec *_v){
     StrVec *v = StrVec_Copy(m, _v);
-    IoUtil_Annotate(m, v);
-    return v;
+    return IoUtil_Annotate(m, v);
 }
 
 StrVec *IoAbsPath(MemCh *m, char *cstr){
@@ -259,7 +256,7 @@ StrVec *IoUtil_AbsPathBuilder(MemCh *m, char *args[]){
     return IoUtil_AbsVec(m, v);
 }
 
-status IoUtil_Annotate(MemCh *m, StrVec *path){
+StrVec *IoUtil_Annotate(MemCh *m, StrVec *path){
     return Path_Annotate(m, path, pathSeps);
 }
 
@@ -293,8 +290,7 @@ StrVec *IoUtil_AbsVec(MemCh *m, StrVec *v){
         StrVec_Add(path, s);
     }
     
-    IoUtil_Annotate(m, path);
-    return path;
+    return IoUtil_Annotate(m, path);
 }
 
 status IoUtil_AddVec(MemCh *m, StrVec *path, StrVec *v){
@@ -303,8 +299,7 @@ status IoUtil_AddVec(MemCh *m, StrVec *path, StrVec *v){
         StrVec_Add(path, Str_Ref(m, (byte *)"/", 1, 2, MORE));
     }
 
-    IoUtil_Annotate(m, v);
-    return StrVec_AddVec(path, v);
+    return StrVec_AddVec(path, IoUtil_Annotate(m, v));
 }
 
 status IoUtil_AddStr(MemCh *m, StrVec *path, Str *s){
@@ -477,7 +472,7 @@ StrVec *IoUtil_BasePath(MemCh *m, StrVec *path){
     return StrVec_CopyTo(m, path, IoUtil_BasePathAnchor(path));
 }
 
-status IoUtil_AddDotPath(StrVec *path, StrVec *dot, Str *ext){
+StrVec *IoUtil_AddDotPath(StrVec *path, StrVec *dot, Str *ext){
     if(path == NULL){
         return ERROR;
     }

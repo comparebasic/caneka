@@ -454,10 +454,66 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     return r;
 }
 
+void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
+    MemCh *m = ctx->m;
+    if(md->config == NULL){
+        StrVec *configPath = Clone(m, md->src);
+        StrVec_Add(configPath, S(m, "/build.json"));
+        md->config = Json_FromPath(m, configPath); 
+        if(md->config == NULL){
+            void *ar[] = {
+                configPath,
+                NULL
+            };
+            Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                "build.json file not found \\@$", ar);
+        }
+    }
+
+    Str *path = Ifc(m, md->target, TYPE_STR);
+    if(File_PathExists(m, path)){
+        File_ModTime(m, path, &md->latest); 
+    }
+
+    Table *deps = Node_KvFromChild(md->config, K(m, "dependency")); 
+    if(deps != NULL){
+
+        ctx->deps = Table_Make(m);
+
+        Iter it;
+        Iter_Init(&it, Table_Ordered(m, deps));
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = Iter_Get(&it);
+            if(h != NULL){
+                if(Table_Get(ctx->deps, h->key) == NULL){
+                    if(Equals(h->value, K(m, "option")) || 
+                            Equals(h->value, K(m, "implied-option"))){
+                        i32 idx = Span_Has(ctx->options, h->key);
+                        if(idx != -1){
+                            Abstract *opt = Span_Get(ctx->options, idx);
+                            BuildModule *md = NULL;
+                            if(opt->type.of == TYPE_IDENT){
+                                md = BuildModule_FromIdent(m, ctx, (Ident *)opt);
+                            }else{
+                                md = BuildModule_Make(m, ctx, h->key);
+                            }
+                            Table_Set(ctx->deps, h->key, md);
+                        }
+                    }else{
+                        Table_Set(ctx->deps, h->key, BuildModule_Make(m, ctx, h->key));
+                    }
+                }
+            }
+        }
+    }
+}
+
 BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
     BuildModule *md = MemCh_AllocOf(m, sizeof(BuildModule), TYPE_BUILD_MODULE);
     md->type.of = TYPE_BUILD_MODULE;
     md->name = name;
+
+    Debug_Push(m, md);
 
     md->src = Clone(m, ctx->src);
     IoUtil_AddVec(m, md->src, Sv(m, "mod"));
@@ -474,7 +530,7 @@ BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
     StrVec_AddVec(md->src, Sv(m, ".a"));
     StrVec_AddVec(target, Sv(m, ".a"));
 
-    return md;
+    Return(m, md);
 }
 
 BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
@@ -482,24 +538,41 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
     md->type.of = TYPE_BUILD_MODULE;
     md->name = StrVec_From(m, Ident_NameStr(m, ident));
 
+    Debug_Push(m, md);
+
     md->src = Clone(m, ctx->src);
+
     StrVec *domain = StrVec_From(m, Ident_DomainStr(m, ident));
     if(!Equals(domain, K(m, "programs"))){
         IoUtil_AddVec(m, md->src, Sv(m, "mod"));
     }
+
     IoUtil_AddVec(m, md->src, domain);
-    IoUtil_AddVec(m, md->src, StrVec_From(m, Ident_ValueStr(m, ident)));
+    if(ident->value == NULL){
+        IoUtil_AddVec(m, md->src, StrVec_From(m, Ident_NameStr(m, ident)));
+    }else{
+        IoUtil_AddVec(m, md->src, StrVec_From(m, Ident_ValueStr(m, ident)));
+    }
 
     StrVec *target = Sv(m, "lib-cnk-");
     StrVec_AddVec(target, Clone(m, md->name));
-    md->target = target;
 
-    md->src = Clone(m, ctx->dir);
-    IoUtil_AddVec(m, md->src, Sv(m, "lib"));
-    IoUtil_AddVec(m, md->src, target);
+    md->targetName = Clone(m, target);
+    md->target = Clone(m, ctx->dir);
+
+    IoUtil_AddVec(m, md->target, target);
+    IoUtil_AddVec(m, md->target, target);
+    StrVec_AddVec(md->target, Sv(m, ".a"));
+
     IoUtil_AddVec(m, md->src, target);
     StrVec_AddVec(md->src, Sv(m, ".a"));
-    StrVec_AddVec(target, Sv(m, ".a"));
+    
+    void *ar[] = {
+        target,
+        md,
+        NULL
+    };
+    Out("^c.Moddule @/@^0\n", ar);
 
-    return md;
+    Return(m, md);
 }

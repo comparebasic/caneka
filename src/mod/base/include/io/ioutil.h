@@ -8,7 +8,7 @@ Str *IoUtil_GetAbsPath(MemCh *m, Str *path);
 boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b);
 Str *IoUtil_FnameStr(MemCh *m, StrVec *path);
 StrVec *IoUtil_BasePath(MemCh *m, StrVec *path);
-status IoUtil_Annotate(MemCh *m, StrVec *path);
+StrVec *IoUtil_Annotate(MemCh *m, StrVec *path);
 StrVec *IoUtil_GetAbsVec(MemCh *m, Str *path);
 status IoUtil_RemoveSeps(MemCh *m, StrVec *path);
 StrVec *IoUtil_AbsVec(MemCh *m, StrVec *v);

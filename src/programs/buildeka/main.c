@@ -38,7 +38,7 @@ i32 main(int argc, char **argv){
     Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL,
         Sv(m, "Skip ansi color sequences in output."));
 
-    Args_Add(cli, targetKey, NULL, ARG_MULTIPLE,
+    Args_Add(cli, targetKey, NULL, ZERO,
         Sv(m, "Target program or module to build."));
 
     Args_Add(cli, srcPrefixKey, S(m, "src"), ARG_DEFAULT,
@@ -84,16 +84,12 @@ i32 main(int argc, char **argv){
     ctx->input.buildDir = CliArgs_GetAbsPath(cli, dirKey);
     ctx->input.buildDir->type.state |= STRVEC_NOSHRINK;
 
-    void *ar[] = {
-        ctx->input.buildDir,
-        NULL
-    };
-    Out("^y.buildDir @^0\n", ar);
 
     ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
     ctx->dir = StrVec_Copy(m, ctx->input.buildDir);
     ctx->src = CliArgs_GetAbsPath(cli, srcPrefixKey);
-    ctx->ident = Ident_FromVec(m, StrVec_From(m, CliArgs_Get(cli, targetKey)));
+    StrVec *targetV = StrVec_From(m, CliArgs_Get(cli, targetKey));
+    ctx->ident = Ident_FromVec(m, targetV);
     ctx->options = CliArgs_Get(cli, optionsKey);
     ctx->current.source = CliArgs_GetAbsPath(cli, srcPrefixKey);
     ctx->current.liblist = Span_Make(m);
