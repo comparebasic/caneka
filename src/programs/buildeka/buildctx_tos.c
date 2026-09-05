@@ -1,16 +1,23 @@
 #include <external.h>
 #include "buildeka_module.h"
 
+static Str **moduleLabels = NULL;
+
 
 status BuildModule_Print(Buff *bf, void *a, cls type, word flags){
     BuildModule *md = (BuildModule *)a;
     void *ar[] = {
+        Type_StateVec(bf->m, md->type.of, md->type.state),
         md->name,
-        md->target,
+        md->targetName,
+        Time_ToRStr(bf->m, &md->latest),
         md->src,
+        md->target,
         md->sel,
+        md->config,
+        NULL
     };
-    return Fmt(bf, "BuildModule<@/@ <- @ @>", ar);
+    return Fmt(bf, "BuildModule<@ @/@ (@) <- @ -> @ = Sel(@) config(@)>", ar);
 }
 
 status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
@@ -82,6 +89,12 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
 
 status BuildCtx_ToSInit(MemCh *m){
     status r = READY;
+    if(moduleLabels == NULL){
+        moduleLabels = (Str **)Arr_Make(m, 17);
+        moduleLabels[9] = Str_CstrRef(m, "INC");
+        Lookup_Add(m, ToSFlagLookup, TYPE_BUILD_MODULE, (void *)moduleLabels);
+        r |= SUCCESS;
+    }
     r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILDCTX, (void *)BuildCtx_Print);
     r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILD_MODULE, (void *)BuildModule_Print);
     return r;

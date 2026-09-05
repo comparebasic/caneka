@@ -456,17 +456,30 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
 
 void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
     MemCh *m = ctx->m;
+    Debug_Push(m, md);
     if(md->config == NULL){
         StrVec *configPath = Clone(m, md->src);
         StrVec_Add(configPath, S(m, "/build.json"));
-        md->config = Json_FromPath(m, configPath); 
-        if(md->config == NULL){
-            void *ar[] = {
-                configPath,
-                NULL
-            };
+
+        StrVec *incPath = Clone(m, md->src);
+        StrVec_Add(incPath, S(m, "/inc.c"));
+
+        if(File_PathExists(m, Ifc(m, configPath, TYPE_STR))){
+            md->config = Json_FromPath(m, configPath); 
+            if(md->config == NULL){
+                void *ar[] = {
+                    configPath,
+                    NULL
+                };
+                Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                    "build.json file not found \\@$", ar);
+            }
+        }else if(File_PathExists(m, Ifc(m, incPath, TYPE_STR))){
+            md->type.state |= BUILDMODULE_INC;
+        }else{
+            void *ar[] = {md, NULL};
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                "build.json file not found \\@$", ar);
+                "Neither inc.c or build.json file found for @", ar);
         }
     }
 
@@ -475,37 +488,47 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
         File_ModTime(m, path, &md->latest); 
     }
 
-    Table *deps = Node_KvFromChild(md->config, K(m, "dependency")); 
-    if(deps != NULL){
+    if(md->config != NULL){
+        Table *deps = Node_KvFromChild(md->config, K(m, "dependency")); 
+        if(deps != NULL){
 
-        ctx->deps = Table_Make(m);
+            if(ctx->deps == NULL){
+                ctx->deps = Table_Make(m);
+            }
 
-        Iter it;
-        Iter_Init(&it, Table_Ordered(m, deps));
-        while((Iter_Next(&it) & END) == 0){
-            Hashed *h = Iter_Get(&it);
-            if(h != NULL){
-                if(Table_Get(ctx->deps, h->key) == NULL){
-                    if(Equals(h->value, K(m, "option")) || 
-                            Equals(h->value, K(m, "implied-option"))){
-                        i32 idx = Span_Has(ctx->options, h->key);
-                        if(idx != -1){
-                            Abstract *opt = Span_Get(ctx->options, idx);
-                            BuildModule *md = NULL;
-                            if(opt->type.of == TYPE_IDENT){
-                                md = BuildModule_FromIdent(m, ctx, (Ident *)opt);
-                            }else{
-                                md = BuildModule_Make(m, ctx, h->key);
+            Iter it;
+            Iter_Init(&it, Table_Ordered(m, deps));
+            while((Iter_Next(&it) & END) == 0){
+                Hashed *h = Iter_Get(&it);
+                if(h != NULL){
+
+                    if(Table_Get(ctx->deps, h->key) == NULL){
+                        if(Equals(h->value, K(m, "option")) || 
+                                Equals(h->value, K(m, "implied-option"))){
+                            i32 idx = Span_Has(ctx->options, h->key);
+                            if(idx != -1){
+                                Abstract *opt = Span_Get(ctx->options, idx);
+                                BuildModule *omd = NULL;
+                                if(opt->type.of == TYPE_IDENT){
+                                    omd = BuildModule_FromIdent(m, ctx, (Ident *)opt);
+                                }else{
+                                    omd = BuildModule_Make(m, ctx, h->key);
+                                }
+                                Table_Set(ctx->deps, h->key, omd);
+                                BuildModule_Load(ctx, omd);
                             }
-                            Table_Set(ctx->deps, h->key, md);
+                        }else{
+                            BuildModule *omd = BuildModule_Make(m, ctx, h->key);
+                            Table_Set(ctx->deps, h->key, omd);
+                            BuildModule_Load(ctx, omd);
                         }
-                    }else{
-                        Table_Set(ctx->deps, h->key, BuildModule_Make(m, ctx, h->key));
                     }
                 }
             }
         }
     }
+
+    ReturnVoid(m);
 }
 
 BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
@@ -516,19 +539,23 @@ BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
     Debug_Push(m, md);
 
     md->src = Clone(m, ctx->src);
-    IoUtil_AddVec(m, md->src, Sv(m, "mod"));
-    IoUtil_AddVec(m, md->src, md->name);
+    StrVec *domain = domain = Sv(m, "mod");
 
-    StrVec *target = Sv(m, "lib-cnk-");
+    IoUtil_AddVec(m, md->src, domain);
+    IoUtil_AddVec(m, md->src, name);
+
+    StrVec *target = Sv(m, "libcnk-");
     StrVec_AddVec(target, Clone(m, md->name));
-    md->target = target;
+    StrVec_AddVec(target, Clone(m, domain));
 
-    md->src = Clone(m, ctx->dir);
-    IoUtil_AddVec(m, md->src, Sv(m, "lib"));
-    IoUtil_AddVec(m, md->src, target);
-    IoUtil_AddVec(m, md->src, target);
-    StrVec_AddVec(md->src, Sv(m, ".a"));
-    StrVec_AddVec(target, Sv(m, ".a"));
+    md->targetName = Clone(m, target);
+    md->target = Clone(m, ctx->dir);
+
+    IoUtil_AddVec(m, md->target, Sv(m, "lib"));
+    IoUtil_AddVec(m, md->target, target);
+    IoUtil_AddVec(m, md->target, target);
+    StrVec_AddVec(md->target, Sv(m, ".a"));
+
 
     Return(m, md);
 }
@@ -544,7 +571,7 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
 
     StrVec *domain = StrVec_From(m, Ident_DomainStr(m, ident));
     if(!Equals(domain, K(m, "programs"))){
-        IoUtil_AddVec(m, md->src, Sv(m, "mod"));
+        domain = Sv(m, "mod");
     }
 
     IoUtil_AddVec(m, md->src, domain);
@@ -554,25 +581,17 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
         IoUtil_AddVec(m, md->src, StrVec_From(m, Ident_ValueStr(m, ident)));
     }
 
-    StrVec *target = Sv(m, "lib-cnk-");
+    StrVec *target = Sv(m, "libcnk-");
     StrVec_AddVec(target, Clone(m, md->name));
+    StrVec_AddVec(target, Clone(m, domain));
 
     md->targetName = Clone(m, target);
     md->target = Clone(m, ctx->dir);
 
+    IoUtil_AddVec(m, md->target, Sv(m, "lib"));
     IoUtil_AddVec(m, md->target, target);
     IoUtil_AddVec(m, md->target, target);
     StrVec_AddVec(md->target, Sv(m, ".a"));
-
-    IoUtil_AddVec(m, md->src, target);
-    StrVec_AddVec(md->src, Sv(m, ".a"));
-    
-    void *ar[] = {
-        target,
-        md,
-        NULL
-    };
-    Out("^c.Moddule @/@^0\n", ar);
 
     Return(m, md);
 }

@@ -369,23 +369,19 @@ status Path_Check(void *_a, Span *sep){
     return NOOP;
 }
 
-StrVec *Path_Annotate(MemCh *m, StrVec *v, Span *sep){
+StrVec *Path_Annotate(MemCh *m, StrVec *orig, Span *sep){
     status r = READY;
-    if(v == NULL || (v->type.state & STRVEC_PATH)){
-        return v;
+    if(orig == NULL || (orig->type.state & STRVEC_PATH)){
+        return orig;
     }
 
     StrVec *v = StrVec_Make(m);
+    i64 total = orig->total;
 
-    i64 total = v->total;
-    Span *p = v->p;
-
-    v->total = 0;
-
-    Iter it;
     Iter sepIt;
     Iter_Init(&sepIt, sep);
-    Iter_Init(&it, p);
+    Iter it;
+    Iter_Init(&it, orig->p);
     while((Iter_Next(&it) & END) == 0){
         Str *s = (Str *)Ifc(m, Iter_Get(&it), TYPE_STR);
         if(s->length == 0){
@@ -420,8 +416,8 @@ StrVec *Path_Annotate(MemCh *m, StrVec *v, Span *sep){
     }
 
     if(v->total != total){
-        void *args[] = {v, I32_Wrapped(m, v->total), p, I32_Wrapped(m, total), NULL};
-        Error(p->m, FUNCNAME, FILENAME, LINENUMBER,
+        void *args[] = {v, I32_Wrapped(m, v->total), orig->p, I32_Wrapped(m, total), NULL};
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
             "Annotate somehow adjusted the total which was expected to be equivilent"
             " &/@ vs @/@",
              args);

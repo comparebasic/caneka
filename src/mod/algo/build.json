@@ -1,0 +1,6 @@
+{
+    "dependency":[
+        {"base": "implied"},
+        {"task": "implied"}
+    ]
+}

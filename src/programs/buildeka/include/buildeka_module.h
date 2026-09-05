@@ -8,6 +8,10 @@
 
 #include "types/range.h"
 
+enum module_flags {
+    BUILDMODULE_INC = 1 << 8,
+};
+
 enum cli_name_idx {
     BUILIDER_CLI_LIBFILENAME = 0,
     BUILIDER_CLI_ACTION,

@@ -87,7 +87,13 @@ static Hashed *Table_GetSetHashed(Iter *it, word op, void *_key, void *_value){
                 h->id = parity;
                 h->idx = hk.idx;
                 h->orderIdx = tbl->nvalues;
-                Span_Set((Span *)tbl, hk.idx, h);
+
+                if(record != NULL && record->orderIdx == -1){
+                    it->p->nvalues++;
+                }
+
+                it->type.state |= DEBUG;
+                Iter_Set(it, h);
                 tbl->type.state |= SUCCESS;
                 return h;
             }

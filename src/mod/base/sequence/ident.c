@@ -24,7 +24,7 @@ Ident *Ident_FromVec(MemCh *m, StrVec *v){
     Debug_Push(m, v);
 
     Ident *ident = Ident_Make(m);
-    Path_Annotate(m, v, identSeps);
+    v = Path_Annotate(m, v, identSeps);
 
     Iter it;
     Iter_Init(&it, v->p);

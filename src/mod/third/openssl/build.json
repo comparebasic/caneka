@@ -1,0 +1,9 @@
+{
+    "dependency":[
+        {"base": "required"},
+        {"task": "required"}
+    ],
+    "link": ["crypto", "ssl"],
+    "lib": ["/usr/local/lib"],
+    "include": ["/usr/local/include"]
+}

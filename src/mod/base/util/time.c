@@ -104,6 +104,9 @@ void Time_Delay(struct timespec *ts, struct timespec *remaining){
 }
 
 Str *Time_ToStr(MemCh *m, struct timespec *ts){
+    if(ts->tv_sec == 0 && ts->tv_nsec == 0){
+        return S(m, "NoTime");
+    }
     Str *s = Str_Make(m, TIME_BUFF_LEN);
     struct tm value;
     gmtime_r(&ts->tv_sec, &value);
@@ -115,6 +118,9 @@ Str *Time_ToStr(MemCh *m, struct timespec *ts){
 }
 
 Str *Time_ToRStr(MemCh *m, struct timespec *ts){
+    if(ts->tv_sec == 0 && ts->tv_nsec == 0){
+        return S(m, "NoTime");
+    }
     Str *s = Str_Make(m, TIME_BUFF_LEN);
     struct tm value;
     gmtime_r(&ts->tv_sec, &value);

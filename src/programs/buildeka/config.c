@@ -16,6 +16,12 @@ void BuildCtx_Config(BuildCtx *ctx){
 
     StrVec *configPath = StrVec_Make(m);
     if(ctx->ident != NULL){
+        void *ar[] = {
+            ctx->ident,
+            NULL
+        };
+        Out("^p.ctx->ident @^0\n", ar);
+
         ctx->mod = BuildModule_FromIdent(m, ctx, ctx->ident);
         BuildModule_Load(ctx, ctx->mod);
     }
