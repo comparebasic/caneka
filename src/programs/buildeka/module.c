@@ -1,6 +1,20 @@
 #include <external.h>
 #include "buildeka_module.h"
 
+static DirSel *BuildModule_makeDirSel(MemCh *m, BuildCtx *ctx, Str *ext, StrVec *path){
+    DirSel *sel = DirSel_Make(m,
+        ext, NULL, DIR_SELECTOR_MTIME_ALL|DIR_SELECTOR_NODIRS);
+
+    StrVec *base = StrVec_Copy(m, path);
+    StrVec_Add(base, IoUtil_PathSep(m));
+    StrVec_Add(base, S(m, "option"));
+
+    sel->source = Span_Make(m);
+    Span_Add((Span *)sel->source, Ifc(m, base, TYPE_STR));
+    sel->type.state |= DIR_SELECTOR_INVERT;
+    return sel;
+}
+
 static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
     /*
     Debug_Push(ctx->m, key);
@@ -454,6 +468,23 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     return r;
 }
 
+void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md){
+    struct timespec hdrLatest;
+
+    DirSel *hdrSel = BuildModule_makeDirSel(m,
+        ctx, S(m, ".h"), md->src);
+    Dir_GatherFilterDir(m, Ifc(m, md->src, TYPE_STR), hdrSel);
+    
+    md->sel = BuildModule_makeDirSel(m, ctx, S(m, ".c"), md->src);
+    Dir_GatherFilterDir(m, Ifc(m, md->src, TYPE_STR), md->sel);
+
+    if(Time_Greater(&hdrSel->time, &md->sel->time)){
+        memcpy(&md->latest, &hdrLatest, sizeof(struct timespec));
+    }else{
+        memcpy(&md->latest, &md->sel->time, sizeof(struct timespec));
+    }
+}
+
 void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
     MemCh *m = ctx->m;
     Debug_Push(m, md);
@@ -503,12 +534,12 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
                 if(h != NULL){
 
                     if(Table_Get(ctx->deps, h->key) == NULL){
+                        BuildModule *omd = NULL;
                         if(Equals(h->value, K(m, "option")) || 
                                 Equals(h->value, K(m, "implied-option"))){
                             i32 idx = Span_Has(ctx->options, h->key);
                             if(idx != -1){
                                 Abstract *opt = Span_Get(ctx->options, idx);
-                                BuildModule *omd = NULL;
                                 if(opt->type.of == TYPE_IDENT){
                                     omd = BuildModule_FromIdent(m, ctx, (Ident *)opt);
                                 }else{
@@ -518,7 +549,7 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
                                 BuildModule_Load(ctx, omd);
                             }
                         }else{
-                            BuildModule *omd = BuildModule_Make(m, ctx, h->key);
+                            omd = BuildModule_Make(m, ctx, h->key);
                             Table_Set(ctx->deps, h->key, omd);
                             BuildModule_Load(ctx, omd);
                         }
@@ -527,6 +558,8 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
             }
         }
     }
+
+    BuildModule_Gather(m, ctx, md);
 
     ReturnVoid(m);
 }

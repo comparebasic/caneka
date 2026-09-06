@@ -13,11 +13,12 @@ status BuildModule_Print(Buff *bf, void *a, cls type, word flags){
         Time_ToRStr(bf->m, &md->latest),
         md->src,
         md->target,
-        md->sel,
+        md->sel != NULL && md->sel->dest != NULL ?
+            I32_Wrapped(bf->m, md->sel->dest->nvalues) : I32_Wrapped(bf->m, 0),
         md->config,
         NULL
     };
-    return Fmt(bf, "BuildModule<@ @/@ (@) <- @ -> @ = Sel(@) config(@)>", ar);
+    return Fmt(bf, "BuildModule<@ @/@ (@) <- @ -> @ = Sel(@files) config(@)>", ar);
 }
 
 status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){

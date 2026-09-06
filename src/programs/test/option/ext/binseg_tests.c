@@ -2,6 +2,7 @@
 #include <caneka.h>
 #include <test_module.h>
 
+
 status BinSeg_Tests(MemCh *m){
     Debug_Push(m, NULL);
     status r = READY;

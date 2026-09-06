@@ -154,5 +154,6 @@ BuildCtx *BuildCtx_Make(MemCh *m);
 BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name);
 BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident);
 void BuildModule_Load(BuildCtx *ctx, BuildModule *md);
+void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md);
 
 #endif
