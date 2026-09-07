@@ -11,6 +11,17 @@ status BuildCtx_SetFlag(BuildCtx *ctx, StrVec *flag){
     return NOOP;
 }
 
+status BuildCtx_SetLogging(BuildCtx *ctx){
+    Iter it;
+    Iter_Init(&it, Table_Ordered(m, ctx->deps));
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        BuildModule *md = (BuildModule *)h->value;
+        ctx->metrics.modules++;
+        ctx->metrics.sources += md->metrics.sources;
+    }
+}
+
 status BuildCtx_Build(BuildCtx *ctx){
 
     status r = READY;
@@ -27,7 +38,6 @@ status BuildCtx_Build(BuildCtx *ctx){
             BuildModule_Build(m, ctx, md);
         }
     }
-    exit(1);
     /*
 
     Time_Now(&ctx->start);
