@@ -8,6 +8,7 @@ void BuildCtx_SetQuiet(boolean quiet){
 }
 
 status BuildCtx_Log(BuildCtx *ctx){
+    /*
     if(_quiet){
         void *args[7];
         if(ctx->type.state & SUCCESS){
@@ -57,5 +58,6 @@ status BuildCtx_Log(BuildCtx *ctx){
             CliStatus_Print(OutStream, ctx->cli.cli);
         }
     }
+    */
     return ZERO;
 }

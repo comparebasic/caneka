@@ -29,60 +29,39 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
             Type_StateVec(m, ctx->type.of, ctx->type.state),
             Time_ToStr(m, &ctx->modified),
             ctx->ident,
-            ctx->dir,
+            ctx->dest,
             ctx->src,
             ctx->tools.cc,
             ctx->tools.ccVersion,
             ctx->tools.ar,
-            ctx->current.target,
-            ctx->current.targetName,
-            ctx->current.source,
-            ctx->current.dest,
-            ctx->input.inc,
-            ctx->input.cflags,
-            ctx->input.libs,
-            ctx->input.sources,
-            ctx->input.objects,
-            ctx->input.gens,
-            ctx->input.srcPrefix,
             ctx->options,
             Table_Ordered(bf->m, ctx->deps),
             NULL
         };
         return Fmt(bf, "BuildCtx<@ @ $\n"
-            "  dir:@\nsrc:@\n"
+            "  dest:@\nsrc:@\n"
             "  tools: cc:$/$ ar:$\n"
-            "  target: @\n      name:@\n      source:@\n      dest:@\n"
-            "  input: inc:@ cflags:@ libs:@ sources:@ objects:@ gens:@, srcPrefix:@\n"
-            "    options: @\n"
-            "    deps: @\n"
+            "  deps: @\n"
             ">", args);
     }else{
         void *args[] = {
             Type_StateVec(m, ctx->type.of, ctx->type.state),
             Time_ToStr(m, &ctx->modified),
             ctx->ident,
-            ctx->dir,
+            ctx->dest,
             ctx->src,
             ctx->tools.cc,
             ctx->tools.ccVersion,
             ctx->tools.ar,
-            ctx->current.target,
-            ctx->current.targetName,
-            ctx->current.source,
-            ctx->current.dest,
-            ctx->input.buildDir,
             ctx->options,
             Table_Ordered(bf->m, ctx->deps),
             NULL
         };
         return Fmt(bf, "BuildCtx<@ @ $\n"
-            "  dir:@\nsrc:@\n"
+            "  dest:@\nsrc:@\n"
             "  tools: cc:@/$ ar:@\n"
-            "  target: @ name:@ source:@ dest:@\n"
-            "  buildDir: @\n"
-            "    options: @\n"
-            "    deps: @\n"
+            "  options: @\n"
+            "  deps: @\n"
             ">", args);
     }
     return ZERO;
@@ -93,6 +72,7 @@ status BuildCtx_ToSInit(MemCh *m){
     if(moduleLabels == NULL){
         moduleLabels = (Str **)Arr_Make(m, 17);
         moduleLabels[9] = Str_CstrRef(m, "INC");
+        moduleLabels[10] = Str_CstrRef(m, "SATISFIED");
         Lookup_Add(m, ToSFlagLookup, TYPE_BUILD_MODULE, (void *)moduleLabels);
         r |= SUCCESS;
     }

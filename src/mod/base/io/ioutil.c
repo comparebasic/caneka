@@ -3,6 +3,19 @@
 
 static Span *pathSeps = NULL;
 
+boolean IoUtil_IsSep(Str *s){
+    return s != NULL && (s->type.state & MORE) && s->length == 1 && s->bytes[0] == '/';
+}
+
+boolean IoUtil_IsStrAbs(Str *s){
+    return s->bytes[0] == '/';
+}
+
+boolean IoUtil_IsAbs(StrVec *v){
+    Str *s = Span_Get(v->p, 0);
+    return IoUtil_IsStrAbs(s);
+}
+
 status IoUtil_Relativise(MemCh *m, StrVec *path){
     status r = READY;
     Iter it;
@@ -67,10 +80,6 @@ status IoUtil_Relativise(MemCh *m, StrVec *path){
     return r;
 }
 
-boolean IoUtil_IsSep(Str *s){
-    return s != NULL && (s->type.state & MORE) && s->length == 1 && s->bytes[0] == '/';
-}
-
 Str *IoUtil_PathSep(MemCh *m){
     return Str_Ref(m, (byte *)"/", 1, 1, STRING_COPY|MORE);
 }
@@ -84,15 +93,6 @@ void IoUtil_TrimDir(MemCh *m, StrVec *v){
     if(s != NULL && s->type.state & MORE){
         StrVec_Pop(v);
     }
-}
-
-boolean IoUtil_IsStrAbs(Str *s){
-    return s->bytes[0] == '/';
-}
-
-boolean IoUtil_IsAbs(StrVec *v){
-    Str *s = Span_Get(v->p, 0);
-    return IoUtil_IsStrAbs(s);
 }
 
 StrVec *IoUtil_GetExt(MemCh *m, StrVec *path){

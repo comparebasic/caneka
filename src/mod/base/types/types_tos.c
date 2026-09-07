@@ -26,6 +26,9 @@ Str *Boolean_ToStr(MemCh *m, boolean t){
 StrVec *Type_StateVec(MemCh *m, cls typeOf, word flags){
     Str **labels = Lookup_Get(ToSFlagLookup, typeOf);
     StrVec *v = StrVec_Make(m);
+    if(flags == ZERO){
+        return v;
+    }
     Str *lbl = NULL;
     if(flags == 0){
         if(labels != NULL && labels[0] != NULL){

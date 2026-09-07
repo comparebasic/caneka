@@ -81,34 +81,13 @@ i32 main(int argc, char **argv){
     StrVec *prefix = StrVec_From(m, CliArgs_Get(cli, srcPrefixKey));
     IoUtil_Annotate(m, prefix);
 
-    ctx->input.buildDir = CliArgs_GetAbsPath(cli, dirKey);
-    ctx->input.buildDir->type.state |= STRVEC_NOSHRINK;
-
-
-    ctx->current.dest = StrVec_Copy(m, ctx->input.buildDir);
-    ctx->dir = StrVec_Copy(m, ctx->input.buildDir);
-    ctx->src = CliArgs_GetAbsPath(cli, srcPrefixKey);
+    ctx->dest = CliArgs_GetAbsPath(cli, dirKey);
+    Str *pathS = CliArgs_Get(cli, srcPrefixKey);
+    Path_StrRmTrailingSlash(m, pathS);
+    ctx->src = IoUtil_AbsVec(m, StrVec_From(m, pathS));
     StrVec *targetV = StrVec_From(m, CliArgs_Get(cli, targetKey));
     ctx->ident = Ident_FromVec(m, targetV);
     ctx->options = CliArgs_Get(cli, optionsKey);
-    ctx->current.source = CliArgs_GetAbsPath(cli, srcPrefixKey);
-    ctx->current.liblist = Span_Make(m);
-    ctx->input.sources = Span_Make(m);
-    ctx->input.srcPrefix = prefix;
-    ctx->input.srcPrefix->type.state |= STRVEC_NOSHRINK;
-
-    ctx->metrics.totalSources = I32_Wrapped(m, 0);
-    ctx->metrics.countSources = I32_Wrapped(m, 0);
-    ctx->metrics.totalModules = I32_Wrapped(m, 0);
-    ctx->metrics.countModules = I32_Wrapped(m, 0);
-    ctx->metrics.totalModuleSources = I32_Wrapped(m, 0);
-    ctx->metrics.countModuleSources = I32_Wrapped(m, 0);
-
-    Iter it;
-    Iter_Init(&it, ctx->input.sources);
-    while((Iter_Next(&it) & END) == 0){
-        Path_StrRmTrailingSlash(m, it.value);
-    }
 
     if(CliArgs_Get(cli, quietKey)){
         BuildCtx_SetQuiet(TRUE);

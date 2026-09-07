@@ -16,24 +16,10 @@ void BuildCtx_Config(BuildCtx *ctx){
 
     StrVec *configPath = StrVec_Make(m);
     if(ctx->ident != NULL){
-        void *ar[] = {
-            ctx->ident,
-            NULL
-        };
-        Out("^p.ctx->ident @^0\n", ar);
-
         ctx->mod = BuildModule_FromIdent(m, ctx, ctx->ident);
         BuildModule_Load(ctx, ctx->mod);
     }
     
     Table_Set(ctx->deps, Ident_NameStr(m, ctx->ident), ctx->mod);
-
-    void *ar[] = {
-        ctx->mod->config,
-        ctx,
-        NULL
-    };
-    Out("^y.Config @\n^c.@^0\n", ar);
-
     ReturnVoid(m);
 }

@@ -1,32 +1,13 @@
 #include <external.h>
 #include "buildeka_module.h"
 
-status BuildCtx_SetupModules(BuildCtx *ctx){
-    status r = READY;
-    MemCh *m = ctx->m;
-    Debug_Push(m, ctx);
-    Iter it;
-    Iter_Init(&it, ctx->deps);
-    while((Iter_Next(&it) & END) == 0){
-        Hashed *h = Iter_Get(&it); 
-        if(h != NULL){
-            void *ar[] = {
-                h->key,
-                h->value,
-                NULL
-            };
-            Out("^p.Gathering Deps^0\n", ar);
-        }
-    }
-
-    Return(m, r);
-}
-
 status BuildCtx_SetFlag(BuildCtx *ctx, StrVec *flag){
+    /*
     if(Span_Has(ctx->input.cflags, flag) == -1){
         Span_Add(ctx->input.cflags, flag);
         return SUCCESS;
     }
+    */
     return NOOP;
 }
 
@@ -37,6 +18,15 @@ status BuildCtx_Build(BuildCtx *ctx){
     Debug_Push(m, ctx);
 
     BuildCtx_Config(ctx);
+    Iter it;
+    Iter_Init(&it, Table_Ordered(m, ctx->deps));
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        BuildModule *md = (BuildModule *)h->value;
+        if((md->type.state & BUILDMODULE_SATISFIED) == 0){
+            BuildModule_Build(m, ctx, md);
+        }
+    }
     exit(1);
     /*
 
@@ -90,23 +80,9 @@ BuildCtx *BuildCtx_Make(MemCh *m){
     ctx->m = MemCh_Make();
     ctx->cli.cli = CliStatus_Make(m, BuildCli_RenderStatus, ctx);
 
-    ctx->dir = StrVec_Make(m);
+    ctx->dest = StrVec_Make(m);
     ctx->src = StrVec_Make(m);
     ctx->deps = Table_Make(m);
-
-    ctx->current.target = StrVec_Make(m);
-    ctx->current.targetName = StrVec_Make(m);
-    ctx->current.version = StrVec_Make(m);
-    ctx->current.source = StrVec_Make(m);
-    ctx->current.dest = StrVec_Make(m);
-
-    ctx->input.inc = Span_Make(m);
-    ctx->input.cflags = Span_Make(m);
-    ctx->input.libs = Span_Make(m);
-    ctx->input.staticLibs = Span_Make(m);
-    ctx->input.sources = Span_Make(m);
-    ctx->input.objects = Span_Make(m);
-    ctx->input.gens = Span_Make(m);
 
     ctx->tools.cc = S(m, _gen_CC);
     ctx->tools.ccVersion = Str_FromI64(m, (i64)_gen_CC_VERSION);

@@ -468,6 +468,20 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     return r;
 }
 
+void BuildModule_Build(MemCh *m, BuildCtx *ctx, BuildModule *md){
+    void *ar[] = {
+        md->name,
+        Type_StateVec(m, md->type.of, md->type.state),
+        md->targetName, 
+        Time_ToRStr(m, &md->latest),
+        I32_Wrapped(m, md->metrics.sources),
+        md->src,
+        md->target,
+        NULL
+    };
+    Out("^p.Building @/@ -> ^D.$^d. latest(@) files:@ -> \n  $ -> $^0\n", ar);
+}
+
 void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md){
     struct timespec hdrLatest;
 
@@ -561,6 +575,20 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
 
     BuildModule_Gather(m, ctx, md);
 
+    if(md->sel != NULL && md->sel->dest != NULL ){
+        md->metrics.sources = md->sel->dest->nvalues;
+    }
+
+    Str *targetStr = Ifc(m, md->target, TYPE_STR);
+    struct timespec targetModified = {0, 0};
+    if(File_PathExists(m, targetStr)){
+        File_ModTime(m, targetStr, &targetModified);
+        if(targetModified.tv_sec > 0 && Time_Greater(&targetModified, &md->latest)){
+            md->type.state |= BUILDMODULE_SATISFIED;
+            md->metrics.built = md->metrics.sources;
+        }
+    }
+
     ReturnVoid(m);
 }
 
@@ -582,7 +610,7 @@ BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
     StrVec_AddVec(target, Clone(m, domain));
 
     md->targetName = Clone(m, target);
-    md->target = Clone(m, ctx->dir);
+    md->target = Clone(m, ctx->dest);
 
     IoUtil_AddVec(m, md->target, Sv(m, "lib"));
     IoUtil_AddVec(m, md->target, target);
@@ -619,7 +647,7 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
     StrVec_AddVec(target, Clone(m, domain));
 
     md->targetName = Clone(m, target);
-    md->target = Clone(m, ctx->dir);
+    md->target = Clone(m, ctx->dest);
 
     IoUtil_AddVec(m, md->target, Sv(m, "lib"));
     IoUtil_AddVec(m, md->target, target);

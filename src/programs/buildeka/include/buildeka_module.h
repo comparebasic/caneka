@@ -10,6 +10,7 @@
 
 enum module_flags {
     BUILDMODULE_INC = 1 << 8,
+    BUILDMODULE_SATISFIED = 1 << 9,
 };
 
 enum cli_name_idx {
@@ -65,6 +66,11 @@ typedef struct build_module {
     DirSel *sel;
     Node *config;
     struct timespec latest;
+    struct  {
+        i32 sources;
+        i32 built;
+        i32 idx;
+    } metrics;
 } BuildModule;
 
 typedef struct buildctx {
@@ -72,50 +78,22 @@ typedef struct buildctx {
     MemCh *m;
     struct timespec start;
     struct timespec modified;
-    StrVec *dir;
     StrVec *src;
+    StrVec *dest;
     Ident *ident;
     Table *options;
     Table *deps /*<BuildModule>*/;
     BuildModule *mod;
-    struct {
-        StrVec *key;
-        StrVec *name;
-        StrVec *target;
-        StrVec *targetName;
-        StrVec *version;
-        StrVec *source;
-        StrVec *dest;
-        StrVec *binDest;
-        Span *staticlibs;
-        Span *liblist;
-        Span *inc;
-        Span *flags;
-    } current;
-    struct {
-        StrVec *buildDir;
-        Span *inc;
-        Span *cflags;
-        Span *libs;
-        Span *staticLibs;
-        Span *sources;
-        Span *objects;
-        Span *gens;
-        StrVec *srcPrefix;
-        Span *libDirs;
-    } input;
     struct {
         Str *cc;
         Str *ccVersion;
         Str *ar;
     } tools;
     struct {
-        Single *totalSources;
-        Single *countSources;
-        Single *totalModules;
-        Single *countModules;
-        Single *totalModuleSources;
-        Single *countModuleSources;
+        i32 sources;
+        i32 built;
+        i32 modules;
+        i32 modulesBuilt;
     } metrics;
     struct {
         CliStatus *cli;
@@ -155,5 +133,6 @@ BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name);
 BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident);
 void BuildModule_Load(BuildCtx *ctx, BuildModule *md);
 void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md);
+void BuildModule_Build(MemCh *m, BuildCtx *ctx, BuildModule *md);
 
 #endif

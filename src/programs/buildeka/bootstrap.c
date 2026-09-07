@@ -526,7 +526,7 @@ int main(int argc, char *argv[]){
 
     cmd[0] = "mkdir";
     cmd[1] = "-p";
-    cmd[2] = "build/libcnkbase";
+    cmd[2] = "build/lib/libcnk-basemod";
     cmd[3] =  NULL;
 
     if(run("Making build dir", cmd) == -1){
@@ -557,7 +557,7 @@ int main(int argc, char *argv[]){
     cmd[3] = "-Isrc/api/include";
     cmd[4] = "-c";
     cmd[5] = "-o";
-    cmd[6] = "./build/libcnkbase/libcnkbase.a";
+    cmd[6] = "./build/lib/libcnk-basemod/libcnk-basemod.a";
     cmd[7] = "./src/mod/base/inc.c";
     cmd[8] =  NULL;
 
@@ -573,7 +573,7 @@ int main(int argc, char *argv[]){
     cmd[5] = "-Iprograms/buildeka/include";
     cmd[6] = "-o";
     cmd[7] = "./dist/bin/buildeka";
-    cmd[8] = "./build/libcnkbase/libcnkbase.a";
+    cmd[8] = "./build/lib/libcnk-basemod/libcnk-basemod.a";
     cmd[9] = "./src/programs/buildeka/inc.c";
     cmd[10] = "-lm";
     cmd[11] =  NULL;

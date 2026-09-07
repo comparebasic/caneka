@@ -8,7 +8,8 @@ StrVec *BuildCtx_DestFromSrc(BuildCtx *ctx,
 
 status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
     MemCh *m = ctx->m;
-    Debug_Push(m, ctx->current.dest);
+    Debug_Push(m, ctx->dest);
+    /*
 
     ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Link Object");
     ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.source;
@@ -32,15 +33,19 @@ status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
             "Build error for adding object to lib", NULL);
         Return(m, ERROR);
     }
+    */
 
     Return(m, ZERO);
 }
 
 status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
     MemCh *m = ctx->m;
+    /*
     Debug_Push(m, ctx->current.source);
+    */
     void *args[8];
     status r = READY;
+    /*
 
     if(ctx->type.state & DEBUG){
         args[0] = name;
@@ -102,6 +107,7 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
         Fatal(ctx->m, FUNCNAME, FILENAME, LINENUMBER, "Build error for source file: @", args);
         Return(m, ERROR);
     }
+    */
 
     Return(m, r);
 }

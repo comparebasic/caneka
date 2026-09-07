@@ -2,6 +2,7 @@
 #include "buildeka_module.h"
 
 status BuildCli_RenderStatus(MemCh *m, void *a){
+    /*
     CliStatus *cli = (CliStatus *)Ifc(m, a, TYPE_CLI_STATUS);
     BuildCtx *ctx = (BuildCtx *)Ifc(m, cli->source, TYPE_BUILDCTX);
 
@@ -26,12 +27,14 @@ status BuildCli_RenderStatus(MemCh *m, void *a){
     sg = (Single *)Ifc(m, CliStatus_GetByKey(m, 
         cli, Str_CstrRef(m, "chaptersTotal")), TYPE_WRAPPED_I64);
     sg->val.value = st.pageIdx;
+    */
 
 
     return SUCCESS;
 }
 
 status BuildCli_SetupComplete(BuildCtx *ctx){
+    /*
     FmtLine *ln = Span_Get(ctx->cli.cli->lines, 0);
     ln->fmt = "^g.Completed ^D.$^d. sources^0.";
     ln->args = Arr_Make(ctx->m, 2);
@@ -46,12 +49,14 @@ status BuildCli_SetupComplete(BuildCtx *ctx){
 
     ln = Span_Get(ctx->cli.cli->lines, 3);
     ln->args[0] = Str_Ref(ctx->m, (byte *)"g.", 2, 3, STRING_FMT_ANSI);
+    */
 
     return SUCCESS;
 }
 
 status BuildCli_SetupStatus(BuildCtx *ctx){
     MemCh *m = ctx->m;
+    /*
     Span *lines = ctx->cli.cli->lines;
     memset(&ctx->cli.fields, 0, sizeof(ctx->cli.fields));
 
@@ -102,6 +107,7 @@ status BuildCli_SetupStatus(BuildCtx *ctx){
     CliStatus_SetKey(m, ctx->cli.cli, Str_CstrRef(m, "chapters"), &coords);
     coords.b = 2;
     CliStatus_SetKey(m, ctx->cli.cli, Str_CstrRef(m, "chaptersTotal"), &coords);
+    */
 
     return SUCCESS;
 }

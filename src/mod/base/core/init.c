@@ -42,7 +42,9 @@ status Core_Init(MemCh *m){
     return NOOP;
 }
 
-i64 Out(char *fmt, void *args[]){
+status Out(char *fmt, void *args[]){
+    /*
     Buff_SetTemp(OutStream);
+    */
     return Fmt(OutStream, fmt, args);
 }
