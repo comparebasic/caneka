@@ -3,6 +3,15 @@
 
 static Str **moduleLabels = NULL;
 
+status BuildObject_Print(Buff *bf, void *a, cls type, word flags){
+    BuildObject *obj = (BuildObject *)a;
+    void *ar[] = {
+        obj->src,
+        obj->dest,
+        NULL
+    };
+    return Fmt(bf, "Object<@ -> @>", ar);
+}
 
 status BuildModule_Print(Buff *bf, void *a, cls type, word flags){
     BuildModule *md = (BuildModule *)a;
@@ -78,5 +87,6 @@ status BuildCtx_ToSInit(MemCh *m){
     }
     r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILDCTX, (void *)BuildCtx_Print);
     r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILD_MODULE, (void *)BuildModule_Print);
+    r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILD_OBJECT, (void *)BuildObject_Print);
     return r;
 }

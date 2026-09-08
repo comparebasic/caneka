@@ -5,6 +5,8 @@ void BuildCtx_Config(BuildCtx *ctx){
     MemCh *m = ctx->m;
     Debug_Push(m, ctx);
 
+    BuildModule *md = NULL;
+
     Iter it;
     Iter_Init(&it, ctx->options);
     while((Iter_Next(&it) & END) == 0){
@@ -16,10 +18,12 @@ void BuildCtx_Config(BuildCtx *ctx){
 
     StrVec *configPath = StrVec_Make(m);
     if(ctx->ident != NULL){
-        ctx->mod = BuildModule_FromIdent(m, ctx, ctx->ident);
-        BuildModule_Load(ctx, ctx->mod);
+        md = BuildModule_FromIdent(m, ctx, ctx->ident);
+        BuildModule_Load(ctx, md);
     }
     
-    Table_Set(ctx->deps, Ident_NameStr(m, ctx->ident), ctx->mod);
+    Table_Set(ctx->deps, Ident_NameStr(m, ctx->ident), md);
+    ctx->depsOrdered = Table_Ordered(m, ctx->deps);
+
     ReturnVoid(m);
 }

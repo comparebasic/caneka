@@ -468,20 +468,6 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     return r;
 }
 
-void BuildModule_Build(MemCh *m, BuildCtx *ctx, BuildModule *md){
-    void *ar[] = {
-        md->name,
-        Type_StateVec(m, md->type.of, md->type.state),
-        md->targetName, 
-        Time_ToRStr(m, &md->latest),
-        I32_Wrapped(m, md->metrics.sources),
-        md->src,
-        md->target,
-        NULL
-    };
-    Out("^p.Building @/@ -> ^D.$^d. latest(@) files:@ -> \n  $ -> $^0\n", ar);
-}
-
 void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md){
     struct timespec hdrLatest;
 

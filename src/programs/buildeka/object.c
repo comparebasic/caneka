@@ -111,3 +111,24 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
 
     Return(m, r);
 }
+
+BuildObject *BuildObject_Make(MemCh *m, BuildCtx *ctx, i32 modIdx, i32 idx){
+    BuildObject *obj = MemCh_AllocOf(m, sizeof(BuildObject), TYPE_BUILD_OBJECT);
+    obj->type.of = TYPE_BUILD_OBJECT;
+
+    obj->md = Span_Get(ctx->depsOrdered, modIdx);
+
+    if(obj->md->sel == NULL || obj->md->sel->dest == NULL){
+        Error(m, FUNCNAME, FUNCNAME, LINENUMBER, 
+            "Error no source files in module", NULL);
+        obj->type.state |= ERROR;
+        return obj;
+    }
+
+    obj->src = Span_Get(obj->md->sel->dest, idx);
+    StrVec *local = Clone(m, obj->src);
+    StrVec_Incr(local, ctx->src->total+1);
+    obj->dest = Clone(m, ctx->dest);
+    IoUtil_AddVec(m, obj->dest, local);
+    
+}

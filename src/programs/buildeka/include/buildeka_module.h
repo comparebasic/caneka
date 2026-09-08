@@ -6,26 +6,6 @@
 #include "detect.h"
 #include <base_module.h>
 
-#include "types/range.h"
-
-enum module_flags {
-    BUILDMODULE_INC = 1 << 8,
-    BUILDMODULE_SATISFIED = 1 << 9,
-};
-
-enum cli_name_idx {
-    BUILIDER_CLI_LIBFILENAME = 0,
-    BUILIDER_CLI_ACTION,
-    BUILIDER_CLI_SOURCE,
-    BUILIDER_CLI_DEST,
-};
-
-enum mod_declare_idx {
-    BUILD_MOD_DECLARE_TAG = 0,
-    BUILD_MOD_DECLARE_LABEL = 1,
-    BUILD_MOD_DECLARE_VALUE = 2,
-};
-
 enum build_types {
     BUILD_EXEC = 1 << 8,
     BUILD_STATIC = 1 << 9,
@@ -37,102 +17,13 @@ enum build_types {
     BUILD_SUB_DEP = 1 << 15,
 };
 
-typedef struct executable {
-    char *bin;
-    char *src;
-} Executable;
-
-typedef struct build_cli_fields {
-    struct {
-        Str *name; 
-        Str *barStart;
-        Str *barLead;
-    } steps;
-    void *current[5];
-} BuildCliFields;
-
-typedef struct gen_config {
-    char *file;
-    char *key;
-    char **args;
-} GenConfig;
-
-typedef struct build_module {
-    Type type;
-    StrVec *name;
-    StrVec *target;
-    StrVec *targetName;
-    StrVec *src;
-    DirSel *sel;
-    Node *config;
-    struct timespec latest;
-    struct  {
-        i32 sources;
-        i32 built;
-        i32 idx;
-    } metrics;
-} BuildModule;
-
-typedef struct buildctx {
-    Type type;
-    MemCh *m;
-    struct timespec start;
-    struct timespec modified;
-    StrVec *src;
-    StrVec *dest;
-    Ident *ident;
-    Table *options;
-    Table *deps /*<BuildModule>*/;
-    BuildModule *mod;
-    struct {
-        Str *cc;
-        Str *ccVersion;
-        Str *ar;
-    } tools;
-    struct {
-        i32 sources;
-        i32 built;
-        i32 modules;
-        i32 modulesBuilt;
-    } metrics;
-    struct {
-        CliStatus *cli;
-        BuildCliFields fields;
-    } cli;
-} BuildCtx;
-
-void BuildCtx_Config(BuildCtx *ctx);
-status BuildCtx_Build(BuildCtx *ctx);
-
-status BuildCtx_Log(BuildCtx *ctx);
-void BuildCtx_SetQuiet(boolean quiet);
-
-status BuildCli_RenderStatus(MemCh *m, void *a);
-status BuildCli_SetupComplete(BuildCtx *ctx);
-status BuildCli_SetupStatus(BuildCtx *ctx);
-
-status BuildCtx_ParseDependencies(BuildCtx *ctx, StrVec *key, StrVec *path);
-
-status BuildCtx_GenAllIncSpan(BuildCtx *ctx);
-status BuildCtx_GenIncFlags(BuildCtx *ctx, Span *modlist, Span *apis, Table *genlist);
-status BuildCtx_GenStrArr(BuildCtx *ctx, Span *files, Str *filter);
-status BuildCtx_GenStr(BuildCtx *ctx, StrVec *file, Str *filter);
-
-status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel);
-status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel);
-status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel);
-status BuildCtx_SetFlag(BuildCtx *ctx, StrVec *flag);
-StrVec *BuildCtx_DestFromSrc(BuildCtx *ctx,
-        StrVec *path, StrVec *src, StrVec *dest);
-
-status BuildCtx_ToSInit(MemCh *m);
-
-BuildCtx *BuildCtx_Make(MemCh *m);
-
-BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name);
-BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident);
-void BuildModule_Load(BuildCtx *ctx, BuildModule *md);
-void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md);
-void BuildModule_Build(MemCh *m, BuildCtx *ctx, BuildModule *md);
+#include "types/range.h"
+#include "types/structs.h"
+#include "buildctx.h"
+#include "module.h"
+#include "buildlogger.h"
+#include "cli.h"
+#include "object.h"
+#include "buildeka_tos.h"
 
 #endif

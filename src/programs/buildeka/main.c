@@ -90,9 +90,7 @@ i32 main(int argc, char **argv){
     ctx->options = CliArgs_Get(cli, optionsKey);
 
     if(CliArgs_Get(cli, quietKey)){
-        BuildCtx_SetQuiet(TRUE);
-    }else{
-        BuildCli_SetupStatus(ctx);
+        Ansi_SetColor(OutStream, FALSE);
     }
 
     BuildCtx_Build(ctx);

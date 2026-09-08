@@ -12,6 +12,7 @@ status BuildCtx_SetFlag(BuildCtx *ctx, StrVec *flag){
 }
 
 status BuildCtx_SetLogging(BuildCtx *ctx){
+    MemCh *m = ctx->m;
     Iter it;
     Iter_Init(&it, Table_Ordered(m, ctx->deps));
     while((Iter_Next(&it) & END) == 0){
@@ -19,6 +20,14 @@ status BuildCtx_SetLogging(BuildCtx *ctx){
         BuildModule *md = (BuildModule *)h->value;
         ctx->metrics.modules++;
         ctx->metrics.sources += md->metrics.sources;
+    }
+
+    if(Ansi_HasColor(OutStream)){
+        BuildCli_SetupStatus(ctx);
+        ctx->cli = CliStatus_Make(m, BuildCli_RenderStatus, ctx);
+        ctx->log = BuildCli_Log;
+    }else{
+        ctx->log = BuildLogger_Log;
     }
 }
 
@@ -29,15 +38,48 @@ status BuildCtx_Build(BuildCtx *ctx){
     Debug_Push(m, ctx);
 
     BuildCtx_Config(ctx);
+    BuildCtx_SetLogging(ctx);
+
     Iter it;
-    Iter_Init(&it, Table_Ordered(m, ctx->deps));
-    while((Iter_Next(&it) & END) == 0){
+    Iter_Init(&ctx->current.moduleIt, ctx->depsOrdered);
+    while((Iter_Next(&ctx->current.moduleIt) & END) == 0){
         Hashed *h = Iter_Get(&it);
         BuildModule *md = (BuildModule *)h->value;
         if((md->type.state & BUILDMODULE_SATISFIED) == 0){
-            BuildModule_Build(m, ctx, md);
+            void *ar[] = {
+                md->name,
+                Type_StateVec(m, md->type.of, md->type.state),
+                md->targetName, 
+                Time_ToRStr(m, &md->latest),
+                I32_Wrapped(m, md->metrics.sources),
+                md->src,
+                md->target,
+                NULL
+            };
+            Out("^p.Building @/@ -> ^D.$^d. latest(@) files:@ -> \n  $ -> $^0\n", ar);
+
+            if(md->sel == NULL || md->sel->dest == NULL){
+                Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                    "Empty DirSel no file count to build", NULL);
+                return ERROR;
+            }
+
+            Iter_Init(&ctx->current.sourcesIt, md->sel->dest);
+            while((Iter_Next(&ctx->current.sourcesIt) & END) == 0){
+                BuildObject *obj = BuildObject_Make(m,
+                    ctx, ctx->current.moduleIt.idx, ctx->current.sourcesIt.idx);
+                
+                void *ar[] = {
+                    obj,
+                    NULL
+                };
+                Out("^y.Building @^0\n", ar);
+            }
+
         }
     }
+}
+
     /*
 
     Time_Now(&ctx->start);
@@ -79,8 +121,6 @@ status BuildCtx_Build(BuildCtx *ctx){
 
     Return(m, r);
     */
-    return ZERO;
-}
 
 BuildCtx *BuildCtx_Make(MemCh *m){
     Debug_Push(m, NULL);
@@ -88,7 +128,6 @@ BuildCtx *BuildCtx_Make(MemCh *m){
     BuildCtx *ctx = MemCh_AllocOf(m, sizeof(BuildCtx), TYPE_BUILDCTX);
     ctx->type.of = TYPE_BUILDCTX;
     ctx->m = MemCh_Make();
-    ctx->cli.cli = CliStatus_Make(m, BuildCli_RenderStatus, ctx);
 
     ctx->dest = StrVec_Make(m);
     ctx->src = StrVec_Make(m);

@@ -111,3 +111,7 @@ status BuildCli_SetupStatus(BuildCtx *ctx){
 
     return SUCCESS;
 }
+
+status BuildCli_Log(MemCh *m, void *a, void *source){
+    return ZERO;
+}
