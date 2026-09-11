@@ -112,12 +112,23 @@ status BuildCtx_BuildObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
     Return(m, r);
 }
 
-BuildObject *BuildObject_Make(MemCh *m, BuildCtx *ctx, i32 modIdx, i32 idx){
-    BuildObject *obj = MemCh_AllocOf(m, sizeof(BuildObject), TYPE_BUILD_OBJECT);
+BuildObject *BuildObject_Current(MemCh *m, BuildCtx *ctx){
+    i32 modIdx = ctx->current.moduleIt.idx;
+    i32 idx = ctx->current.sourcesIt.idx;
+
+    BuildObject *obj = MemCh_AllocOf(m, 
+        sizeof(BuildObject), TYPE_BUILD_OBJECT);
     obj->type.of = TYPE_BUILD_OBJECT;
 
-    obj->md = Span_Get(ctx->depsOrdered, modIdx);
+    Hashed *h = Iter_Get(&ctx->current.moduleIt);
+    if(h == NULL || h->value == NULL){
+        Error(m, FUNCNAME, FUNCNAME, LINENUMBER, 
+            "Error no module found as current in Iter", NULL);
+        obj->type.state |= ERROR;
+        return obj;
+    }
 
+    obj->md = (BuildModule *)h->value;
     if(obj->md->sel == NULL || obj->md->sel->dest == NULL){
         Error(m, FUNCNAME, FUNCNAME, LINENUMBER, 
             "Error no source files in module", NULL);
@@ -125,10 +136,13 @@ BuildObject *BuildObject_Make(MemCh *m, BuildCtx *ctx, i32 modIdx, i32 idx){
         return obj;
     }
 
-    obj->src = Span_Get(obj->md->sel->dest, idx);
+    obj->src = IoUtil_Annotate(m, Iter_Get(&ctx->current.sourcesIt));
     StrVec *local = Clone(m, obj->src);
     StrVec_Incr(local, ctx->src->total+1);
     obj->dest = Clone(m, ctx->dest);
-    IoUtil_AddVec(m, obj->dest, local);
+    StrVec *out = Clone(m, local);
+    IoUtil_SwapExt(m, out, S(m, "o"));
+    IoUtil_AddVec(m, obj->dest, out);
     
+    return obj;
 }

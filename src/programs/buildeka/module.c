@@ -618,7 +618,7 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
 
     StrVec *domain = StrVec_From(m, Ident_DomainStr(m, ident));
     if(!Equals(domain, K(m, "programs"))){
-        domain = Sv(m, "mod");
+        IoUtil_AddVec(m, md->src, Sv(m, "mod"));
     }
 
     IoUtil_AddVec(m, md->src, domain);

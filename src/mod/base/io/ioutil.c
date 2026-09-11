@@ -150,7 +150,7 @@ status IoUtil_SwapExt(MemCh *m, StrVec *path, Str *ext){
                 "Expected path sep of flag type LAST before path sep of MORE"
                 " in & at @", args);
             return ERROR;
-        }else if (s->type.state & LAST){
+        }else if (flags & LAST){
             break;
         }else{
             Str *s = Iter_Get(&it);
@@ -161,7 +161,7 @@ status IoUtil_SwapExt(MemCh *m, StrVec *path, Str *ext){
 
     if((flags & LAST) == 0){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Extension seperator not found in @ at @", args);
+            "Extension seperator not found in @ at &", args);
         return ERROR;
     }
 

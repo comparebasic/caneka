@@ -750,15 +750,19 @@ status Buff_PosEnd(Buff *bf){
     return Buff_posFrom(bf, 0, SEEK_END);
 }
 
-Buff *Buff_From(MemCh *m, StrVec *v){
-    Buff *bf = (Buff *)MemCh_AllocOf(m, sizeof(Buff), TYPE_BUFF);
-    bf->type.of = TYPE_BUFF;
+void Buff_InitVec(MemCh *m, Buff *bf,  StrVec *v){
     bf->m = m;
     bf->v = v;
     bf->tail.idx = -1;
     bf->unsent.idx = 0;
     bf->unsent.s = Span_Get(v->p, bf->unsent.idx);
     bf->unsent.total = v->total;
+}
+
+Buff *Buff_From(MemCh *m, StrVec *v){
+    Buff *bf = (Buff *)MemCh_AllocOf(m, sizeof(Buff), TYPE_BUFF);
+    bf->type.of = TYPE_BUFF;
+    Buff_InitVec(m, bf, v);
     return bf;
 }
 

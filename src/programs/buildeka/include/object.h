@@ -5,4 +5,4 @@ typedef struct build_object {
     BuildModule *md;
 } BuildObject;
 
-BuildObject *BuildObject_Make(MemCh *m, BuildCtx *ctx, i32 modIdx, i32 idx);
+BuildObject *BuildObject_Current(MemCh *m, BuildCtx *ctx);

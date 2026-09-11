@@ -466,7 +466,8 @@ status Iter_Next(Iter *it){
         it->type.state &= ~END;
     }
 
-    if((it->type.state & END) || (it->type.state & PROCESSING) == 0){
+    if((it->type.state & END) || 
+            it->idx < 0 || (it->type.state & PROCESSING) == 0){
         word fl = it->type.state & ~(END|LAST);
         if(it->type.state & END){
             idx = 0;
@@ -704,12 +705,15 @@ status Iter_Reset(Iter *it){
 
 status Iter_Prev(Iter *it){
     it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_GET|FLAG_ITER_REVERSE);
-    if(it->idx == 0 && it->type.state & PROCESSING){
+    if(it->idx == 0){
         it->type.state |= END;
-        return it->type.state;
+        if(it->type.state & PROCESSING){
+            return it->type.state;
+        }
     }else{
         it->type.state &= ~END;
     }
+
     return _Iter_Prev(it);
 }
 

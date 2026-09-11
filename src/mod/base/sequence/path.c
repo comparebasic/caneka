@@ -321,16 +321,15 @@ status Path_Check(void *_a, Span *sep){
 
     Iter it;
     Iter sepIt;
-
+    Iter_Init(&sepIt, sep);
     if(a->type.of == TYPE_STR){
         Str *s = (Str *)a;
         byte *ptr = s->bytes;
         byte *last = s->bytes+s->length-1;
         while(TRUE){
-            sepIt.type.state = ZERO;
             while((Iter_Next(&sepIt) & END) == 0){
                 Single *sg = (Single *)Iter_Get(&sepIt);
-                if(*ptr == sg->val.b){
+                if(*ptr == sg->val.b && sepIt.type.state & LAST){
                     return SUCCESS;
                 }
             }
@@ -339,7 +338,6 @@ status Path_Check(void *_a, Span *sep){
             }
             ptr++;
         }
-
     }else if(a->type.of == TYPE_STRVEC){
         StrVec *v = (StrVec *)a;
         Iter_Init(&it, v->p);
@@ -351,10 +349,9 @@ status Path_Check(void *_a, Span *sep){
             byte *ptr = s->bytes;
             byte *last = s->bytes+s->length-1;
             while(TRUE){
-                sepIt.type.state = ZERO;
                 while((Iter_Next(&sepIt) & END) == 0){
                     Single *sg = (Single *)Iter_Get(&sepIt);
-                    if(*ptr == sg->val.b){
+                    if(*ptr == sg->val.b && sepIt.type.state & LAST){
                         return SUCCESS;
                     }
                 }

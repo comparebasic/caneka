@@ -65,5 +65,6 @@ i64 Buff_GetPos(Buff *bf);
 
 Buff *Buff_From(MemCh *m, StrVec *v);
 Buff *Buff_Make(MemCh *m, word flags);
+void Buff_InitVec(MemCh *m, Buff *bf, StrVec *v);
 
 util Hash_Buff(void *bf);

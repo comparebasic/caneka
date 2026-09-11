@@ -1,13 +1,54 @@
 #include <external.h>
 #include "buildeka_module.h"
 
-status BuildCtx_SetFlag(BuildCtx *ctx, StrVec *flag){
-    /*
-    if(Span_Has(ctx->input.cflags, flag) == -1){
-        Span_Add(ctx->input.cflags, flag);
-        return SUCCESS;
+status BuildCtx_SetFlags(BuildCtx *ctx){
+    MemCh *m = ctx->m;
+    ctx->current.flags = Span_Make(m);
+    void *args[4];
+
+    args[0] = ctx->dest;
+    args[1] = NULL;
+    Span_Add(ctx->current.flags, S(m, "-I"));
+    Span_Add(ctx->current.flags, Fmt_ToStrVec(m, "$/include/", args));
+
+    args[0] = ctx->src;
+    args[1] = NULL;
+    Span_Add(ctx->current.flags, S(m, "-I"));
+    Span_Add(ctx->current.flags, Fmt_ToStrVec(m, "$/api/include/", args));
+
+    Iter it;
+    Iter_Init(&it, ctx->depsOrdered);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            BuildModule *md = (BuildModule *)h->value;
+            args[0] = md->src;
+            args[1] = md->name;
+            args[2] = NULL;
+            Span_Add(ctx->current.flags, S(m, "-I"));
+            Span_Add(ctx->current.flags, Fmt_ToStrVec(m, "$/include/", args));
+        }
     }
-    */
+
+    Iter_Init(&it, ctx->options);
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *a = Iter_Get(&it);
+        Str *opt = NULL;
+        if(a->type.of == TYPE_STR){
+            opt = (Str *)a;
+        }else if(a->type.of == TYPE_IDENT){
+            Ident *ident = (Ident *)a;
+            opt = (Str *)Ifc(m, ident->name, TYPE_STR);
+        }
+        if(opt != NULL){
+            opt = Str_ToUpper(m, opt);
+            args[0] = opt;
+            args[1] = NULL;
+            Span_Add(ctx->current.flags, S(m, "-D"));
+            Span_Add(ctx->current.flags, Fmt_ToStrVec(m, "CNKOPT_$", args));
+        }
+    }
+
     return NOOP;
 }
 
@@ -29,6 +70,7 @@ status BuildCtx_SetLogging(BuildCtx *ctx){
     }else{
         ctx->log = BuildLogger_Log;
     }
+    return ZERO;
 }
 
 status BuildCtx_Build(BuildCtx *ctx){
@@ -40,87 +82,53 @@ status BuildCtx_Build(BuildCtx *ctx){
     BuildCtx_Config(ctx);
     BuildCtx_SetLogging(ctx);
 
-    Iter it;
     Iter_Init(&ctx->current.moduleIt, ctx->depsOrdered);
     while((Iter_Next(&ctx->current.moduleIt) & END) == 0){
-        Hashed *h = Iter_Get(&it);
-        BuildModule *md = (BuildModule *)h->value;
-        if((md->type.state & BUILDMODULE_SATISFIED) == 0){
+        Hashed *h = Iter_Get(&ctx->current.moduleIt);
+        if(h != NULL){
+            BuildCtx_SetFlags(ctx);
+
             void *ar[] = {
-                md->name,
-                Type_StateVec(m, md->type.of, md->type.state),
-                md->targetName, 
-                Time_ToRStr(m, &md->latest),
-                I32_Wrapped(m, md->metrics.sources),
-                md->src,
-                md->target,
+                ctx->current.flags,
                 NULL
             };
-            Out("^p.Building @/@ -> ^D.$^d. latest(@) files:@ -> \n  $ -> $^0\n", ar);
+            Out("^y.Flags @^0\n", ar);
 
-            if(md->sel == NULL || md->sel->dest == NULL){
-                Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                    "Empty DirSel no file count to build", NULL);
-                return ERROR;
-            }
-
-            Iter_Init(&ctx->current.sourcesIt, md->sel->dest);
-            while((Iter_Next(&ctx->current.sourcesIt) & END) == 0){
-                BuildObject *obj = BuildObject_Make(m,
-                    ctx, ctx->current.moduleIt.idx, ctx->current.sourcesIt.idx);
-                
+            BuildModule *md = (BuildModule *)h->value;
+            if((md->type.state & BUILDMODULE_SATISFIED) == 0){
                 void *ar[] = {
-                    obj,
+                    md->name,
+                    Type_StateVec(m, md->type.of, md->type.state),
+                    md->targetName, 
+                    Time_ToRStr(m, &md->latest),
+                    I32_Wrapped(m, md->metrics.sources),
+                    md->src,
+                    md->target,
                     NULL
                 };
-                Out("^y.Building @^0\n", ar);
-            }
+                Out("^p.Building @/@ -> ^D.$^d. latest(@) files:@ -> \n  $ -> $^0\n", ar);
 
+                if(md->sel == NULL || md->sel->dest == NULL){
+                    Error(m, FUNCNAME, FILENAME, LINENUMBER,
+                        "Empty DirSel no file count to build", NULL);
+                    return ERROR;
+                }
+
+                Iter_Init(&ctx->current.sourcesIt, md->sel->dest);
+                while((Iter_Next(&ctx->current.sourcesIt) & END) == 0){
+                    BuildObject *obj = BuildObject_Current(m, ctx);
+                    void *ar[] = {
+                        obj,
+                        NULL
+                    };
+                    Out("^c.Building @^0\n", ar);
+                }
+
+            }
         }
     }
+    return ZERO;
 }
-
-    /*
-
-    Time_Now(&ctx->start);
-
-    BuildCtx_GenAllIncSpan(ctx);
-
-    Iter it;
-    Iter_Init(&it, ctx->input.sources);
-    while((Iter_Next(&it) & END) == 0){
-        StrVec *v = StrVec_From(m, Iter_Get(&it));
-        IoUtil_Annotate(m, v);
-        StrVec *key = StrVec_Make(m);
-        StrVec_AddVecAfter(key, v, ctx->input.srcPrefix->p->nvalues+1);
-        BuildCtx_ParseDependencies(ctx, key, v);
-    }
-
-    if(ctx->type.state & DEBUG){
-        void *args[] = {ctx, NULL};
-        Out("^p.Ctx after dependencies &^0\n", args);
-    }
-
-    ctx->input.countModules->val.i = 0;
-    StrVec_Add(ctx->current.source, IoUtil_PathSep(m));
-    Iter_Init(&it, Table_Ordered(m, ctx->input.dependencies));
-    while((Iter_Prev(&it) & END) == 0){
-        Hashed *h = Iter_Get(&it);
-        if(h != NULL){
-            ctx->input.countModules->val.i = it.p->nvalues - it.idx;
-
-            IoUtil_TrimDir(m, h->key);
-            if(BuildCtx_BuildModule(ctx,
-                (StrVec *)h->key, (DirSel *)h->value) & ERROR){
-                r |= ERROR;
-                break;
-            }
-        }
-    }
-
-
-    Return(m, r);
-    */
 
 BuildCtx *BuildCtx_Make(MemCh *m){
     Debug_Push(m, NULL);

@@ -12,6 +12,7 @@ typedef struct buildctx {
     struct {
         Iter moduleIt /*<BuildModule>*/;;
         Iter sourcesIt /*<BuildModule>*/;;
+        Span *flags;
     } current;
     struct {
         Str *cc;
@@ -32,5 +33,6 @@ typedef struct buildctx {
 void BuildCtx_Config(BuildCtx *ctx);
 status BuildCtx_Build(BuildCtx *ctx);
 status BuildCtx_Log(BuildCtx *ctx);
+status BuildCtx_SetFlags(BuildCtx *ctx);
 
 BuildCtx *BuildCtx_Make(MemCh *m);

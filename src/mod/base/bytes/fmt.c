@@ -235,9 +235,13 @@ StrVec *Fmt_ToStrVec(MemCh *m, char *fmt, void **args){
      * into a StrVec object by using a temporary Buff
      * object
      */
-    Buff *bf = Buff_Make(m, ZERO);
-    Fmt(bf, fmt, args); 
-    return bf->v;
+    StrVec *v = StrVec_Make(m);
+    Buff bf;
+    memset(&bf, 0, sizeof(Buff));
+    bf.type.of = TYPE_BUFF;
+    Buff_InitVec(m, &bf, v);
+    Fmt(&bf, fmt, args); 
+    return bf.v;
 }
 
 FmtLine *FmtLine_Make(MemCh *m, char *fmt, void **args){
