@@ -15,6 +15,12 @@ static DirSel *BuildModule_makeDirSel(MemCh *m, BuildCtx *ctx, Str *ext, StrVec 
     return sel;
 }
 
+static void BuildModule_makeDestDir(MemCh *m, BuildCtx *ctx, BuildModule *md){
+    StrVec *path = IoUtil_BasePath(m, md->target);
+    IoUtil_AddVec(m, path, Sv(m, "object"));
+    Dir_CheckCreate(m, Ifc(m, path, TYPE_STR));
+}
+
 static status setDepVars(BuildCtx *ctx, StrVec *key, DirSel *sel){
     /*
     Debug_Push(ctx->m, key);
@@ -468,6 +474,114 @@ status BuildCtx_BuildModule(BuildCtx *ctx, StrVec *name, DirSel *sel){
     return r;
 }
 
+void BuildModule_SetFlags(BuildCtx *ctx, BuildModule *md){
+    MemCh *m = md->m;
+    Debug_Push(m, md);
+    md->flags = Span_Make(m);
+    void *args[4];
+
+    args[0] = ctx->dest;
+    args[1] = NULL;
+    Span_Add(md->flags, S(m, "-I"));
+    Span_Add(md->flags, Fmt_ToStrVec(m, "$/include/", args));
+
+    args[0] = ctx->src;
+    args[1] = NULL;
+    Span_Add(md->flags, S(m, "-I"));
+    Span_Add(md->flags, Fmt_ToStrVec(m, "$/api/include/", args));
+
+    Iter it;
+    Iter_Init(&it, ctx->depsOrdered);
+    while((Iter_Next(&it) & END) == 0){
+        Hashed *h = Iter_Get(&it);
+        if(h != NULL){
+            BuildModule *omd = (BuildModule *)h->value;
+            args[0] = omd->src;
+            args[1] = omd->name;
+            args[2] = NULL;
+            Span_Add(md->flags, S(m, "-I"));
+            Span_Add(md->flags, Fmt_ToStrVec(m, "$/include/", args));
+        }
+    }
+
+    Iter_Init(&it, ctx->options);
+    while((Iter_Next(&it) & END) == 0){
+        Abstract *a = Iter_Get(&it);
+        Str *opt = NULL;
+        if(a->type.of == TYPE_STR){
+            opt = (Str *)a;
+        }else if(a->type.of == TYPE_IDENT){
+            Ident *ident = (Ident *)a;
+            opt = (Str *)Ifc(m, ident->name, TYPE_STR);
+        }
+        if(opt != NULL){
+            opt = Str_ToUpper(m, opt);
+            args[0] = opt;
+            args[1] = NULL;
+            Span_Add(md->flags, S(m, "-D"));
+            Span_Add(md->flags, Fmt_ToStrVec(m, "CNKOPT_$", args));
+        }
+    }
+
+    ReturnVoid(m);
+}
+
+void BuildModule_BuildCurrent(BuildCtx *ctx){
+
+    Hashed *h = Iter_Get(&ctx->current.moduleIt);
+    if(h == NULL || h->value == NULL){
+        Error(ctx->m, FUNCNAME, FUNCNAME, LINENUMBER, 
+            "Error no module found as current in Iter", NULL);
+        ctx->type.state |= ERROR;
+        ReturnVoid(ctx->m);
+    }
+
+    BuildModule *md = (BuildModule *)h->value;
+    MemCh *m = md->m;
+    Debug_Push(m, md);
+    BuildModule_SetFlags(ctx, md);
+    BuildModule_makeDestDir(m, ctx, md);
+
+    void *_ar[] = {
+        ctx->current.flags,
+        NULL
+    };
+    Out("^y.Flags @^0\n", _ar);
+
+    void *ar[] = {
+        md->name,
+        Type_StateVec(m, md->type.of, md->type.state),
+        md->targetName, 
+        Time_ToRStr(m, &md->latest),
+        I32_Wrapped(m, md->metrics.sources),
+        md->src,
+        md->target,
+        NULL
+    };
+    Out("^p.Building @/@ -> ^D.$^d. latest(@) files:@ -> \n  $ -> $^0\n", ar);
+
+    if(md->sel == NULL || md->sel->dest == NULL){
+        Error(m, FUNCNAME, FILENAME, LINENUMBER,
+            "Empty DirSel no file count to build", NULL);
+        ReturnVoid(m);
+    }
+
+    Iter_Init(&ctx->current.sourcesIt, md->sel->dest);
+    while((Iter_Next(&ctx->current.sourcesIt) & END) == 0){
+        BuildObject *obj = BuildObject_Current(m, ctx);
+        if((obj->type.state & BUILDOBJ_SATISFIED) == 0){
+            void *ar[] = {
+                obj,
+                NULL
+            };
+            Out("^c.Building @^0\n", ar);
+            BuildObject_Build(m, ctx, obj);
+        }
+    }
+
+    ReturnVoid(m);
+}
+
 void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md){
     struct timespec hdrLatest;
 
@@ -486,7 +600,7 @@ void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md){
 }
 
 void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
-    MemCh *m = ctx->m;
+    MemCh *m = md->m;
     Debug_Push(m, md);
     if(md->config == NULL){
         StrVec *configPath = Clone(m, md->src);
@@ -541,15 +655,16 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
                             if(idx != -1){
                                 Abstract *opt = Span_Get(ctx->options, idx);
                                 if(opt->type.of == TYPE_IDENT){
-                                    omd = BuildModule_FromIdent(m, ctx, (Ident *)opt);
+                                    omd = BuildModule_FromIdent(MemCh_Make(),
+                                        ctx, (Ident *)opt);
                                 }else{
-                                    omd = BuildModule_Make(m, ctx, h->key);
+                                    omd = BuildModule_Make(MemCh_Make(), ctx, h->key);
                                 }
                                 Table_Set(ctx->deps, h->key, omd);
                                 BuildModule_Load(ctx, omd);
                             }
                         }else{
-                            omd = BuildModule_Make(m, ctx, h->key);
+                            omd = BuildModule_Make(MemCh_Make(), ctx, h->key);
                             Table_Set(ctx->deps, h->key, omd);
                             BuildModule_Load(ctx, omd);
                         }
@@ -581,15 +696,18 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
 BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
     BuildModule *md = MemCh_AllocOf(m, sizeof(BuildModule), TYPE_BUILD_MODULE);
     md->type.of = TYPE_BUILD_MODULE;
+    md->m = m;
     md->name = name;
 
     Debug_Push(m, md);
 
     md->src = Clone(m, ctx->src);
+    md->local = StrVec_Make(m);
     StrVec *domain = domain = Sv(m, "mod");
 
-    IoUtil_AddVec(m, md->src, domain);
-    IoUtil_AddVec(m, md->src, name);
+    IoUtil_AddVec(m, md->local, domain);
+    IoUtil_AddVec(m, md->local, name);
+    IoUtil_AddVec(m, md->src, md->local);
 
     StrVec *target = Sv(m, "libcnk-");
     StrVec_AddVec(target, Clone(m, md->name));
@@ -603,6 +721,7 @@ BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
     IoUtil_AddVec(m, md->target, target);
     StrVec_AddVec(md->target, Sv(m, ".a"));
 
+    md->m->level++;
 
     Return(m, md);
 }
@@ -610,23 +729,27 @@ BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
 BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
     BuildModule *md = MemCh_AllocOf(m, sizeof(BuildModule), TYPE_BUILD_MODULE);
     md->type.of = TYPE_BUILD_MODULE;
+    md->m = m;
     md->name = StrVec_From(m, Ident_NameStr(m, ident));
 
     Debug_Push(m, md);
 
     md->src = Clone(m, ctx->src);
+    md->local = StrVec_Make(m);
 
     StrVec *domain = StrVec_From(m, Ident_DomainStr(m, ident));
     if(!Equals(domain, K(m, "programs"))){
-        IoUtil_AddVec(m, md->src, Sv(m, "mod"));
+        IoUtil_AddVec(m, md->local, Sv(m, "mod"));
     }
 
-    IoUtil_AddVec(m, md->src, domain);
+    IoUtil_AddVec(m, md->local, domain);
     if(ident->value == NULL){
-        IoUtil_AddVec(m, md->src, StrVec_From(m, Ident_NameStr(m, ident)));
+        IoUtil_AddVec(m, md->local, StrVec_From(m, Ident_NameStr(m, ident)));
     }else{
-        IoUtil_AddVec(m, md->src, StrVec_From(m, Ident_ValueStr(m, ident)));
+        IoUtil_AddVec(m, md->local, StrVec_From(m, Ident_ValueStr(m, ident)));
     }
+
+    IoUtil_AddVec(m, md->src, md->local);
 
     StrVec *target = Sv(m, "libcnk-");
     StrVec_AddVec(target, Clone(m, md->name));
@@ -639,6 +762,8 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
     IoUtil_AddVec(m, md->target, target);
     IoUtil_AddVec(m, md->target, target);
     StrVec_AddVec(md->target, Sv(m, ".a"));
+
+    md->m->level++;
 
     Return(m, md);
 }

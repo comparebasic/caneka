@@ -34,5 +34,6 @@ void BuildCtx_Config(BuildCtx *ctx);
 status BuildCtx_Build(BuildCtx *ctx);
 status BuildCtx_Log(BuildCtx *ctx);
 status BuildCtx_SetFlags(BuildCtx *ctx);
+status BuildCtx_MakeInclude(BuildCtx *ctx);
 
 BuildCtx *BuildCtx_Make(MemCh *m);

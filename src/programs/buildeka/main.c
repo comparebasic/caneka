@@ -31,6 +31,7 @@ i32 main(int argc, char **argv){
     Str *targetKey = K(m, "target");
     Str *typeKey = K(m, "type");
     Str *dirKey = K(m, "dir");
+    Str *debugKey = K(m, "debug");
     Str *libDirKey = K(m, "libDirs");
     Str *srcPrefixKey = K(m, "src-prefix");
 
@@ -46,6 +47,9 @@ i32 main(int argc, char **argv){
 
     Args_Add(cli, optionsKey, NULL, ARG_MULTIPLE|ARG_OPTIONAL,
         Sv(m, "Optional dependency source modules to include."));
+
+    Args_Add(cli, debugKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Optionaly add debug objects to objects."));
 
     Span *libDirs = Span_Make(m);
     Span_Add(libDirs, S(m, "/usr/lib64"));
@@ -91,6 +95,11 @@ i32 main(int argc, char **argv){
 
     if(CliArgs_Get(cli, quietKey)){
         Ansi_SetColor(OutStream, FALSE);
+    }
+
+    ctx->current.flags = Span_Make(m);
+    if(CliArgs_Get(cli, debugKey)){
+        Span_Add(ctx->current.flags, Sv(m, "-g"));
     }
 
     BuildCtx_Build(ctx);

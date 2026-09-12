@@ -2,15 +2,17 @@
 #include "buildeka_module.h"
 
 static Str **moduleLabels = NULL;
+static Str **objectLabels = NULL;
 
 status BuildObject_Print(Buff *bf, void *a, cls type, word flags){
     BuildObject *obj = (BuildObject *)a;
     void *ar[] = {
+        Type_StateVec(bf->m, obj->type.of, obj->type.state),
         obj->src,
         obj->dest,
         NULL
     };
-    return Fmt(bf, "Object<@ -> @>", ar);
+    return Fmt(bf, "Object<@ @ -> @>", ar);
 }
 
 status BuildModule_Print(Buff *bf, void *a, cls type, word flags){
@@ -77,16 +79,20 @@ status BuildCtx_Print(Buff *bf, void *a, cls type, word flags){
 }
 
 status BuildCtx_ToSInit(MemCh *m){
-    status r = READY;
     if(moduleLabels == NULL){
         moduleLabels = (Str **)Arr_Make(m, 17);
         moduleLabels[9] = Str_CstrRef(m, "INC");
         moduleLabels[10] = Str_CstrRef(m, "SATISFIED");
         Lookup_Add(m, ToSFlagLookup, TYPE_BUILD_MODULE, (void *)moduleLabels);
-        r |= SUCCESS;
     }
-    r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILDCTX, (void *)BuildCtx_Print);
-    r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILD_MODULE, (void *)BuildModule_Print);
-    r |= Lookup_Add(m, ToStreamLookup, TYPE_BUILD_OBJECT, (void *)BuildObject_Print);
-    return r;
+    if(objectLabels == NULL){
+        objectLabels = (Str **)Arr_Make(m, 17);
+        objectLabels[10] = Str_CstrRef(m, "SATISFIED");
+        Lookup_Add(m, ToSFlagLookup, TYPE_BUILD_OBJECT, (void *)objectLabels);
+    }
+    Lookup_Add(m, ToStreamLookup, TYPE_BUILDCTX, (void *)BuildCtx_Print);
+    Lookup_Add(m, ToStreamLookup, TYPE_BUILD_MODULE, (void *)BuildModule_Print);
+    Lookup_Add(m, ToStreamLookup, TYPE_BUILD_OBJECT, (void *)BuildObject_Print);
+
+    return ZERO;
 }

@@ -18,7 +18,7 @@ void BuildCtx_Config(BuildCtx *ctx){
 
     StrVec *configPath = StrVec_Make(m);
     if(ctx->ident != NULL){
-        md = BuildModule_FromIdent(m, ctx, ctx->ident);
+        md = BuildModule_FromIdent(MemCh_Make(), ctx, ctx->ident);
         BuildModule_Load(ctx, md);
     }
     

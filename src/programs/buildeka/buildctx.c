@@ -3,18 +3,22 @@
 
 status BuildCtx_SetFlags(BuildCtx *ctx){
     MemCh *m = ctx->m;
-    ctx->current.flags = Span_Make(m);
-    void *args[4];
+    return ZERO;
+}
 
-    args[0] = ctx->dest;
-    args[1] = NULL;
-    Span_Add(ctx->current.flags, S(m, "-I"));
-    Span_Add(ctx->current.flags, Fmt_ToStrVec(m, "$/include/", args));
-
-    args[0] = ctx->src;
-    args[1] = NULL;
-    Span_Add(ctx->current.flags, S(m, "-I"));
-    Span_Add(ctx->current.flags, Fmt_ToStrVec(m, "$/api/include/", args));
+status BuildCtx_MakeInclude(BuildCtx *ctx){
+    MemCh *m = ctx->m;
+    Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
+    StrVec *path = Clone(m, ctx->dest);
+    IoUtil_AddVec(m, path, Sv(m, "include/caneka.h"));
+    void *ar[] = {
+        path,
+        NULL
+    };
+    Out("Making dir for $^0\n", ar);
+    Dir_CheckCreateFor(m, path);
+    File_Open(bf, Ifc(m, path, TYPE_STR), O_WRONLY|O_CREAT);
+    Buff_Add(bf, S(m, "/* Caneka.h - main header file for building Caneka */\n\n#ifndef CANEKA_H\n#define CANEKA_H\n\n"));
 
     Iter it;
     Iter_Init(&it, ctx->depsOrdered);
@@ -22,34 +26,18 @@ status BuildCtx_SetFlags(BuildCtx *ctx){
         Hashed *h = Iter_Get(&it);
         if(h != NULL){
             BuildModule *md = (BuildModule *)h->value;
-            args[0] = md->src;
-            args[1] = md->name;
-            args[2] = NULL;
-            Span_Add(ctx->current.flags, S(m, "-I"));
-            Span_Add(ctx->current.flags, Fmt_ToStrVec(m, "$/include/", args));
+            void *ar[] = {
+                md->name,
+                NULL
+            };
+            Fmt(bf, "#include <$_module.h>\n", ar);
         }
     }
 
-    Iter_Init(&it, ctx->options);
-    while((Iter_Next(&it) & END) == 0){
-        Abstract *a = Iter_Get(&it);
-        Str *opt = NULL;
-        if(a->type.of == TYPE_STR){
-            opt = (Str *)a;
-        }else if(a->type.of == TYPE_IDENT){
-            Ident *ident = (Ident *)a;
-            opt = (Str *)Ifc(m, ident->name, TYPE_STR);
-        }
-        if(opt != NULL){
-            opt = Str_ToUpper(m, opt);
-            args[0] = opt;
-            args[1] = NULL;
-            Span_Add(ctx->current.flags, S(m, "-D"));
-            Span_Add(ctx->current.flags, Fmt_ToStrVec(m, "CNKOPT_$", args));
-        }
-    }
+    Buff_Add(bf, S(m, "\n#endif\n"));
+    File_Close(bf);
 
-    return NOOP;
+    return ZERO;
 }
 
 status BuildCtx_SetLogging(BuildCtx *ctx){
@@ -74,57 +62,27 @@ status BuildCtx_SetLogging(BuildCtx *ctx){
 }
 
 status BuildCtx_Build(BuildCtx *ctx){
-
     status r = READY;
     MemCh *m = ctx->m;
     Debug_Push(m, ctx);
 
     BuildCtx_Config(ctx);
     BuildCtx_SetLogging(ctx);
+    BuildCtx_SetFlags(ctx);
+    BuildCtx_MakeInclude(ctx);
 
     Iter_Init(&ctx->current.moduleIt, ctx->depsOrdered);
     while((Iter_Next(&ctx->current.moduleIt) & END) == 0){
         Hashed *h = Iter_Get(&ctx->current.moduleIt);
         if(h != NULL){
-            BuildCtx_SetFlags(ctx);
-
-            void *ar[] = {
-                ctx->current.flags,
-                NULL
-            };
-            Out("^y.Flags @^0\n", ar);
-
             BuildModule *md = (BuildModule *)h->value;
             if((md->type.state & BUILDMODULE_SATISFIED) == 0){
-                void *ar[] = {
-                    md->name,
-                    Type_StateVec(m, md->type.of, md->type.state),
-                    md->targetName, 
-                    Time_ToRStr(m, &md->latest),
-                    I32_Wrapped(m, md->metrics.sources),
-                    md->src,
-                    md->target,
-                    NULL
-                };
-                Out("^p.Building @/@ -> ^D.$^d. latest(@) files:@ -> \n  $ -> $^0\n", ar);
-
-                if(md->sel == NULL || md->sel->dest == NULL){
-                    Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                        "Empty DirSel no file count to build", NULL);
-                    return ERROR;
-                }
-
-                Iter_Init(&ctx->current.sourcesIt, md->sel->dest);
-                while((Iter_Next(&ctx->current.sourcesIt) & END) == 0){
-                    BuildObject *obj = BuildObject_Current(m, ctx);
-                    void *ar[] = {
-                        obj,
-                        NULL
-                    };
-                    Out("^c.Building @^0\n", ar);
-                }
-
+                BuildModule_BuildCurrent(ctx);
             }
+            /*
+            md->m->level--;
+            MemCh_FreeTemp(md->m);
+            */
         }
     }
     return ZERO;
