@@ -582,6 +582,47 @@ void BuildModule_BuildCurrent(BuildCtx *ctx){
     ReturnVoid(m);
 }
 
+void BuildModule_SetStatus(BuildCtx *ctx, BuildModule *md){
+    MemCh *m = md->m;
+    if(md->sel == NULL){
+        return;
+    }
+
+    Iter it;
+    Iter_Init(&it, md->sel->dest);
+    while((Iter_Next(&it) & END) == 0){
+        StrVec *v = Iter_Get(&it);
+        StrVec *path = IoUtil_Annotate(m, v);
+        StrVec *out = BuildObject_GetDest(m, ctx, md, path);
+
+        struct stat sourceSt;
+        struct stat st;
+        File_Stat(m, Ifc(m, v, TYPE_STR), &sourceSt);
+        if((File_Stat(m, Ifc(m, out, TYPE_STR), &st) & ERROR)
+                || (sourceSt.st_mtime > st.st_mtime)){
+            v->type.state |= MORE;
+            void *ar[] = {
+                v,
+                out,
+                NULL
+            };
+            Out("^p.Build $ vs $^0\n", ar);
+        }else{
+            void *ar[] = {
+                v,
+                out,
+                NULL
+            };
+            Out("^p.Already Built $ vs $^0\n", ar);
+            md->metrics.built++;
+        }
+    }
+
+    if(md->metrics.built == md->metrics.sources){
+        md->type.state |= BUILDMODULE_SATISFIED;
+    }
+}
+
 void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md){
     struct timespec hdrLatest;
 
@@ -594,8 +635,10 @@ void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md){
 
     if(Time_Greater(&hdrSel->time, &md->sel->time)){
         memcpy(&md->latest, &hdrLatest, sizeof(struct timespec));
+        md->type.state |= BUILDMODULE_HEADER_CHANGE;
     }else{
         memcpy(&md->latest, &md->sel->time, sizeof(struct timespec));
+        md->type.state |= BUILDMODULE_SOURCE_CHANGE;
     }
 }
 
@@ -687,7 +730,11 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
         if(targetModified.tv_sec > 0 && Time_Greater(&targetModified, &md->latest)){
             md->type.state |= BUILDMODULE_SATISFIED;
             md->metrics.built = md->metrics.sources;
+        }else{
+            BuildModule_SetStatus(ctx, md); 
         }
+    }else{
+        BuildModule_SetStatus(ctx, md); 
     }
 
     ReturnVoid(m);

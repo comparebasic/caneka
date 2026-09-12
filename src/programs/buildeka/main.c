@@ -102,6 +102,8 @@ i32 main(int argc, char **argv){
         Span_Add(ctx->current.flags, Sv(m, "-g"));
     }
 
+    BuildCtx_Setup(ctx);
+    BuildCtx_ShowStatus(ctx);
     BuildCtx_Build(ctx);
 
     args[0] = CliArgs_Get(cli, targetKey);

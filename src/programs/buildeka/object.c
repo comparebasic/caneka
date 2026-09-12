@@ -1,41 +1,17 @@
 #include <external.h>
 #include "buildeka_module.h"
 
-StrVec *BuildCtx_DestFromSrc(BuildCtx *ctx,
-        StrVec *path, StrVec *src, StrVec *dest){
-    return NULL;
-}
+StrVec *BuildObject_GetDest(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *path){
+    StrVec *local = Clone(m, path);
+    StrVec_Incr(local, ctx->src->total+1);
+    StrVec *dest = IoUtil_BasePath(m, md->target);
+    IoUtil_AddVec(m, dest, Sv(m, "object"));
 
-status BuildCtx_LinkObject(BuildCtx *ctx, StrVec *name, DirSel *sel){
-    MemCh *m = ctx->m;
-    Debug_Push(m, ctx->dest);
-    /*
-
-    ctx->cli.fields.current[BUILIDER_CLI_ACTION] = K(m, "Link Object");
-    ctx->cli.fields.current[BUILIDER_CLI_SOURCE] = ctx->current.source;
-    ctx->cli.fields.current[BUILIDER_CLI_DEST] = ctx->current.dest;
-    BuildCtx_Log(ctx);
-
-    ProcDets pd;
-    ProcDets_Init(m, &pd);
-
-    Span *cmd = Span_Make(m);
-    Span_Add(cmd, ctx->tools.ar);
-    Span_Add(cmd, Str_CstrRef(m, "-rc"));
-    Span_Add(cmd, StrVec_Str(m, ctx->current.target));
-    Span_Add(cmd, StrVec_Str(m, ctx->current.dest));
-
-    ProcDets_Init(m, &pd);
-    status re = SubProcess(m, cmd, &pd);
-    if(re & ERROR){
-        Debug_SetRef(m, cmd);
-        Fatal(ctx->m, FUNCNAME, FILENAME, LINENUMBER, 
-            "Build error for adding object to lib", NULL);
-        Return(m, ERROR);
-    }
-    */
-
-    Return(m, ZERO);
+    StrVec *out = Clone(m, local);
+    StrVec_Incr(out, md->local->total+1);
+    IoUtil_SwapExt(m, out, S(m, "o"));
+    IoUtil_AddVec(m, dest, out);
+    return dest;
 }
 
 void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj){
@@ -107,15 +83,7 @@ BuildObject *BuildObject_Current(MemCh *m, BuildCtx *ctx){
     }
 
     obj->src = IoUtil_Annotate(m, Iter_Get(&ctx->current.sourcesIt));
-    StrVec *local = Clone(m, obj->src);
-    StrVec_Incr(local, ctx->src->total+1);
-    obj->dest = IoUtil_BasePath(m, obj->md->target);
-    IoUtil_AddVec(m, obj->dest, Sv(m, "object"));
-    StrVec *out = Clone(m, local);
-
-    StrVec_Incr(out, obj->md->local->total+1);
-    IoUtil_SwapExt(m, out, S(m, "o"));
-    IoUtil_AddVec(m, obj->dest, out);
+    obj->dest = BuildObject_GetDest(m, ctx, obj->md, obj->src);
 
     struct stat sourceSt;
     struct stat st;

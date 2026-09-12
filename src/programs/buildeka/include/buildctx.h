@@ -31,6 +31,9 @@ typedef struct buildctx {
 
 
 void BuildCtx_Config(BuildCtx *ctx);
+status BuildCtx_Setup(BuildCtx *ctx);
+status BuildCtx_SetStatus(BuildCtx *ctx);
+status BuildCtx_ShowStatus(BuildCtx *ctx);
 status BuildCtx_Build(BuildCtx *ctx);
 status BuildCtx_Log(BuildCtx *ctx);
 status BuildCtx_SetFlags(BuildCtx *ctx);

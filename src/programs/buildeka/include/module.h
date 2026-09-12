@@ -1,6 +1,9 @@
 enum module_flags {
     BUILDMODULE_INC = 1 << 8,
     BUILDMODULE_SATISFIED = 1 << 9,
+    BUILDMODULE_SOURCE_CHANGE = 1 << 10,
+    BUILDMODULE_HEADER_CHANGE = 1 << 11,
+    BUILDMODULE_UPSTREAM_CHANGE = 1 << 12,
 };
 
 typedef struct build_module {
