@@ -740,8 +740,9 @@ BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
     IoUtil_AddVec(m, md->local, name);
     IoUtil_AddVec(m, md->src, md->local);
 
-    StrVec *target = Sv(m, "libcnk-");
+    StrVec *target = Sv(m, "libcaneka-");
     StrVec_AddVec(target, Clone(m, md->name));
+    StrVec_Add(target, S(m, "-"));
     StrVec_AddVec(target, Clone(m, domain));
 
     md->targetName = Clone(m, target);
@@ -769,7 +770,7 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
     md->local = StrVec_Make(m);
 
     StrVec *domain = StrVec_From(m, Ident_DomainStr(m, ident));
-    if(!Equals(domain, K(m, "programs"))){
+    if(!Equals(domain, K(m, "program"))){
         IoUtil_AddVec(m, md->local, Sv(m, "mod"));
     }
 
@@ -782,8 +783,9 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
 
     IoUtil_AddVec(m, md->src, md->local);
 
-    StrVec *target = Sv(m, "libcnk-");
+    StrVec *target = Sv(m, "libcaneka-");
     StrVec_AddVec(target, Clone(m, md->name));
+    StrVec_Add(target, S(m, "-"));
     StrVec_AddVec(target, Clone(m, domain));
 
     md->targetName = Clone(m, target);

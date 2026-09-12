@@ -4,7 +4,7 @@
  *
  * A small menu displays if no other arguments are given.
  *
- * The rest of the build process can be found at src/programs/buildeka/
+ * The rest of the build process can be found at src/program/buildeka/
  *
  * see ./LICENCE for licene details
  *
@@ -39,19 +39,19 @@ char *buildekaExamples = ""
     "\n"
     "    Build the \x1b[1mTest Program\x1b[22m\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/test --option base ext inter\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/program/test --option base ext inter\x1b[0m\n"
     "\n"
     "    With OpenSsl for crypto (experimental):\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/test --option base ext inter crypto=openssl@third\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/program/test --option base ext inter crypto=openssl@third\x1b[0m\n"
     "\n"
     "    Build the \x1b[1mClineka\x1b[22m command line tool\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/clineka --option crypto=openssl@third\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/program/clineka --option crypto=openssl@third\x1b[0m\n"
     "\n"
     "    Build the \x1b[1mWebServer\x1b[22m (Serveneka)\n"
     "\n"
-    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/programs/serveneka\x1b[0m\n"
+    "    \x1b[1m$\x1b[22m \x1b[33m./dist/bin/buildeka --src src/program/serveneka\x1b[0m\n"
     "\n"
     "    Build the \x1b[1mPyneka\x1b[22m Python module\n"
     "\n"
@@ -78,7 +78,7 @@ char *buildCaneka[] = {
 char *buildTests[] = {
     "./dist/bin/buildeka",
     "--target",
-    "test@programs",
+    "test@program",
     "--option",
     "base",
     "task",
@@ -90,7 +90,7 @@ char *buildTests[] = {
 char *buildTestsNoCrypto[] = {
     "./dist/bin/buildeka",
     "--src",
-    "src/programs/test",
+    "src/program/test",
     "--option",
     "base",
     "ext",
@@ -101,7 +101,7 @@ char *buildTestsNoCrypto[] = {
 char *buildWebServer[] = {
     "./dist/bin/buildeka",
     "--src",
-    "src/programs/serveneka",
+    "src/program/serveneka",
     "--option",
     "crypto=openssl@third",
     NULL
@@ -110,7 +110,7 @@ char *buildWebServer[] = {
 char *buildWebServerNoCrypto[] = {
     "./dist/bin/buildeka",
     "--src",
-    "src/programs/serveneka",
+    "src/program/serveneka",
     NULL
 };
 
@@ -118,7 +118,7 @@ char *buildWebServerNoCrypto[] = {
 char *buildCli[] = {
     "./dist/bin/buildeka",
     "--src",
-    "src/programs/clineka",
+    "src/program/clineka",
     "--option",
     "base",
     "ext",
@@ -161,7 +161,7 @@ char *runWebServerNoCrypto[] = {
 char *buildDoc[] = {
     "./dist/bin/buildeka",
     "--src",
-    "src/programs/doc",
+    "src/program/doc",
     NULL
 };
 
@@ -526,7 +526,7 @@ int main(int argc, char *argv[]){
 
     cmd[0] = "mkdir";
     cmd[1] = "-p";
-    cmd[2] = "build/lib/libcnk-basemod";
+    cmd[2] = "build/lib/libcaneka-base-mod";
     cmd[3] =  NULL;
 
     if(run("Making build dir", cmd) == -1){
@@ -557,7 +557,7 @@ int main(int argc, char *argv[]){
     cmd[3] = "-Isrc/api/include";
     cmd[4] = "-c";
     cmd[5] = "-o";
-    cmd[6] = "./build/lib/libcnk-basemod/libcnk-basemod.a";
+    cmd[6] = "./build/lib/libcaneka-base-mod/libcaneka-base-mod.a";
     cmd[7] = "./src/mod/base/inc.c";
     cmd[8] =  NULL;
 
@@ -567,14 +567,14 @@ int main(int argc, char *argv[]){
 
     cmd[0] = _gen_CC;
     cmd[1] = "-g";
-    cmd[2] = "-Isrc/programs/buildeka/include";
+    cmd[2] = "-Isrc/program/buildeka/include";
     cmd[3] = "-Isrc/mod/base/include";
     cmd[4] = "-Isrc/api/include";
-    cmd[5] = "-Iprograms/buildeka/include";
+    cmd[5] = "-Iprogram/buildeka/include";
     cmd[6] = "-o";
     cmd[7] = "./dist/bin/buildeka";
-    cmd[8] = "./build/lib/libcnk-basemod/libcnk-basemod.a";
-    cmd[9] = "./src/programs/buildeka/inc.c";
+    cmd[8] = "./build/lib/libcaneka-base-mod/libcaneka-base-mod.a";
+    cmd[9] = "./src/program/buildeka/inc.c";
     cmd[10] = "-lm";
     cmd[11] =  NULL;
 

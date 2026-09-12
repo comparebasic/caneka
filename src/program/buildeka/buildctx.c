@@ -90,51 +90,114 @@ status BuildCtx_SetStatus(BuildCtx *ctx){
 }
 
 status BuildCtx_ShowStatus(BuildCtx *ctx){
-    BuildModule *md = Span_Get(ctx->depsOrdered, ctx->depsOrdered->max_idx);
-    void *ar[] = {
-        md->local,
-        NULL
-    };
-    Out("^pD.^d.Building the following modules/sources for ^D.$^d.:\n", ar);
-
     MemCh *m = ctx->m;
+    BuildModule *md = Span_Get(ctx->depsOrdered, ctx->depsOrdered->max_idx);
+    void *args[6];
     Iter it;
+
+    args[0] = md->local;
+    args[1] = NULL;
+    Out("\n^pD.^d.Building the following modules/sources for ^D.$^d.:\n", args);
+
+    Iter_Init(&it, ctx->depsOrdered);
+    Out("  ^p.Order: ", NULL);
+    while((Iter_Next(&it) & END) == 0){
+        BuildModule *md = (BuildModule *)Iter_Get(&it);
+        args[0] = md->name;
+        args[1] = NULL;
+        if(it.type.state & LAST){
+            Out("$.", args);
+        }else{
+            Out("$, ", args);
+        }
+    }
+    Out("\n", NULL);
+
+    Span *build = Span_Make(m);
+    Span *update = Span_Make(m);
+    Span *skip = Span_Make(m);
+
     Iter_Init(&it, ctx->depsOrdered);
     while((Iter_Next(&it) & END) == 0){
         BuildModule *md = (BuildModule *)Iter_Get(&it);
-        void *args[5];
         if(md->type.state & BUILDOBJ_SATISFIED){
+            Span_Add(skip, md);
+        }else if(md->metrics.built > 0){
+            Span_Add(update, md);
+        }else{
+            Span_Add(build, md);
+        }
+    }
+
+    if(skip->nvalues > 0){
+        args[0] = I32_Wrapped(m, skip->nvalues);
+        args[1] = NULL;
+        Out("\n  ^g.Skipping ^D.$^d. modules: not rebuilding, newest target already exists:\n", args);
+
+        Iter_Init(&it, skip);
+        while((Iter_Next(&it) & END) == 0){
+            BuildModule *md = (BuildModule *)Iter_Get(&it);
             args[0] = md->name;
             args[1] = md->targetName;
             args[2] = NULL;
-            Out("  ^p.|\n  +-- ^D.$^d. -> ^0.not rebuilding, newest target already exists ($).\n", args);
-        }else{
-            Str *reason = S(m, "");
-            if(md->type.state & BUILDMODULE_UPSTREAM_CHANGE){
-                reason = S(m, "upstream changed");
-            }else if(md->type.state & BUILDMODULE_HEADER_CHANGE){
-                reason = S(m, "headers changed");
-            }else if(md->type.state & BUILDMODULE_SOURCE_CHANGE){
-                reason = S(m, "sources changed");
-            }
-
-            if(md->metrics.built > 0){
-                args[0] = md->name;
-                args[1] = I32_Wrapped(m, md->metrics.sources - md->metrics.built);
-                args[2] = I32_Wrapped(m, md->metrics.sources);
-                args[3] = reason;
-                args[4] = NULL;
-                Out("  ^p.|\n  +-- ^D.$^d. -> ^c.building ^D.$^d. of $ sources because $.\n", args);
-            }else{
-                args[0] = md->name;
-                args[1] = I32_Wrapped(m, md->metrics.sources);
-                args[2] = reason;
-                args[3] = NULL;
-                Out("  ^p.|\n  +-- ^D.$^d. -> building all ^D.$^d. sources because $.\n", args);
-            }
+            Out("    |\n    + ^D.$^d. -> (^D.$^d.).\n", args);
         }
     }
-    Out("^0.\n", ar);
+
+    if(update->nvalues > 0){
+        args[0] = I32_Wrapped(m, update->nvalues);
+        args[1] = NULL;
+        Out("\n  ^c.Updating ^D.$^d. modules:\n", args);
+
+        Str *reason = S(m, "");
+        if(md->type.state & BUILDMODULE_UPSTREAM_CHANGE){
+            reason = S(m, "upstream changed");
+        }else if(md->type.state & BUILDMODULE_HEADER_CHANGE){
+            reason = S(m, "headers changed");
+        }else if(md->type.state & BUILDMODULE_SOURCE_CHANGE){
+            reason = S(m, "sources changed");
+        }
+
+        Iter_Init(&it, update);
+        while((Iter_Next(&it) & END) == 0){
+            BuildModule *md = (BuildModule *)Iter_Get(&it);
+            args[0] = md->name;
+            args[1] = I32_Wrapped(m, md->metrics.sources - md->metrics.built);
+            args[2] = I32_Wrapped(m, md->metrics.sources);
+            args[3] = md->targetName;
+            args[4] = reason;
+            args[5] = NULL;
+            Out("    |\n    + ^D.$^d. -> rebuilding ^D.$^d. of $ objects (^D.$^d.): $.\n", args);
+        }
+    }
+
+    if(build->nvalues > 0){
+        args[0] = I32_Wrapped(m, build->nvalues);
+        args[1] = NULL;
+        Out("\n  ^y.Building ^D.$^d. modules:\n", args);
+
+        Str *reason = S(m, "");
+        if(md->type.state & BUILDMODULE_UPSTREAM_CHANGE){
+            reason = S(m, "upstream changed");
+        }else if(md->type.state & BUILDMODULE_HEADER_CHANGE){
+            reason = S(m, "headers changed");
+        }else if(md->type.state & BUILDMODULE_SOURCE_CHANGE){
+            reason = S(m, "sources changed");
+        }
+
+        Iter_Init(&it, build);
+        while((Iter_Next(&it) & END) == 0){
+            BuildModule *md = (BuildModule *)Iter_Get(&it);
+            args[0] = md->name;
+            args[1] = I32_Wrapped(m, md->metrics.sources);
+            args[2] = md->targetName;
+            args[3] = reason;
+            args[4] = NULL;
+            Out("    |\n    + ^D.$^d. -> building ^D.$^d. objects (^D.$^d.): $.\n", args);
+        }
+    }
+
+    Out("\n^0.\n", args);
     return ZERO;
 }
 

@@ -22,7 +22,7 @@ cmd="mkdir -p ./dist/bin"
 echo "making dir $cmd"
 $cmd;
 
-cmd="$CC -o ./dist/bin/bootstrap -DCC=${CC} -I src/programs/buildeka/include/ src/programs/buildeka/bootstrap.c"
+cmd="$CC -o ./dist/bin/bootstrap -DCC=${CC} -I src/program/buildeka/include/ src/program/buildeka/bootstrap.c"
 echo "building bootstrap: $cmd"
 $cmd
 
