@@ -493,15 +493,12 @@ void BuildModule_SetFlags(BuildCtx *ctx, BuildModule *md){
     Iter it;
     Iter_Init(&it, ctx->depsOrdered);
     while((Iter_Next(&it) & END) == 0){
-        Hashed *h = Iter_Get(&it);
-        if(h != NULL){
-            BuildModule *omd = (BuildModule *)h->value;
-            args[0] = omd->src;
-            args[1] = omd->name;
-            args[2] = NULL;
-            Span_Add(md->flags, S(m, "-I"));
-            Span_Add(md->flags, Fmt_ToStrVec(m, "$/include/", args));
-        }
+        BuildModule *omd = (BuildModule *)Iter_Get(&it);
+        args[0] = omd->src;
+        args[1] = omd->name;
+        args[2] = NULL;
+        Span_Add(md->flags, S(m, "-I"));
+        Span_Add(md->flags, Fmt_ToStrVec(m, "$/include/", args));
     }
 
     Iter_Init(&it, ctx->options);
@@ -528,15 +525,14 @@ void BuildModule_SetFlags(BuildCtx *ctx, BuildModule *md){
 
 void BuildModule_BuildCurrent(BuildCtx *ctx){
 
-    Hashed *h = Iter_Get(&ctx->current.moduleIt);
-    if(h == NULL || h->value == NULL){
+    BuildModule *md = (BuildModule *)Iter_Get(&ctx->current.moduleIt);
+    if(md == NULL){
         Error(ctx->m, FUNCNAME, FUNCNAME, LINENUMBER, 
             "Error no module found as current in Iter", NULL);
         ctx->type.state |= ERROR;
         ReturnVoid(ctx->m);
     }
 
-    BuildModule *md = (BuildModule *)h->value;
     MemCh *m = md->m;
     Debug_Push(m, md);
     BuildModule_SetFlags(ctx, md);
@@ -601,19 +597,7 @@ void BuildModule_SetStatus(BuildCtx *ctx, BuildModule *md){
         if((File_Stat(m, Ifc(m, out, TYPE_STR), &st) & ERROR)
                 || (sourceSt.st_mtime > st.st_mtime)){
             v->type.state |= MORE;
-            void *ar[] = {
-                v,
-                out,
-                NULL
-            };
-            Out("^p.Build $ vs $^0\n", ar);
         }else{
-            void *ar[] = {
-                v,
-                out,
-                NULL
-            };
-            Out("^p.Already Built $ vs $^0\n", ar);
             md->metrics.built++;
         }
     }

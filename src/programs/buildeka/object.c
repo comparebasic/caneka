@@ -66,15 +66,14 @@ BuildObject *BuildObject_Current(MemCh *m, BuildCtx *ctx){
 
     Debug_Push(m, obj);
 
-    Hashed *h = Iter_Get(&ctx->current.moduleIt);
-    if(h == NULL || h->value == NULL){
+    obj->md = (BuildModule *)Iter_Get(&ctx->current.moduleIt);
+    if(obj->md == NULL){
         Error(m, FUNCNAME, FUNCNAME, LINENUMBER, 
             "Error no module found as current in Iter", NULL);
         obj->type.state |= ERROR;
         return obj;
     }
 
-    obj->md = (BuildModule *)h->value;
     if(obj->md->sel == NULL || obj->md->sel->dest == NULL){
         Error(m, FUNCNAME, FUNCNAME, LINENUMBER, 
             "Error no source files in module", NULL);

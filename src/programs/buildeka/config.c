@@ -23,7 +23,7 @@ void BuildCtx_Config(BuildCtx *ctx){
     }
     
     Table_Set(ctx->deps, Ident_NameStr(m, ctx->ident), md);
-    ctx->depsOrdered = Table_Ordered(m, ctx->deps);
+    ctx->depsOrdered = Table_OrdValues(m, ctx->deps);
 
     ReturnVoid(m);
 }

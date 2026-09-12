@@ -23,15 +23,12 @@ status BuildCtx_MakeInclude(BuildCtx *ctx){
     Iter it;
     Iter_Init(&it, ctx->depsOrdered);
     while((Iter_Next(&it) & END) == 0){
-        Hashed *h = Iter_Get(&it);
-        if(h != NULL){
-            BuildModule *md = (BuildModule *)h->value;
-            void *ar[] = {
-                md->name,
-                NULL
-            };
-            Fmt(bf, "#include <$_module.h>\n", ar);
-        }
+        BuildModule *md = (BuildModule *)Iter_Get(&it);
+        void *ar[] = {
+            md->name,
+            NULL
+        };
+        Fmt(bf, "#include <$_module.h>\n", ar);
     }
 
     Buff_Add(bf, S(m, "\n#endif\n"));
@@ -79,59 +76,65 @@ status BuildCtx_SetStatus(BuildCtx *ctx){
     Iter it;
     Iter_Init(&it, ctx->depsOrdered);
     while((Iter_Next(&it) & END) == 0){
-        Hashed *h = Iter_Get(&it);
-        if(h != NULL){
-            BuildModule *md = (BuildModule *)h->value;
-            if(md->type.state & BUILDMODULE_HEADER_CHANGE){
-                r |= BUILDMODULE_UPSTREAM_CHANGE;
-                continue;
-            }
-            if(r != ZERO){
-                md->type.state &= ~BUILDMODULE_SATISFIED;
-            }
-            md->type.state |= r;
+        BuildModule *md = (BuildModule *)Iter_Get(&it);
+        if(md->type.state & BUILDMODULE_HEADER_CHANGE){
+            r |= BUILDMODULE_UPSTREAM_CHANGE;
+            continue;
         }
+        if(r != ZERO){
+            md->type.state &= ~BUILDMODULE_SATISFIED;
+        }
+        md->type.state |= r;
     }
     return ZERO;
 }
 
 status BuildCtx_ShowStatus(BuildCtx *ctx){
+    BuildModule *md = Span_Get(ctx->depsOrdered, ctx->depsOrdered->max_idx);
+    void *ar[] = {
+        md->local,
+        NULL
+    };
+    Out("^pD.^d.Building the following modules/sources for ^D.$^d.:\n", ar);
+
     MemCh *m = ctx->m;
     Iter it;
     Iter_Init(&it, ctx->depsOrdered);
     while((Iter_Next(&it) & END) == 0){
-        Hashed *h = Iter_Get(&it);
-        if(h != NULL){
-            BuildModule *md = (BuildModule *)h->value;
-            if(md->type.state & BUILDOBJ_SATISFIED){
-                void *ar[] = {
-                    md->name,
-                    NULL
-                };
-                Out("^pD.$^d. -> not rebuilding^0\n", ar);
+        BuildModule *md = (BuildModule *)Iter_Get(&it);
+        void *args[5];
+        if(md->type.state & BUILDOBJ_SATISFIED){
+            args[0] = md->name;
+            args[1] = md->targetName;
+            args[2] = NULL;
+            Out("  ^p.|\n  +-- ^D.$^d. -> ^0.not rebuilding, newest target already exists ($).\n", args);
+        }else{
+            Str *reason = S(m, "");
+            if(md->type.state & BUILDMODULE_UPSTREAM_CHANGE){
+                reason = S(m, "upstream changed");
+            }else if(md->type.state & BUILDMODULE_HEADER_CHANGE){
+                reason = S(m, "headers changed");
+            }else if(md->type.state & BUILDMODULE_SOURCE_CHANGE){
+                reason = S(m, "sources changed");
+            }
+
+            if(md->metrics.built > 0){
+                args[0] = md->name;
+                args[1] = I32_Wrapped(m, md->metrics.sources - md->metrics.built);
+                args[2] = I32_Wrapped(m, md->metrics.sources);
+                args[3] = reason;
+                args[4] = NULL;
+                Out("  ^p.|\n  +-- ^D.$^d. -> ^c.building ^D.$^d. of $ sources because $.\n", args);
             }else{
-                Str *reason = S(m, "");
-                if(md->type.state & BUILDMODULE_UPSTREAM_CHANGE){
-                    reason = S(m, 
-                        "Upstream Changed - rebuilding because of something upstream.");
-                }else if(md->type.state & BUILDMODULE_INC){
-                    reason = S(m, "Inc - using inc.c to build as includes.");
-                }else if(md->type.state & BUILDMODULE_HEADER_CHANGE){
-                    reason = S(m, "Header Changed - rebuilding.");
-                }else if(md->type.state & BUILDMODULE_SOURCE_CHANGE){
-                    reason = S(m, "Sources Changed - rebuilding select sources.");
-                }
-                void *ar[] = {
-                    md->name,
-                    I32_Wrapped(m, md->metrics.sources - md->metrics.built),
-                    I32_Wrapped(m, md->metrics.sources),
-                    reason,
-                    NULL
-                };
-                Out("^pD.$^d. -> building $ of $ sources: $^0\n", ar);
+                args[0] = md->name;
+                args[1] = I32_Wrapped(m, md->metrics.sources);
+                args[2] = reason;
+                args[3] = NULL;
+                Out("  ^p.|\n  +-- ^D.$^d. -> building all ^D.$^d. sources because $.\n", args);
             }
         }
     }
+    Out("^0.\n", ar);
     return ZERO;
 }
 
@@ -144,17 +147,14 @@ status BuildCtx_Build(BuildCtx *ctx){
 
     Iter_Init(&ctx->current.moduleIt, ctx->depsOrdered);
     while((Iter_Next(&ctx->current.moduleIt) & END) == 0){
-        Hashed *h = Iter_Get(&ctx->current.moduleIt);
-        if(h != NULL){
-            BuildModule *md = (BuildModule *)h->value;
-            if((md->type.state & BUILDMODULE_SATISFIED) == 0){
-                BuildModule_BuildCurrent(ctx);
-            }
-            /*
-            md->m->level--;
-            MemCh_FreeTemp(md->m);
-            */
+        BuildModule *md = (BuildModule *)Iter_Get(&ctx->current.moduleIt);
+        if((md->type.state & BUILDMODULE_SATISFIED) == 0){
+            BuildModule_BuildCurrent(ctx);
         }
+        /*
+        md->m->level--;
+        MemCh_FreeTemp(md->m);
+        */
     }
     return ZERO;
 }
