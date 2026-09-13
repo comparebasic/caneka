@@ -8,6 +8,7 @@ enum module_flags {
 
 typedef struct build_module {
     Type type;
+    i32 idx;
     MemCh *m;
     StrVec *name;
     StrVec *target;
@@ -21,7 +22,7 @@ typedef struct build_module {
     Node *config;
     struct timespec latest;
     struct  {
-        i32 sources;
+        i32 total;
         i32 built;
         i32 idx;
     } metrics;
@@ -32,4 +33,4 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident);
 void BuildModule_Load(BuildCtx *ctx, BuildModule *md);
 void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md);
 void BuildModule_SetFlags(BuildCtx *ctx, BuildModule *md);
-void BuildModule_BuildCurrent(BuildCtx *ctx);
+void BuildModule_Build(BuildCtx *ctx, BuildModule *md);

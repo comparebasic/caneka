@@ -289,19 +289,8 @@ static status _Iter_Prev(Iter *it){
         goto end;
     }
 
-    if(it->type.state & END || it->idx < 0){
+    if((it->type.state & END) || (it->type.state & PROCESSING) == 0){
         idx = it->idx = it->p->max_idx;
-        it->type.state &= ~(END|LAST);
-        it->type.state |= PROCESSING;
-
-        word fl = it->type.state & (SPAN_OP_REMOVE|FLAG_ITER_REVERSE);
-        it->type.state &= ~(fl);
-        Iter_Query(it);
-        it->type.state |= fl;
-
-        goto end;
-
-    }else if((it->type.state & PROCESSING) == 0){
         it->type.state &= ~(END|LAST);
         it->type.state |= PROCESSING;
 
@@ -466,8 +455,7 @@ status Iter_Next(Iter *it){
         it->type.state &= ~END;
     }
 
-    if((it->type.state & END) || 
-            it->idx < 0 || (it->type.state & PROCESSING) == 0){
+    if((it->type.state & END) || (it->type.state & PROCESSING) == 0){
         word fl = it->type.state & ~(END|LAST);
         if(it->type.state & END){
             idx = 0;
@@ -705,15 +693,12 @@ status Iter_Reset(Iter *it){
 
 status Iter_Prev(Iter *it){
     it->type.state = (it->type.state & NORMAL_FLAGS) | (SPAN_OP_GET|FLAG_ITER_REVERSE);
-    if(it->idx == 0){
+    if(it->idx == 0 && it->type.state & PROCESSING){
         it->type.state |= END;
-        if(it->type.state & PROCESSING){
-            return it->type.state;
-        }
+        return it->type.state;
     }else{
         it->type.state &= ~END;
     }
-
     return _Iter_Prev(it);
 }
 

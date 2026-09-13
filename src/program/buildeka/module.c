@@ -70,32 +70,13 @@ void BuildModule_SetFlags(BuildCtx *ctx, BuildModule *md){
     ReturnVoid(m);
 }
 
-void BuildModule_BuildCurrent(BuildCtx *ctx){
-
-    BuildModule *md = (BuildModule *)Iter_Get(&ctx->current.moduleIt);
-    if(md == NULL){
-        Error(ctx->m, FUNCNAME, FUNCNAME, LINENUMBER, 
-            "Error no module found as current in Iter", NULL);
-        ctx->type.state |= ERROR;
-        ReturnVoid(ctx->m);
-    }
-
+void BuildModule_Build(BuildCtx *ctx, BuildModule *md){
     MemCh *m = md->m;
     Debug_Push(m, md);
     BuildModule_SetFlags(ctx, md);
     BuildModule_makeDestDir(m, ctx, md);
 
-    void *ar[] = {
-        md->name,
-        Type_StateVec(m, md->type.of, md->type.state),
-        md->targetName, 
-        Time_ToRStr(m, &md->latest),
-        I32_Wrapped(m, md->metrics.sources),
-        md->src,
-        md->target,
-        NULL
-    };
-    Out("^p.Building @/@ -> ^D.$^d. latest(@) files:@ -> \n  $ -> $^0\n", ar);
+    ctx->log(m, ctx, md);
 
     if(md->sel == NULL || md->sel->dest == NULL){
         Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -108,25 +89,21 @@ void BuildModule_BuildCurrent(BuildCtx *ctx){
         File_Unlink(m, targetPathS);
     }
 
-    Iter_Init(&ctx->current.sourcesIt, md->sel->dest);
-    while((Iter_Next(&ctx->current.sourcesIt) & END) == 0){
-        StrVec *v = Iter_Get(&ctx->current.sourcesIt);
+    Iter it;
+    Iter_Init(&it, md->sel->dest);
+    while((Iter_Next(&it) & END) == 0){
+        StrVec *v = Iter_Get(&it);
         /* skip exec files for now */
         if(v->type.state & LAST){
             continue;
         }
-        BuildObject *obj = BuildObject_Current(m, ctx);
 
-        void *ar[] = {
-            v,
-            NULL
-        };
-        Out("^y.Building @^0\n", ar);
+        BuildObject *obj = BuildObject_From(m, ctx, md, v);
+        obj->idx = it.idx;
 
-        if(v->type.state & MORE){
-            if((obj->type.state & BUILDOBJ_SATISFIED) == 0){
-                BuildObject_Build(m, ctx, obj);
-            }
+        if((v->type.state & MORE) &&
+                (obj->type.state & BUILDOBJ_SATISFIED) == 0){
+            BuildObject_Build(m, ctx, obj);
         }
         BuildObject_Link(m, ctx, obj);
         md->metrics.built++;
@@ -140,11 +117,6 @@ void BuildModule_BuildCurrent(BuildCtx *ctx){
             Hashed *h = Iter_Get(&it);
             if(h != NULL){
                 BuildObject *obj = BuildObject_Exec(m, ctx, md, h->value);
-                void *ar[] = {
-                    obj,
-                    NULL
-                };
-                Out("^p.Exec Obj @^0\n", ar);
                 BuildObject_Build(m, ctx, obj);
                 md->metrics.built++;
                 ctx->metrics.built++;
@@ -184,11 +156,6 @@ void BuildModule_SetStatus(BuildCtx *ctx, BuildModule *md){
             Hashed *h = NULL; 
             if(md->execTbl != NULL && (h = Table_Get(md->execTbl, path)) != NULL){
                 v->type.state |= LAST;
-                void *ar[] = {
-                    v,
-                    NULL
-                };
-                Out("^y.Skipping Exec @^0\n", ar);
             }
 
             StrVec *out = BuildObject_GetDest(m, ctx, md, path);
@@ -205,7 +172,7 @@ void BuildModule_SetStatus(BuildCtx *ctx, BuildModule *md){
         }
     }
 
-    if(md->metrics.built == md->metrics.sources){
+    if(md->metrics.built == md->metrics.total){
         md->type.state |= BUILDMODULE_SATISFIED;
     }
 }
@@ -365,23 +332,19 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
     BuildModule_Gather(m, ctx, md);
 
     if(md->sel != NULL && md->sel->dest != NULL ){
-        md->metrics.sources = md->sel->dest->nvalues;
+        md->metrics.total = md->sel->dest->nvalues;
     }
 
     Str *targetStr = Ifc(m, md->target, TYPE_STR);
     struct timespec targetModified = {0, 0};
     if(File_PathExists(m, targetStr)){
         File_ModTime(m, targetStr, &targetModified);
-        /*
         if(targetModified.tv_sec > 0 && Time_Greater(&targetModified, &md->latest)){
             md->type.state |= BUILDMODULE_SATISFIED;
-            md->metrics.built = md->metrics.sources;
+            md->metrics.built = md->metrics.total;
         }else{
-        */
             BuildModule_SetStatus(ctx, md); 
-            /*
         }
-        */
     }else{
         BuildModule_SetStatus(ctx, md); 
     }

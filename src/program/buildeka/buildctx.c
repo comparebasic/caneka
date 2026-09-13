@@ -55,7 +55,11 @@ status BuildCtx_SetLogging(BuildCtx *ctx){
         Hashed *h = Iter_Get(&it);
         BuildModule *md = (BuildModule *)h->value;
         ctx->metrics.modules++;
-        ctx->metrics.sources += md->metrics.sources;
+        if(md->type.state & BUILDMODULE_INC){
+            ctx->metrics.total += md->metrics.total-1;
+        }else{
+            ctx->metrics.total += md->metrics.total;
+        }
     }
 
     if(Ansi_HasColor(OutStream)){
@@ -172,8 +176,8 @@ status BuildCtx_ShowStatus(BuildCtx *ctx){
         while((Iter_Next(&it) & END) == 0){
             BuildModule *md = (BuildModule *)Iter_Get(&it);
             args[0] = md->name;
-            args[1] = I32_Wrapped(m, md->metrics.sources - md->metrics.built);
-            args[2] = I32_Wrapped(m, md->metrics.sources);
+            args[1] = I32_Wrapped(m, md->metrics.total - md->metrics.built);
+            args[2] = I32_Wrapped(m, md->metrics.total);
             args[3] = md->targetName;
             args[4] = reason;
             args[5] = NULL;
@@ -199,7 +203,7 @@ status BuildCtx_ShowStatus(BuildCtx *ctx){
         while((Iter_Next(&it) & END) == 0){
             BuildModule *md = (BuildModule *)Iter_Get(&it);
             args[0] = md->name;
-            args[1] = I32_Wrapped(m, md->metrics.sources);
+            args[1] = I32_Wrapped(m, md->metrics.total);
             args[2] = md->targetName;
             args[3] = reason;
             args[4] = NULL;
@@ -218,21 +222,16 @@ status BuildCtx_Build(BuildCtx *ctx){
 
     BuildCtx_MakeInclude(ctx);
 
-    Iter_Init(&ctx->current.moduleIt, ctx->depsOrdered);
-    while((Iter_Next(&ctx->current.moduleIt) & END) == 0){
-        BuildModule *md = (BuildModule *)Iter_Get(&ctx->current.moduleIt);
-        /*
-        if((md->type.state & BUILDMODULE_SATISFIED) == 0){
-        */
-            BuildModule_BuildCurrent(ctx);
-        /*
+    Iter it;
+    Iter_Init(&it, ctx->depsOrdered);
+    while((Iter_Next(&it) & END) == 0){
+        BuildModule *md = (BuildModule *)Iter_Get(&it);
+        md->idx = it.idx;
+        if(md->type.state & BUILDMODULE_SATISFIED){
+            ctx->metrics.built += md->metrics.total;
+        }else{
+            BuildModule_Build(ctx, md);
         }
-        */
-
-        /*
-        md->m->level--;
-        MemCh_FreeTemp(md->m);
-        */
     }
     return ZERO;
 }

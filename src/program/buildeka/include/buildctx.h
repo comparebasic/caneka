@@ -11,8 +11,6 @@ typedef struct buildctx {
     Table *deps /*<BuildModule>*/;
     Span *depsOrdered /*<BuildModule>*/;
     struct {
-        Iter moduleIt /*<BuildModule>*/;;
-        Iter sourcesIt /*<BuildModule>*/;;
         Span *flags;
         Span *statLibs;
         Span *libs;
@@ -24,7 +22,7 @@ typedef struct buildctx {
         Str *ar;
     } tools;
     struct {
-        i32 sources;
+        i32 total;
         i32 built;
         i32 modules;
         i32 modulesBuilt;

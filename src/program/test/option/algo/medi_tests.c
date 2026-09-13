@@ -32,7 +32,7 @@ status MediTree_Tests(MemCh *m){
         args[2] = I64_Wrapped(m, MediTree_Find(m, medi, vals[idx]));
         args[3] = NULL;
         r|= Test(Equals(args[1], args[2]), 
-            "Value found in MediTree matches for val of $, expected $, have $", args);
+            "Value found in MediTree matches for value of $, expected $, have $", args);
 
         idx++;
     }

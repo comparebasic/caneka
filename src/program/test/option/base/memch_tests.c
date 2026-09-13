@@ -5,6 +5,7 @@
 status MemCh_Tests(MemCh *m){
     Debug_Push(m, NULL);
     status r = READY;
+    void *args[5];
 
     MemBook *cp = NULL;
 #ifdef INSECURE
@@ -42,8 +43,24 @@ status MemCh_Tests(MemCh *m){
     cp->type.state &= ~DEBUG;
 #endif
 
+    Single totalSg = {
+        .type = {TYPE_WRAPPED_I32, ZERO},
+        .objType = {0, 0},
+        .val.i = 0
+    };
+    Single startSg = {
+        .type = {TYPE_WRAPPED_I32, ZERO},
+        .objType = {0, 0},
+        .val.i = 0
+    };
+
     MemBook_GetStats(m, &st);
-    r |= Test(st.total == start, "MemBook chapters match the start level", NULL);
+    totalSg.val.i = st.total;
+    startSg.val.i = start;
+    args[0] = &startSg;
+    args[1] = &totalSg;
+    args[2] = NULL;
+    r |= Test(st.total == start, "MemBook chapters match the start level expected $, have $", args);
 
     Return(m, r);
 }

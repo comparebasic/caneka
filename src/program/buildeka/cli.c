@@ -112,6 +112,30 @@ status BuildCli_SetupStatus(BuildCtx *ctx){
     return SUCCESS;
 }
 
-status BuildCli_Log(MemCh *m, void *a, void *source){
+status BuildCli_Log(MemCh *m, void *a, void *_source){
+    BuildCtx *ctx = (BuildCtx *)a;
+    Abstract *source = (Abstract *)_source;
+    void *args[5];
+
+    if(source->type.of == TYPE_BUILD_MODULE){
+        BuildModule *md = (BuildModule *)source;
+        args[0] = Str_FromI64Pad(m, md->idx+1, 5, ' ');
+        args[1] = Str_FromI64Pad(m, ctx->depsOrdered->nvalues, 5, ' ');
+        args[2] = md->name; 
+        args[3] = NULL;
+        Out("^c.Module $ of $ ^D.$^d. ^0\n", args);
+    }else if(source->type.of == TYPE_BUILD_OBJECT){
+        BuildObject *obj = (BuildObject *)source;
+        args[0] = Str_FromI64Pad(m, ctx->metrics.built+1, 5, ' ');
+        args[1] = Str_FromI64Pad(m, ctx->metrics.total, 5, ' ');
+        args[2] = obj->dest; 
+        args[3] = NULL;
+        if(obj->type.state & BUILDOBJ_EXEC){
+            Out("^p    Exec $ of $ ^D.$^d.\n", args);
+        }else{
+            Out("^0    Object $ of $ ^D.$^d.\n", args);
+        }
+    }
+
     return ZERO;
 }

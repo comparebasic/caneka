@@ -20,7 +20,7 @@ Str *Str_UniRandom(MemCh *m, i64 n, word digits){
     return s;
 }
 
-Str *Str_FromI64Pad(MemCh *m, i64 n, i32 pad){
+Str *Str_FromI64Pad(MemCh *m, i64 n, i32 pad, char c){
     if(pad > MAX_BASE10){
         return NULL;
     }
@@ -28,16 +28,15 @@ Str *Str_FromI64Pad(MemCh *m, i64 n, i32 pad){
     Str *s = Str_Make(m, MAX_BASE10);
     byte *b = s->bytes;
     i64 length = Str_I64OnBytes(&b, b+MAX_BASE10-1, n);
+    s->length = (word)length;
     if(length != -1 && length < pad){
         word diff = pad-length;
         while(--diff){
-            *(--b) = '0';
+            *(--b) = c;
             s->length++;
             s->alloc++;
             s->bytes = b;
         }
-        s->length++;
-        s->alloc++;
     }
 
     return s;

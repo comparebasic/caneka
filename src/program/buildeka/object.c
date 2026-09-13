@@ -65,12 +65,24 @@ void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj){
         Span_AddSpan(cmd, ctx->current.libs);
     }
 
-    void *ar[] = {
-        obj,
-        cmd,
-        NULL,
-    };
-    Out("^c.Building @ ->\n    @^0\n", ar);
+    ctx->log(m, ctx, obj);
+    if(obj->type.state & BUILDOBJ_EXEC){
+        void *ar[] = {
+            obj,
+            NULL
+        };
+        Out("^p.    Obj: @\n^0", ar);
+        Iter it;
+        Iter_Init(&it, cmd);
+        while((Iter_Next(&it) & END) == 0){
+            ToS(OutStream, Iter_Get(&it), ZERO, ZERO); 
+            if(it.type.state & LAST){
+                Buff_AddBytes(OutStream, (byte *)"\n", 1);
+            }else{
+                Buff_AddBytes(OutStream, (byte *)" ", 1);
+            }
+        }
+    }
 
     ProcDets pd;
     ProcDets_Init(m, &pd);
@@ -112,17 +124,15 @@ BuildObject *BuildObject_Exec(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *
     return obj;
 }
 
-BuildObject *BuildObject_Current(MemCh *m, BuildCtx *ctx){
-    i32 modIdx = ctx->current.moduleIt.idx;
-    i32 idx = ctx->current.sourcesIt.idx;
-
+BuildObject *BuildObject_From(MemCh *m,
+        BuildCtx *ctx, BuildModule *md, StrVec *path){
     BuildObject *obj = MemCh_AllocOf(m, 
         sizeof(BuildObject), TYPE_BUILD_OBJECT);
     obj->type.of = TYPE_BUILD_OBJECT;
 
     Debug_Push(m, obj);
 
-    obj->md = (BuildModule *)Iter_Get(&ctx->current.moduleIt);
+    obj->md = md;
     if(obj->md == NULL){
         Error(m, FUNCNAME, FUNCNAME, LINENUMBER, 
             "Error no module found as current in Iter", NULL);
@@ -137,14 +147,14 @@ BuildObject *BuildObject_Current(MemCh *m, BuildCtx *ctx){
         return obj;
     }
 
-    obj->src = IoUtil_Annotate(m, Iter_Get(&ctx->current.sourcesIt));
+    obj->src = IoUtil_Annotate(m, path);
     obj->dest = BuildObject_GetDest(m, ctx, obj->md, obj->src);
 
     struct stat sourceSt;
     struct stat st;
     File_Stat(m, Ifc(m, obj->src, TYPE_STR), &sourceSt);
     if((File_Stat(m, Ifc(m, obj->dest, TYPE_STR), &st) & SUCCESS)
-            && (sourceSt.st_mtime > st.st_mtime)){
+            && (st.st_mtime > sourceSt.st_mtime)){
         obj->type.state |= BUILDOBJ_SATISFIED;
     }
     

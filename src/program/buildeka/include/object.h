@@ -5,12 +5,13 @@ enum object_flags {
 
 typedef struct build_object {
     Type type;
+    i32 idx;
     StrVec *src;
     StrVec *dest;
     BuildModule *md;
 } BuildObject;
 
-BuildObject *BuildObject_Current(MemCh *m, BuildCtx *ctx);
+BuildObject *BuildObject_From(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *path);
 BuildObject *BuildObject_Exec(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *path);
 void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj);
 void BuildObject_Link(MemCh *m, BuildCtx *ctx, BuildObject *obj);

@@ -114,13 +114,6 @@ there is a bug when compling with gcc related to the order of static libs.
 This will compile and run the bootstrap program which will present a menu
 to guide you through the rest of the build process.
 
-### Manual Clean Step (for now)
-
-note: while the build program is working, it may need to be cleaned on
-each build for stability reasons (at present).
-
-    $ ./dist/bin/bootstrap --clean
-
 ### Run the WebServer with TLS
 
 To build and run the static webserver with TLS install the openssl-dev 3.0
