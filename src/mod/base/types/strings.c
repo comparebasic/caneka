@@ -63,6 +63,7 @@ static char *baseTypeStrings[] = {
     "CSTR",
     "STR",
     "STRVEC",
+    "STRBUILD",
     "IDENT",
     "HISTO",
     "COORD",

@@ -2,6 +2,7 @@
 #include "bytes/str_makers.h"
 #include "bytes/strvec.h"
 #include "bytes/cursor.h"
+#include "bytes/strbuild.h"
 #include "bytes/str_equals.h"
 #include "bytes/str_exact.h"
 #include "bytes/fmt.h"

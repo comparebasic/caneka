@@ -4,6 +4,7 @@ enum hash_flags {
 
 typedef struct hashed {
     Type type;
+    Type objType;
     i32 idx;
     i32 orderIdx;
     util id;

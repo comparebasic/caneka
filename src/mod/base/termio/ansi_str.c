@@ -31,14 +31,12 @@ boolean Ansi_HasColor(Buff *bf){
     return (bf->type.state & BUFF_COLOR) != 0;
 }
 
-Str *Str_ConsumeAnsi(Buff *bf, char **_ptr, char *end, boolean consume){
-    MemCh *m = bf->m;
+word Ansi_Consume(MemCh *m, char **_ptr, word length, byte *dest, word dlength){
     char *ptr = *_ptr;
     char c;
-    Str *s = Str_Make(m, ANSI_ESCAPE_MAX);
-    byte *_s = s->bytes; 
-    byte *b = s->bytes; 
-    byte *e = s->bytes+s->alloc-1;
+    char *end = ptr+length-1;
+    byte *b = dest; 
+    byte *e = dest+dlength-1;
     *(b++) = KEY_ESCAPE;
     *(b++) = '[';
     byte *start = b;
@@ -211,20 +209,17 @@ Str *Str_ConsumeAnsi(Buff *bf, char **_ptr, char *end, boolean consume){
         ptr++;
     }
     *(b++) = 'm';
+    *_ptr = ptr;
 
-    if(bf->type.state & BUFF_COLOR){
-        s->length = (word)(b - s->bytes);
-    }
-
-    if(consume){
-        *_ptr = ptr;
-    }
-
-    return s;
+    return (word)(b - dest);
 }
 
 Str *Str_FromAnsi(Buff *bf, char **_ptr, char *end){
-    return Str_ConsumeAnsi(bf, _ptr, end, FALSE);
+    Str *s = Str_Make(bf->m, ANSI_ESCAPE_MAX);
+    char *ptr = *_ptr;
+    s->length = Ansi_Consume(bf->m, _ptr, end - ptr, s->bytes, s->alloc);
+    *_ptr = ptr;
+    return s;
 }
 
 Str *Str_AnsiCstr(Buff *bf, char *cstr){

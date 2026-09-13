@@ -7,6 +7,17 @@ status Span_Set(Span *p, i32 idx, void *t){
     if(idx < 0){
         return NOOP;
     }
+
+    if(p->dims == 0 && idx < SPAN_STRIDE){
+        void **arr = (void *)p->root;
+        arr[idx] = t;
+        p->nvalues++;
+        if(idx > p->max_idx){
+            p->max_idx = idx;
+        }
+        return SUCCESS;
+    }
+
     Iter it;
     Iter_Init(&it, p);
     return Iter_SetByIdx(&it, idx, t);
@@ -20,6 +31,12 @@ void *Span_Get(Span *p, i32 idx){
     if(idx < 0){
         return NULL;
     }
+
+    if(p->dims == 0 && idx < SPAN_STRIDE){
+        void **arr = (void *)p->root;
+        return arr[idx];
+    }
+
     Iter it;
     Iter_Init(&it, p);
     return Iter_GetByIdx(&it, idx);

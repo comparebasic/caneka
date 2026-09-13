@@ -18,7 +18,7 @@ extern Str *AnsiDark;
 
 Str *Str_FromAnsi(Buff *bf, char **_ptr, char *end);
 Str *Str_AnsiCstr(Buff *bf, char *cstr);
-Str *Str_ConsumeAnsi(Buff *bf, char **_ptr, char *end, boolean consume);
+word Ansi_Consume(MemCh *m, char **ptr, word length, byte *dest, word dlength);
 status AnsiStr_Init(MemCh *m);
 boolean Ansi_HasColor(Buff *bf);
 void Ansi_SetColor(Buff *bf, boolean yn);
