@@ -119,6 +119,8 @@ void Fatal(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
      * args: void *[] passed to ToS to satisfy the contents in *fmt*
      */
     if(_crashing){
+        printf("%s", fmt);
+        fflush(stdout);
         Fmt(ErrStream, "\n^r.Fatal called after crashing^0.\n", NULL);
         exit(9);
         return;

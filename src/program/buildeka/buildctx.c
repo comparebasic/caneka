@@ -221,9 +221,14 @@ status BuildCtx_Build(BuildCtx *ctx){
     Iter_Init(&ctx->current.moduleIt, ctx->depsOrdered);
     while((Iter_Next(&ctx->current.moduleIt) & END) == 0){
         BuildModule *md = (BuildModule *)Iter_Get(&ctx->current.moduleIt);
+        /*
         if((md->type.state & BUILDMODULE_SATISFIED) == 0){
+        */
             BuildModule_BuildCurrent(ctx);
+        /*
         }
+        */
+
         /*
         md->m->level--;
         MemCh_FreeTemp(md->m);
@@ -250,6 +255,7 @@ BuildCtx *BuildCtx_Make(MemCh *m){
     ctx->current.flags = Span_Make(m);
     ctx->current.statLibs = Span_Make(m);
     ctx->current.libs = Span_Make(m);
+    ctx->current.libPaths = Span_Make(m);
 
     Return(m, ctx);
 }

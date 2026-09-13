@@ -116,13 +116,15 @@ void BuildModule_BuildCurrent(BuildCtx *ctx){
             continue;
         }
         BuildObject *obj = BuildObject_Current(m, ctx);
+
+        void *ar[] = {
+            v,
+            NULL
+        };
+        Out("^y.Building @^0\n", ar);
+
         if(v->type.state & MORE){
             if((obj->type.state & BUILDOBJ_SATISFIED) == 0){
-                void *ar[] = {
-                    obj,
-                    NULL
-                };
-                Out("^c.Building @^0\n", ar);
                 BuildObject_Build(m, ctx, obj);
             }
         }
@@ -162,42 +164,44 @@ void BuildModule_SetStatus(BuildCtx *ctx, BuildModule *md){
     }
     Iter it;
 
-    Span *exec = Node_SpanFromChild(md->config, K(m, "exec")); 
-    if(exec != NULL){
-        md->execTbl = Table_Make(m);
-        Iter_Init(&it, exec);
+    if(md->config != NULL){
+        Span *exec = Node_SpanFromChild(md->config, K(m, "exec")); 
+        if(exec != NULL){
+            md->execTbl = Table_Make(m);
+            Iter_Init(&it, exec);
+            while((Iter_Next(&it) & END) == 0){
+                StrVec *v = Clone(m, md->src);
+                IoUtil_AddVec(m, v, Iter_Get(&it));
+                Table_Set(md->execTbl, v, v);
+            }
+        }
+
+        Iter_Init(&it, md->sel->dest);
         while((Iter_Next(&it) & END) == 0){
-            StrVec *v = Clone(m, md->src);
-            IoUtil_AddVec(m, v, Iter_Get(&it));
-            Table_Set(md->execTbl, v, v);
-        }
-    }
+            StrVec *v = Iter_Get(&it);
+            StrVec *path = IoUtil_Annotate(m, v);
 
-    Iter_Init(&it, md->sel->dest);
-    while((Iter_Next(&it) & END) == 0){
-        StrVec *v = Iter_Get(&it);
-        StrVec *path = IoUtil_Annotate(m, v);
+            Hashed *h = NULL; 
+            if(md->execTbl != NULL && (h = Table_Get(md->execTbl, path)) != NULL){
+                v->type.state |= LAST;
+                void *ar[] = {
+                    v,
+                    NULL
+                };
+                Out("^y.Skipping Exec @^0\n", ar);
+            }
 
-        Hashed *h = NULL; 
-        if(md->execTbl != NULL && (h = Table_Get(md->execTbl, path)) != NULL){
-            v->type.state |= LAST;
-            void *ar[] = {
-                v,
-                NULL
-            };
-            Out("^y.Skipping Exec @^0\n", ar);
-        }
+            StrVec *out = BuildObject_GetDest(m, ctx, md, path);
 
-        StrVec *out = BuildObject_GetDest(m, ctx, md, path);
-
-        struct stat sourceSt;
-        struct stat st;
-        File_Stat(m, Ifc(m, v, TYPE_STR), &sourceSt);
-        if((File_Stat(m, Ifc(m, out, TYPE_STR), &st) & ERROR)
-                || (sourceSt.st_mtime > st.st_mtime)){
-            v->type.state |= MORE;
-        }else{
-            md->metrics.built++;
+            struct stat sourceSt;
+            struct stat st;
+            File_Stat(m, Ifc(m, v, TYPE_STR), &sourceSt);
+            if((File_Stat(m, Ifc(m, out, TYPE_STR), &st) & ERROR)
+                    || (sourceSt.st_mtime > st.st_mtime)){
+                v->type.state |= MORE;
+            }else{
+                md->metrics.built++;
+            }
         }
     }
 
@@ -343,8 +347,8 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
         if(libs != NULL){
             Iter_Init(&it, libs);
             while((Iter_Next(&it) & END) == 0){
-                Span_Add(ctx->current.flags, S(m, "-L"));
-                Span_Add(ctx->current.flags, Iter_Get(&it));
+                Span_Add(ctx->current.libPaths, S(m, "-L"));
+                Span_Add(ctx->current.libPaths, Iter_Get(&it));
             }
         }
 
@@ -368,12 +372,16 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
     struct timespec targetModified = {0, 0};
     if(File_PathExists(m, targetStr)){
         File_ModTime(m, targetStr, &targetModified);
+        /*
         if(targetModified.tv_sec > 0 && Time_Greater(&targetModified, &md->latest)){
             md->type.state |= BUILDMODULE_SATISFIED;
             md->metrics.built = md->metrics.sources;
         }else{
+        */
             BuildModule_SetStatus(ctx, md); 
+            /*
         }
+        */
     }else{
         BuildModule_SetStatus(ctx, md); 
     }

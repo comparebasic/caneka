@@ -16,6 +16,7 @@ typedef struct buildctx {
         Span *flags;
         Span *statLibs;
         Span *libs;
+        Span *libPaths;
     } current;
     struct {
         Str *cc;

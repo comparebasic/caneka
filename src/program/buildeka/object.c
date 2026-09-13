@@ -61,6 +61,7 @@ void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj){
 
     if(obj->type.state & BUILDOBJ_EXEC){
         Span_AddSpan(cmd, ctx->current.statLibs);
+        Span_AddSpan(cmd, ctx->current.libPaths);
         Span_AddSpan(cmd, ctx->current.libs);
     }
 
