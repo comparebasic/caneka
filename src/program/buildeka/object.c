@@ -18,7 +18,7 @@ void BuildObject_Link(MemCh *m, BuildCtx *ctx, BuildObject *obj){
     status r = READY;
     Span *cmd = Span_Make(m);
     Span_Add(cmd, ctx->tools.ar);
-    Span_Add(cmd, S(m, "-rcs"));
+    Span_Add(cmd, S(m, "-rc"));
     Span_Add(cmd, Ifc(m, obj->md->target, TYPE_STR));
     Span_Add(cmd, Ifc(m, obj->dest, TYPE_STR));
 
@@ -52,10 +52,17 @@ void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj){
     Span_Add(cmd, ctx->tools.cc);
     Span_AddSpan(cmd, ctx->current.flags);
     Span_AddSpan(cmd, obj->md->flags);
-    Span_Add(cmd, S(m, "-c"));
+    if((obj->type.state & BUILDOBJ_EXEC) == 0){
+        Span_Add(cmd, S(m, "-c"));
+    }
     Span_Add(cmd, S(m, "-o"));
     Span_Add(cmd, destS);
     Span_Add(cmd, Ifc(m, obj->src, TYPE_STR));
+
+    if(obj->type.state & BUILDOBJ_EXEC){
+        Span_AddSpan(cmd, ctx->current.statLibs);
+        Span_AddSpan(cmd, ctx->current.libs);
+    }
 
     void *ar[] = {
         obj,
@@ -79,6 +86,29 @@ void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj){
     }
 
     ReturnVoid(m);
+}
+
+BuildObject *BuildObject_Exec(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *path){
+    BuildObject *obj = MemCh_AllocOf(m, 
+        sizeof(BuildObject), TYPE_BUILD_OBJECT);
+    obj->type.of = TYPE_BUILD_OBJECT;
+    obj->type.state |= BUILDOBJ_EXEC;
+    Debug_Push(m, obj);
+    obj->md = md;
+
+    obj->src = IoUtil_Annotate(m, path);
+    obj->dest = Clone(m, ctx->dest);
+    IoUtil_AddVec(m, obj->dest, Sv(m, "bin"));
+
+    StrVec *local = Clone(m, path);
+    StrVec_Incr(local, ctx->src->total+1);
+    StrVec_Incr(local, md->local->total+1);
+    IoUtil_SwapExt(m, local, NULL);
+    if(Equals(local, K(m, "main"))){
+        local = md->name;
+    }
+    IoUtil_AddVec(m, obj->dest, local);
+    return obj;
 }
 
 BuildObject *BuildObject_Current(MemCh *m, BuildCtx *ctx){

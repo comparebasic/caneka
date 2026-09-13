@@ -17,6 +17,7 @@ typedef struct build_module {
     Table *execTbl;
     DirSel *sel;
     Span *flags;
+    Span *libs;
     Node *config;
     struct timespec latest;
     struct  {

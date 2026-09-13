@@ -3,6 +3,14 @@
 
 status BuildCtx_SetFlags(BuildCtx *ctx){
     MemCh *m = ctx->m;
+
+    Iter it;
+    Iter_Init(&it, ctx->depsOrdered);
+    while((Iter_Prev(&it) & END) == 0){
+        BuildModule *omd = (BuildModule *)Iter_Get(&it);
+        Span_Add(ctx->current.statLibs, omd->target);
+    }
+
     return ZERO;
 }
 
@@ -19,6 +27,8 @@ status BuildCtx_MakeInclude(BuildCtx *ctx){
     Dir_CheckCreateFor(m, path);
     File_Open(bf, Ifc(m, path, TYPE_STR), O_WRONLY|O_CREAT);
     Buff_Add(bf, S(m, "/* Caneka.h - main header file for building Caneka */\n\n#ifndef CANEKA_H\n#define CANEKA_H\n\n"));
+
+    Fmt(bf, "#include <external.h>\n\n", NULL);
 
     Iter it;
     Iter_Init(&it, ctx->depsOrdered);
@@ -236,6 +246,10 @@ BuildCtx *BuildCtx_Make(MemCh *m){
     ctx->tools.cc = S(m, _gen_CC);
     ctx->tools.ccVersion = Str_FromI64(m, (i64)_gen_CC_VERSION);
     ctx->tools.ar = S(m, _gen_AR);
+
+    ctx->current.flags = Span_Make(m);
+    ctx->current.statLibs = Span_Make(m);
+    ctx->current.libs = Span_Make(m);
 
     Return(m, ctx);
 }

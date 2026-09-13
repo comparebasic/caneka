@@ -111,6 +111,10 @@ void BuildModule_BuildCurrent(BuildCtx *ctx){
     Iter_Init(&ctx->current.sourcesIt, md->sel->dest);
     while((Iter_Next(&ctx->current.sourcesIt) & END) == 0){
         StrVec *v = Iter_Get(&ctx->current.sourcesIt);
+        /* skip exec files for now */
+        if(v->type.state & LAST){
+            continue;
+        }
         BuildObject *obj = BuildObject_Current(m, ctx);
         if(v->type.state & MORE){
             if((obj->type.state & BUILDOBJ_SATISFIED) == 0){
@@ -127,6 +131,25 @@ void BuildModule_BuildCurrent(BuildCtx *ctx){
         ctx->metrics.built++;
     }
 
+    if(md->execTbl != NULL){
+        Iter it;
+        Iter_Init(&it, md->execTbl);
+        while((Iter_Next(&it) & END) == 0){
+            Hashed *h = Iter_Get(&it);
+            if(h != NULL){
+                BuildObject *obj = BuildObject_Exec(m, ctx, md, h->value);
+                void *ar[] = {
+                    obj,
+                    NULL
+                };
+                Out("^p.Exec Obj @^0\n", ar);
+                BuildObject_Build(m, ctx, obj);
+                md->metrics.built++;
+                ctx->metrics.built++;
+            }
+        }
+    }
+
     ctx->metrics.modulesBuilt++;
 
     ReturnVoid(m);
@@ -137,23 +160,19 @@ void BuildModule_SetStatus(BuildCtx *ctx, BuildModule *md){
     if(md->sel == NULL){
         return;
     }
-
-    void *ar[] = {md->config, NULL};
-    Out("^y.Config @^0\n", ar);
+    Iter it;
 
     Span *exec = Node_SpanFromChild(md->config, K(m, "exec")); 
     if(exec != NULL){
         md->execTbl = Table_Make(m);
-
-        void *ar[] = {
-            md->name,
-            exec,
-            NULL
-        };
-        Out("^p. exec @ @^0\n", ar);
+        Iter_Init(&it, exec);
+        while((Iter_Next(&it) & END) == 0){
+            StrVec *v = Clone(m, md->src);
+            IoUtil_AddVec(m, v, Iter_Get(&it));
+            Table_Set(md->execTbl, v, v);
+        }
     }
 
-    Iter it;
     Iter_Init(&it, md->sel->dest);
     while((Iter_Next(&it) & END) == 0){
         StrVec *v = Iter_Get(&it);
@@ -162,6 +181,11 @@ void BuildModule_SetStatus(BuildCtx *ctx, BuildModule *md){
         Hashed *h = NULL; 
         if(md->execTbl != NULL && (h = Table_Get(md->execTbl, path)) != NULL){
             v->type.state |= LAST;
+            void *ar[] = {
+                v,
+                NULL
+            };
+            Out("^y.Skipping Exec @^0\n", ar);
         }
 
         StrVec *out = BuildObject_GetDest(m, ctx, md, path);
@@ -267,6 +291,7 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
     }
 
     if(md->config != NULL){
+        Iter it;
         Table *deps = Node_KvFromChild(md->config, K(m, "dependency")); 
         if(deps != NULL){
 
@@ -274,7 +299,6 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
                 ctx->deps = Table_Make(m);
             }
 
-            Iter it;
             Iter_Init(&it, Table_Ordered(m, deps));
             while((Iter_Next(&it) & END) == 0){
                 Hashed *h = Iter_Get(&it);
@@ -303,6 +327,33 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
                         }
                     }
                 }
+            }
+        }
+
+        Span *link = Node_SpanFromChild(md->config, K(m, "link")); 
+        if(link != NULL){
+            Iter_Init(&it, link);
+            while((Iter_Next(&it) & END) == 0){
+                Span_Add(ctx->current.libs, S(m, "-l"));
+                Span_Add(ctx->current.libs, Iter_Get(&it));
+            }
+        }
+
+        Span *libs = Node_SpanFromChild(md->config, K(m, "lib")); 
+        if(libs != NULL){
+            Iter_Init(&it, libs);
+            while((Iter_Next(&it) & END) == 0){
+                Span_Add(ctx->current.flags, S(m, "-L"));
+                Span_Add(ctx->current.flags, Iter_Get(&it));
+            }
+        }
+
+        Span *inc = Node_SpanFromChild(md->config, K(m, "include")); 
+        if(libs != NULL){
+            Iter_Init(&it, libs);
+            while((Iter_Next(&it) & END) == 0){
+                Span_Add(ctx->current.flags, S(m, "-I"));
+                Span_Add(ctx->current.flags, Iter_Get(&it));
             }
         }
     }

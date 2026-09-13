@@ -14,6 +14,8 @@ typedef struct buildctx {
         Iter moduleIt /*<BuildModule>*/;;
         Iter sourcesIt /*<BuildModule>*/;;
         Span *flags;
+        Span *statLibs;
+        Span *libs;
     } current;
     struct {
         Str *cc;
