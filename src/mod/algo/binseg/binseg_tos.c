@@ -70,4 +70,5 @@ status BinSeg_ToSInit(MemCh *m, Lookup *lk){
             (void *)Str_CstrRef(m, "Number"));
         r |= SUCCESS;
     }
+    return r;
 }

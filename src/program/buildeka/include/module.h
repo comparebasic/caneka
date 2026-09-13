@@ -14,6 +14,7 @@ typedef struct build_module {
     StrVec *targetName;
     StrVec *src;
     StrVec *local;
+    Table *execTbl;
     DirSel *sel;
     Span *flags;
     Node *config;

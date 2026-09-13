@@ -6,13 +6,18 @@ void BuildCtx_Config(BuildCtx *ctx){
     Debug_Push(m, ctx);
 
     BuildModule *md = NULL;
+    ctx->optionNames = Span_Make(m);
 
     Iter it;
     Iter_Init(&it, ctx->options);
     while((Iter_Next(&it) & END) == 0){
         Abstract *a = Iter_Get(&it);
         if(Ident_Check(a) & SUCCESS){
-            Iter_Set(&it, Ident_FromVec(m, Ifc(m, a, TYPE_STRVEC)));
+            Ident *ident = Ident_FromVec(m, Ifc(m, a, TYPE_STRVEC));
+            Iter_Set(&it, ident);
+            Span_Add(ctx->optionNames, Ident_NameStr(m, ident));
+        }else{
+            Span_Add(ctx->optionNames, a);
         }
     }
 

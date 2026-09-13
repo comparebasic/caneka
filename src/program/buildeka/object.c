@@ -14,6 +14,27 @@ StrVec *BuildObject_GetDest(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *pa
     return dest;
 }
 
+void BuildObject_Link(MemCh *m, BuildCtx *ctx, BuildObject *obj){
+    status r = READY;
+    Span *cmd = Span_Make(m);
+    Span_Add(cmd, ctx->tools.ar);
+    Span_Add(cmd, S(m, "-rcs"));
+    Span_Add(cmd, Ifc(m, obj->md->target, TYPE_STR));
+    Span_Add(cmd, Ifc(m, obj->dest, TYPE_STR));
+
+    ProcDets pd;
+    ProcDets_Init(m, &pd);
+    r |= SubProcess(m, cmd, &pd);
+    if(r & ERROR){
+        void *args[] = {
+            cmd,
+            NULL
+        };
+        Fatal(ctx->m, FUNCNAME, FILENAME, LINENUMBER, "Archive error for source file: @", args);
+    }
+    ReturnVoid(m);
+}
+
 void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj){
     Debug_Push(m, obj);
     void *args[8];
@@ -23,14 +44,18 @@ void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj){
 
     Span *cmd = Span_Make(m);
 
+    Str *destS = Ifc(m, obj->dest, TYPE_STR);
+    if(File_PathExists(m, destS)){
+        File_Unlink(m, destS);
+    }
+
     Span_Add(cmd, ctx->tools.cc);
     Span_AddSpan(cmd, ctx->current.flags);
     Span_AddSpan(cmd, obj->md->flags);
     Span_Add(cmd, S(m, "-c"));
     Span_Add(cmd, S(m, "-o"));
-    Span_Add(cmd, Ifc(m, obj->dest, TYPE_STR));
+    Span_Add(cmd, destS);
     Span_Add(cmd, Ifc(m, obj->src, TYPE_STR));
-
 
     void *ar[] = {
         obj,

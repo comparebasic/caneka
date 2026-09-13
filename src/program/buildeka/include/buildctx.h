@@ -7,6 +7,7 @@ typedef struct buildctx {
     StrVec *dest;
     Ident *ident;
     Table *options;
+    Table *optionNames;
     Table *deps /*<BuildModule>*/;
     Span *depsOrdered /*<BuildModule>*/;
     struct {

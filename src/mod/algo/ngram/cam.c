@@ -5,6 +5,6 @@ Cam *Cam_Make(MemCh *m, i32 target, i32 idx, util parity, util unique, void *dat
     return NULL;
 }
 
-CamDef *CamDef_Make(MemCh *m, typeOf, SourceFunc func, Span *opers){
+CamDef *CamDef_Make(MemCh *m, cls typeOf, SourceFunc func, Span *opers){
     return NULL;
 }

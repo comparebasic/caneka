@@ -1,6 +1,26 @@
 #include <external.h>
 #include "base_module.h"
 
+Span *Node_SpanFromChild(Inst *node, void *key){
+    MemCh *m = node->m;
+    Abstract *a = Span_Get(node, INST_PROPIDX_CHILDREN);
+    if(a == NULL){
+        void *ar[] = {key, NULL};
+        Error(m, FUNCNAME, FILENAME, LINENUMBER, "Key not found $", ar);
+        return NULL;
+    }
+
+    if(a->type.of == TYPE_TABLE){
+        Table *tbl = Table_Make(m); 
+        Node *nd = Table_Get((Table *)a, key);
+        if(nd != NULL && nd->type.of == TYPE_NODE){
+            return Span_Get(nd, INST_PROPIDX_CHILDREN);
+        }
+    }
+
+    return NULL;
+}
+
 Span *Node_KvFromChild(Inst *node, void *key){
     MemCh *m = node->m;
     Abstract *a = Span_Get(node, INST_PROPIDX_CHILDREN);
@@ -13,8 +33,16 @@ Span *Node_KvFromChild(Inst *node, void *key){
     if(a->type.of == TYPE_TABLE){
         Table *tbl = Table_Make(m); 
         Node *values = Table_Get((Table *)a, key);
+        if(values == NULL){
+            return NULL;
+        }
+
         Iter it;
-        Iter_Init(&it, Span_Get(values, INST_PROPIDX_CHILDREN));
+        Span *p = Span_Get(values, INST_PROPIDX_CHILDREN);
+        if(p == NULL){
+            return NULL;
+        }
+        Iter_Init(&it, p);
         Iter it2;
 
         while((Iter_Next(&it) & END) == 0){
