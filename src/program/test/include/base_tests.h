@@ -26,6 +26,7 @@ status MemCh_Tests(MemCh *gm);
 status MemChLevel_Tests(MemCh *gm);
 status Hash_Tests(MemCh *gm);
 status Cursor_Tests(MemCh *gm);
+status Templ_Tests(MemCh *gm);
 status CursorPos_Tests(MemCh *m);
 status Core_Tests(MemCh *gm);
 status Clone_Tests(MemCh *gm);
@@ -103,6 +104,12 @@ static TestSet BaseTests[] = {
         "StrVec",
         StrVec_Tests,
         "Testing String Vectors",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Templ",
+        Templ_Tests,
+        "Testing String Templates",
         FEATURE_COMPLETE,
     },
     {

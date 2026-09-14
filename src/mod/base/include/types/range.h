@@ -56,7 +56,7 @@ enum types {
     TYPE_CSTR,
     TYPE_STR,
     TYPE_STRVEC,
-    TYPE_STRBUILD,
+    TYPE_TEMPL,
     TYPE_IDENT,
     TYPE_HISTO,
     TYPE_COORD,

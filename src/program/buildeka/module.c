@@ -59,7 +59,7 @@ void BuildModule_SetFlags(BuildCtx *ctx, BuildModule *md){
             opt = (Str *)Ifc(m, ident->name, TYPE_STR);
         }
         if(opt != NULL){
-            opt = Str_ToUpper(m, opt);
+            opt = Str_ToUpper(m, Clone(m, opt));
             args[0] = opt;
             args[1] = NULL;
             Span_Add(md->flags, S(m, "-D"));

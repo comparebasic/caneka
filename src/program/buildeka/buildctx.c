@@ -19,11 +19,6 @@ status BuildCtx_MakeInclude(BuildCtx *ctx){
     Buff *bf = Buff_Make(m, BUFF_UNBUFFERED);
     StrVec *path = Clone(m, ctx->dest);
     IoUtil_AddVec(m, path, Sv(m, "include/caneka.h"));
-    void *ar[] = {
-        path,
-        NULL
-    };
-    Out("Making dir for $^0\n", ar);
     Dir_CheckCreateFor(m, path);
     File_Open(bf, Ifc(m, path, TYPE_STR), O_WRONLY|O_CREAT);
     Buff_Add(bf, S(m, "/* Caneka.h - main header file for building Caneka */\n\n#ifndef CANEKA_H\n#define CANEKA_H\n\n"));

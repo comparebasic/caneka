@@ -195,7 +195,7 @@ status Fmt(Buff *bf, char *fmt, void *args[]){
             }else{
                 Str *s = Str_Make(m, ANSI_ESCAPE_MAX);
                 s->length = Ansi_Consume(bf->m,
-                    &ptr, end - ptr, s->bytes, s->alloc);
+                    &ptr, end - ptr + 1, s->bytes, s->alloc);
                 Buff_AddBytes(bf, s->bytes, s->length);
             }
             start = ptr+1;

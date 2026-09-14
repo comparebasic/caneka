@@ -35,12 +35,12 @@ status Fmt_Tests(MemCh *m){
     };
 
     
-    Fmt(bf, "^DRy.Bold|Red|Yellow^0 then so quit '$' '@' @ & $ $ $", args3);
+    Fmt(bf, "^DRy.Bold|Red|Yellow^0 then so quit '$' '@' @ & $ $ $^0\n", args3);
 
     if(Ansi_HasColor(OutStream)){
         s = Str_FromCstr(m, "\x1b[1;41;33mBold|Red|Yellow\x1b[0m then so quit 'time'"
             " '\"\x1b[1mafterwards\x1b[22m\"' \"\x1b[1mfour\x1b[22m\" Str<[\x1b[1mDEBUG\x1b[22m]"
-            " 4/5:\"\x1b[1mfour\x1b[22m\"> 29 5987263 hi dude, what a wild ride!",
+            " 4/5:\"\x1b[1mfour\x1b[22m\"> 29 5987263 hi dude, what a wild ride!\x1b[0m\n",
             ZERO);
 
         s->type.state |= DEBUG;

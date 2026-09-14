@@ -88,16 +88,20 @@ status Str_Print(Buff *bf, void *a, cls type, word flags){
     args[3] = NULL;
 
     if(flags & DEBUG){
-        Fmt(bf, "Str<@ $/$:\"^D", args);
+        Fmt(bf, "Str<@ $/$:\"^D.", args);
     }else{
-        Fmt(bf, "\"^D", NULL); 
+        Fmt(bf, "\"^D.", NULL); 
     }
 
     if(flags & DEBUG){
         Bytes_Debug(bf, s->bytes, s->bytes+(s->length-1));
         Fmt(bf, "^d.\">", NULL);
     }else{
-        Buff_AddBytes(bf, s->bytes, s->length);
+        if(s->type.state & STRING_BINARY){
+            Bytes_Debug(bf, s->bytes, s->bytes+(s->length-1));
+        }else{
+            Buff_AddBytes(bf, s->bytes, s->length);
+        }
         Fmt(bf, "^d.\"", NULL);
     }
 
@@ -176,6 +180,20 @@ status Histo_Print(Buff *bf, void *a, cls type, word flags){
         NULL
     };
     return Fmt(bf, "Histo<@ $ $% /a$,n$,w$,p$,c$,u$>", args);
+}
+
+status Templ_Print(Buff *bf, void *a, cls type, word flags){
+    MemCh *m = bf->m;
+    Templ *templ = (Templ *)a;
+    Iter it;
+    Iter_Init(&it, templ->p);
+    void *ar[] = {
+        Type_StateVec(m, templ->type.of, templ->type.state),
+        templ->p,
+        NULL
+    };
+    Fmt(bf, "Templ<@ @>", ar);
+    return ZERO;
 }
 
 status Cursor_Print(Buff *bf, void *a, cls type, word flags){
@@ -286,6 +304,7 @@ status Str_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_CURSOR, (void *)Cursor_Print);
     r |= Lookup_Add(m, lk, TYPE_BYTES_POINTER, (void *)BytesLit_Print);
     r |= Lookup_Add(m, lk, TYPE_HISTO, (void *)Histo_Print);
+    r |= Lookup_Add(m, lk, TYPE_TEMPL, (void *)Templ_Print);
     r |= Str_InitLabels(m, ToSFlagLookup);
 
     r |= Lookup_Add(m, EmptyLookup, TYPE_STR, (void *)Str_Empty);

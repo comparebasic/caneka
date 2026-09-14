@@ -59,6 +59,7 @@
 #include "./bytes/str_exact.c"
 #include "./bytes/str_makers.c"
 #include "./bytes/strvec.c"
+#include "./bytes/templ.c"
 #include "./bytes/coord.c"
 #include "./bytes/fmt.c"
 #include "./bytes/histo.c"

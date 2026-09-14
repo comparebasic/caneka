@@ -39,175 +39,100 @@ word Ansi_Consume(MemCh *m, char **_ptr, word length, byte *dest, word dlength){
     byte *e = dest+dlength-1;
     *(b++) = KEY_ESCAPE;
     *(b++) = '[';
-    byte *start = b;
-    while(b <= e && ptr <= end){
-        c = *(ptr);
-        if(c == '0'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '0';
-        }else if(c == 'E'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '7';
-        }else if(c == 'e'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '2';
-            *(b++) = '7';
-        }else if(c == 'L'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '5';
-        }else if(c == 'l'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '2';
-            *(b++) = '5';
-        }else if(c == 'U'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '4';
-        }else if(c == 'u'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '2';
-            *(b++) = '4';
-        }else if(c == 'I'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '3';
-        }else if(c == 'i'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '2';
-            *(b++) = '3';
-        }else if(c == 'd'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '2';
-            *(b++) = '2';
-        }else if(c == 'D'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '1';
-        }else if(c == 'r'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '3';
-            *(b++) = '1';
-        }else if(c == 'R'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '4';
-            *(b++) = '1';
-        }else if(c == 'g'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '3';
-            *(b++) = '2';
-        }else if(c == 'G'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '4';
-            *(b++) = '2';
-        }else if(c == 'y'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '3';
-            *(b++) = '3';
-        }else if(c == 'Y'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '4';
-            *(b++) = '3';
-        }else if(c == 'b'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '3';
-            *(b++) = '4';
-        }else if(c == 'B'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '4';
-            *(b++) = '4';
-        }else if(c == 'p'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '3';
-            *(b++) = '5';
-        }else if(c == 'P'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '4';
-            *(b++) = '5';
-        }else if(c == 'c'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '3';
-            *(b++) = '6';
-        }else if(c == 'C'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '4';
-            *(b++) = '6';
-        }else if(c == 'k'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '3';
-            *(b++) = '7';
-        }else if(c == 'K'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '4';
-            *(b++) = '7';
-        }else if(c == 'x'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '3';
-            *(b++) = '0';
-        }else if(c == 'X'){
-            if(b > start){
-                *(b++) = ';';
-            }
-            *(b++) = '4';
-            *(b++) = '0';
-        }else if(c == '.'){
+    while(b < e && ptr <= end){
+        c = *ptr;
+        if(c == '.'){
             break;
         }else{
-            if(ptr != *_ptr){
-                ptr--;
+            if(b - dest > 2){
+                *(b++) = ';';
             }
-            break;
+            if(c == '0'){
+                *(b++) = '0';
+            }else if(c == 'E'){
+                *(b++) = '7';
+            }else if(c == 'e'){
+                *(b++) = '2';
+                *(b++) = '7';
+            }else if(c == 'L'){
+                *(b++) = '5';
+            }else if(c == 'l'){
+                *(b++) = '2';
+                *(b++) = '5';
+            }else if(c == 'U'){
+                *(b++) = '4';
+            }else if(c == 'u'){
+                *(b++) = '2';
+                *(b++) = '4';
+            }else if(c == 'I'){
+                *(b++) = '3';
+            }else if(c == 'i'){
+                *(b++) = '2';
+                *(b++) = '3';
+            }else if(c == 'd'){
+                *(b++) = '2';
+                *(b++) = '2';
+            }else if(c == 'D'){
+                *(b++) = '1';
+            }else if(c == 'r'){
+                *(b++) = '3';
+                *(b++) = '1';
+            }else if(c == 'R'){
+                *(b++) = '4';
+                *(b++) = '1';
+            }else if(c == 'g'){
+                *(b++) = '3';
+                *(b++) = '2';
+            }else if(c == 'G'){
+                *(b++) = '4';
+                *(b++) = '2';
+            }else if(c == 'y'){
+                *(b++) = '3';
+                *(b++) = '3';
+            }else if(c == 'Y'){
+                *(b++) = '4';
+                *(b++) = '3';
+            }else if(c == 'b'){
+                *(b++) = '3';
+                *(b++) = '4';
+            }else if(c == 'B'){
+                *(b++) = '4';
+                *(b++) = '4';
+            }else if(c == 'p'){
+                *(b++) = '3';
+                *(b++) = '5';
+            }else if(c == 'P'){
+                *(b++) = '4';
+                *(b++) = '5';
+            }else if(c == 'c'){
+                *(b++) = '3';
+                *(b++) = '6';
+            }else if(c == 'C'){
+                *(b++) = '4';
+                *(b++) = '6';
+            }else if(c == 'k'){
+                *(b++) = '3';
+                *(b++) = '7';
+            }else if(c == 'K'){
+                *(b++) = '4';
+                *(b++) = '7';
+            }else if(c == 'x'){
+                *(b++) = '3';
+                *(b++) = '0';
+            }else if(c == 'X'){
+                *(b++) = '4';
+                *(b++) = '0';
+            }else{
+                ptr--;
+                if(b > dest){
+                    b--;
+                }
+                break;
+            }
         }
         ptr++;
     }
+
     *(b++) = 'm';
     *_ptr = ptr;
 
