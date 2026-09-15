@@ -37,6 +37,7 @@ static char *baseTypeStrings[] = {
     "WRAPPED_MEMCOUNT",
     "_TYPE_WRAPPED_END",
     "UNKNOWN",
+    "TYPED_ARR",
     "_TYPE_RANGE_TYPE_START",
     "BYTES_POINTER",
     "POINTER_ARRAY",

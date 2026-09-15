@@ -26,6 +26,10 @@ typedef struct build_module {
         i32 built;
         i32 idx;
     } metrics;
+    struct {
+        Templ *src;
+        Templ *dest;
+    } templ;
 } BuildModule;
 
 BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name);
@@ -34,3 +38,4 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md);
 void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md);
 void BuildModule_SetFlags(BuildCtx *ctx, BuildModule *md);
 void BuildModule_Build(BuildCtx *ctx, BuildModule *md);
+void BuildModule_BuildInc(BuildCtx *ctx, BuildModule *md);

@@ -21,6 +21,18 @@ static void BuildModule_makeDestDir(MemCh *m, BuildCtx *ctx, BuildModule *md){
     Dir_CheckCreate(m, Ifc(m, path, TYPE_STR));
 }
 
+static void BuildModule_setTempls(BuildCtx *ctx, BuildModule *md){
+    MemCh *m = ctx->m;
+
+    StrVec *src = Cone(m, ctx->src);
+    StrVec_Add(src, S(m, "/%"));
+    md->templ.src = Templ_FromVec(m, src);
+
+    StrVec *dest = IoUtil_BasePath(m, md->target);
+    StrVec_Add(dest, S(m, "/objects/%"));
+    md->templ.dest = Templ_FromVec(m, dest);
+}
+
 void BuildModule_SetFlags(BuildCtx *ctx, BuildModule *md){
     MemCh *m = md->m;
     Debug_Push(m, md);
@@ -66,6 +78,29 @@ void BuildModule_SetFlags(BuildCtx *ctx, BuildModule *md){
             Span_Add(md->flags, Fmt_ToStrVec(m, "CNKOPT_$", args));
         }
     }
+
+    ReturnVoid(m);
+}
+
+void BuildModule_BuildInc(BuildCtx *ctx, BuildModule *md){
+    MemCh *m = md->m;
+    Debug_Push(m, md);
+
+    BuildModule_SetFlags(ctx, md);
+    BuildModule_makeDestDir(m, ctx, md);
+
+    ctx->log(m, ctx, md);
+
+    BuildObject *obj = BuildObject_Inc(md->m, ctx, md);
+
+    Str *targetPathS = Ifc(m, md->target, TYPE_STR);
+    if(File_PathExists(m, targetPathS)){
+        File_Unlink(m, targetPathS);
+    }
+
+    BuildObject_Build(m, ctx, obj);
+    md->metrics.built = md->metrics.total;
+    ctx->metrics.built += md->metrics.built;
 
     ReturnVoid(m);
 }
@@ -339,7 +374,14 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
     struct timespec targetModified = {0, 0};
     if(File_PathExists(m, targetStr)){
         File_ModTime(m, targetStr, &targetModified);
-        if(targetModified.tv_sec > 0 && Time_Greater(&targetModified, &md->latest)){
+        if(Time_Greater(&targetModified, &md->latest)){
+            void *ar[] = {
+                md->name,
+                Time_ToRStr(m, &targetModified),
+                Time_ToRStr(m, &md->latest),
+                NULL
+            };
+            Out("Not modified ^D.$^d. $ vs $^0\n", ar);
             md->type.state |= BUILDMODULE_SATISFIED;
             md->metrics.built = md->metrics.total;
         }else{

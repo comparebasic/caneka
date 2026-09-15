@@ -101,12 +101,28 @@ void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj){
     ReturnVoid(m);
 }
 
+BuildObject *BuildObject_Inc(MemCh *m, BuildCtx *ctx, BuildModule *md){
+    BuildObject *obj = MemCh_AllocOf(m, 
+        sizeof(BuildObject), TYPE_BUILD_OBJECT);
+    obj->type.of = TYPE_BUILD_OBJECT;
+    Debug_Push(m, obj);
+    obj->md = md;
+
+    obj->src = Clone(m, md->src);
+    IoUtil_AddVec(m, obj->src, Sv(m, "inc.c"));
+    obj->dest = md->target;
+
+    Return(m, obj);
+}
+
+
 BuildObject *BuildObject_Exec(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *path){
     BuildObject *obj = MemCh_AllocOf(m, 
         sizeof(BuildObject), TYPE_BUILD_OBJECT);
     obj->type.of = TYPE_BUILD_OBJECT;
     obj->type.state |= BUILDOBJ_EXEC;
     Debug_Push(m, obj);
+
     obj->md = md;
 
     obj->src = IoUtil_Annotate(m, path);
@@ -121,7 +137,7 @@ BuildObject *BuildObject_Exec(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *
         local = md->name;
     }
     IoUtil_AddVec(m, obj->dest, local);
-    return obj;
+    Return(m, obj);
 }
 
 BuildObject *BuildObject_From(MemCh *m,
@@ -137,14 +153,14 @@ BuildObject *BuildObject_From(MemCh *m,
         Error(m, FUNCNAME, FUNCNAME, LINENUMBER, 
             "Error no module found as current in Iter", NULL);
         obj->type.state |= ERROR;
-        return obj;
+        Return(m, obj);
     }
 
     if(obj->md->sel == NULL || obj->md->sel->dest == NULL){
         Error(m, FUNCNAME, FUNCNAME, LINENUMBER, 
             "Error no source files in module", NULL);
         obj->type.state |= ERROR;
-        return obj;
+        Return(m, obj);
     }
 
     obj->src = IoUtil_Annotate(m, path);
@@ -158,5 +174,5 @@ BuildObject *BuildObject_From(MemCh *m,
         obj->type.state |= BUILDOBJ_SATISFIED;
     }
     
-    return obj;
+    Return(m, obj);
 }

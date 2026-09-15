@@ -4,3 +4,4 @@ struct strvec;
 struct buff;
 struct mem_ctx;
 struct itinerary;
+struct arr;

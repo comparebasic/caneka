@@ -224,6 +224,8 @@ status BuildCtx_Build(BuildCtx *ctx){
         md->idx = it.idx;
         if(md->type.state & BUILDMODULE_SATISFIED){
             ctx->metrics.built += md->metrics.total;
+        }else if(md->type.state & BUILDMODULE_INC){
+            BuildModule_BuildInc(ctx, md);
         }else{
             BuildModule_Build(ctx, md);
         }
