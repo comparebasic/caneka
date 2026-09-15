@@ -133,23 +133,56 @@ void BuildModule_Build(BuildCtx *ctx, BuildModule *md){
 
     Iter it;
     Iter_Init(&it, md->sel->dest);
-    while((Iter_Next(&it) & END) == 0){
-        StrVec *v = Iter_Get(&it);
-        /* skip exec files for now */
-        if(v->type.state & LAST){
-            continue;
+
+    i32 atOnce = 4;
+    i32 inFlight = 0;
+    i32 available = 0;
+    BuildObject **queue = (BuildObject **)Bytes_Alloc(m,
+        sizeof(void *)*atOnce, TYPE_BYTES_POINTER);
+
+    while(TRUE){
+        printf("inFlight %d end?%d\n", inFlight, (it.type.state & END) != 0);
+        fflush(stdout);
+
+        if(inFlight < atOnce && (it.type.state & END) == 0){
+            if((Iter_Next(&it) & END) == 0){
+                StrVec *v = Iter_Get(&it);
+
+                /* skip exec files for now */
+                if(v->type.state & LAST){
+                    continue;
+                }
+
+                BuildObject *obj = BuildObject_From(m, ctx, md, v);
+                obj->idx = it.idx;
+                printf("Adding %d\n", inFlight);
+                queue[inFlight] = obj;
+
+                BuildObject_Build(m, ctx, obj);
+                inFlight++;
+            }
         }
 
-        BuildObject *obj = BuildObject_From(m, ctx, md, v);
-        obj->idx = it.idx;
-
-        if((v->type.state & MORE) &&
-                (obj->type.state & BUILDOBJ_SATISFIED) == 0){
-            BuildObject_Build(m, ctx, obj);
+        for(i32 i = 0; i < atOnce; i++){
+            BuildObject *obj = queue[i];
+            if(obj != NULL){
+                if(SubStatus(&obj->pd) & SUCCESS){
+                    BuildObject_Link(m, ctx, obj);
+                    inFlight--;
+                    available = i;
+                    printf("Removing %d inFlight\n", i);
+                    queue[i] = NULL;
+                }
+            }
         }
-        BuildObject_Link(m, ctx, obj);
-        md->metrics.built++;
-        ctx->metrics.built++;
+
+        if(inFlight <= 0 && (it.type.state & END)){
+            break;
+        }
+
+        struct timespec ts = {0, 5000000};
+        struct timespec remaining;
+        Time_Delay(&ts, &remaining);
     }
 
     if(md->execTbl != NULL){

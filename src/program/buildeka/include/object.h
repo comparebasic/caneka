@@ -9,6 +9,7 @@ typedef struct build_object {
     Str *src;
     Str *dest;
     Str *dir;
+    ProcDets pd;
     BuildModule *md;
 } BuildObject;
 

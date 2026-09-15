@@ -126,14 +126,16 @@ status BuildCli_Log(MemCh *m, void *a, void *_source){
         Out("^c.Module $ of $ ^D.$^d. ^0\n", args);
     }else if(source->type.of == TYPE_BUILD_OBJECT){
         BuildObject *obj = (BuildObject *)source;
-        args[0] = Str_FromI64Pad(m, ctx->metrics.built+1, 5, ' ');
+        args[0] = Str_FromI64Pad(m, ctx->metrics.built+obj->idx, 5, ' ');
         args[1] = Str_FromI64Pad(m, ctx->metrics.total, 5, ' ');
         args[2] = obj->dest; 
         args[3] = NULL;
         if(obj->type.state & BUILDOBJ_EXEC){
-            Out("^p    Exec $ of $ ^D.$^d.\n", args);
+            Out("^p    Exec    $ of $ ^D.$^d.\n", args);
+        }else if(obj->type.state & SUCCESS){
+            Out("^b.    Linking $ of $ ^D.$^d.\n", args);
         }else{
-            Out("^0    Object $ of $ ^D.$^d.\n", args);
+            Out("^0    Object  $ of $ ^D.$^d.\n", args);
         }
     }
 

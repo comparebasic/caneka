@@ -23,6 +23,9 @@ void BuildObject_Link(MemCh *m, BuildCtx *ctx, BuildObject *obj){
     Span_Add(cmd, Ifc(m, obj->md->target, TYPE_STR));
     Span_Add(cmd, Ifc(m, obj->dest, TYPE_STR));
 
+    obj->type.state |= SUCCESS;
+    ctx->log(m, ctx, obj);
+
     ProcDets pd;
     ProcDets_Init(m, &pd);
     r |= SubProcess(m, cmd, &pd);
@@ -33,6 +36,7 @@ void BuildObject_Link(MemCh *m, BuildCtx *ctx, BuildObject *obj){
         };
         Fatal(ctx->m, FUNCNAME, FILENAME, LINENUMBER, "Archive error for source file: @", args);
     }
+
     ReturnVoid(m);
 }
 
@@ -85,11 +89,16 @@ void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj){
         }
     }
 
-    ProcDets pd;
-    ProcDets_Init(m, &pd);
 
     Dir_CheckCreate(m, obj->dir);
-    r |= SubProcess(m, cmd, &pd);
+
+    ProcDets_Init(m, &obj->pd);
+    if(obj->type.state & BUILDOBJ_EXEC){
+        r |= SubProcess(m, cmd, &obj->pd);
+    }else{
+        obj->pd.type.state |= PROCDETS_ASYNC;
+        r |= SubCall(m, cmd, &obj->pd);
+    }
     if(r & ERROR){
         void *args[] = {
             cmd,
