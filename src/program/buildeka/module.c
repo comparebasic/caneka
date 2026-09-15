@@ -136,14 +136,13 @@ void BuildModule_Build(BuildCtx *ctx, BuildModule *md){
 
     i32 atOnce = 4;
     i32 inFlight = 0;
-    i32 available = 0;
     BuildObject **queue = (BuildObject **)Bytes_Alloc(m,
         sizeof(void *)*atOnce, TYPE_BYTES_POINTER);
 
-    while(TRUE){
-        printf("inFlight %d end?%d\n", inFlight, (it.type.state & END) != 0);
-        fflush(stdout);
+    i16 *slate = (i16*)Bytes_Alloc(m, sizeof(i16)*atOnce, TYPE_BYTES_POINTER);
+    i16 *ptr = slate;
 
+    while(TRUE){
         if(inFlight < atOnce && (it.type.state & END) == 0){
             if((Iter_Next(&it) & END) == 0){
                 StrVec *v = Iter_Get(&it);
@@ -155,11 +154,29 @@ void BuildModule_Build(BuildCtx *ctx, BuildModule *md){
 
                 BuildObject *obj = BuildObject_From(m, ctx, md, v);
                 obj->idx = it.idx;
-                printf("Adding %d\n", inFlight);
-                queue[inFlight] = obj;
+
+                if(ptr != slate){
+                    printf("Adding ptr slot %d inFlight %d\n", (i32)*ptr, inFlight);
+                    fflush(stdout);
+                    if(queue[*ptr] != NULL){
+                        printf("Conflict!\n");
+                        exit(1);
+                    }
+                    queue[*ptr] = obj;
+                    ptr--;
+                }else{
+                    printf("Adding slot %d inFlight %d\n", (i32)inFlight, inFlight);
+                    fflush(stdout);
+                    queue[inFlight] = obj;
+                    if(queue[inFlight] != NULL){
+                        printf("Conflict!\n");
+                        exit(1);
+                    }
+                }
+
+                inFlight++;
 
                 BuildObject_Build(m, ctx, obj);
-                inFlight++;
             }
         }
 
@@ -168,10 +185,15 @@ void BuildModule_Build(BuildCtx *ctx, BuildModule *md){
             if(obj != NULL){
                 if(SubStatus(&obj->pd) & SUCCESS){
                     BuildObject_Link(m, ctx, obj);
-                    inFlight--;
-                    available = i;
-                    printf("Removing %d inFlight\n", i);
+
+                    printf("Removing slot %d inFlight %d\n", i, inFlight);
+                    fflush(stdout);
+
                     queue[i] = NULL;
+
+                    *ptr = i;
+                    ptr++;
+                    inFlight--;
                 }
             }
         }
