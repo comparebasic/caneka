@@ -28,6 +28,7 @@
 #include "./mem/mem_iter.c"
 #include "./sequence/parity.c"
 #include "./sequence/arr.c"
+#include "./sequence/slate.c"
 #include "./sequence/span_utils.c"
 #include "./sequence/hashed.c"
 #include "./sequence/lookup.c"

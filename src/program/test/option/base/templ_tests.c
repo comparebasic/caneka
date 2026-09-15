@@ -1,6 +1,5 @@
 #include <external.h>
 #include <caneka.h>
-#include <test_module.h>
 
 status Templ_Tests(MemCh *m){
     void *args[3];

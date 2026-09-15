@@ -93,12 +93,7 @@ void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj){
     Dir_CheckCreate(m, obj->dir);
 
     ProcDets_Init(m, &obj->pd);
-    if(obj->type.state & BUILDOBJ_EXEC){
-        r |= SubProcess(m, cmd, &obj->pd);
-    }else{
-        obj->pd.type.state |= PROCDETS_ASYNC;
-        r |= SubCall(m, cmd, &obj->pd);
-    }
+    r |= SubProcess(m, cmd, &obj->pd);
     if(r & ERROR){
         void *args[] = {
             cmd,

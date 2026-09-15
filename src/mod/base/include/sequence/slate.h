@@ -1,9 +1,12 @@
 typedef struct slate {
     Type type;
     RangeType rangeType;
-    i16 *available;
-    i16 *next;
-    void *slots;
+    struct {
+        i16 *start;
+        i16 *next;
+        i16 *last;
+    } available;
+    void **slots;
 } Slate;
 
 i16 Slate_Add(MemCh *m, Slate *sl, void *item);

@@ -126,7 +126,7 @@ status BuildCli_Log(MemCh *m, void *a, void *_source){
         Out("^c.Module $ of $ ^D.$^d. ^0\n", args);
     }else if(source->type.of == TYPE_BUILD_OBJECT){
         BuildObject *obj = (BuildObject *)source;
-        args[0] = Str_FromI64Pad(m, ctx->metrics.built+obj->idx, 5, ' ');
+        args[0] = Str_FromI64Pad(m, ctx->metrics.built+1, 5, ' ');
         args[1] = Str_FromI64Pad(m, ctx->metrics.total, 5, ' ');
         args[2] = obj->dest; 
         args[3] = NULL;

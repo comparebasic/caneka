@@ -1,39 +1,40 @@
-status Stream_Tests(MemCh *gm);
-status Iter_Tests(MemCh *gm);
-status IterMax_Tests(MemCh *gm);
-status IterPrevRemove_Tests(MemCh *gm);
-status Encoding_Tests(MemCh *gm);
-status Buff_Tests(MemCh *gm);
 status BuffIo_Tests(MemCh *gm);
 status BuffPos_Tests(MemCh *gm);
 status BuffSendRecv_Tests(MemCh *gm);
-status Time_Tests(MemCh *gm);
-status Table_Tests(MemCh *gm);
-status TableResize_Tests(MemCh *gm);
-status TableUtilKey_Tests(MemCh *gm);
-status TableHKey_Tests(MemCh *gm);
-status Stash_Tests(MemCh *gm);
-status Str_Tests(MemCh *gm);
-status Str_EndMatchTests(MemCh *gm);
-status StrVec_Tests(MemCh *gm);
-status Fmt_Tests(MemCh *m);
+status Buff_Tests(MemCh *gm);
+status Clone_Tests(MemCh *gm);
+status Core_Tests(MemCh *gm);
+status CursorPos_Tests(MemCh *m);
+status Cursor_Tests(MemCh *gm);
+status DebugStack_Tests(MemCh *gm);
+status Encoding_Tests(MemCh *gm);
 status FmtMem_Tests(MemCh *m);
-status Span_Tests(MemCh *gm);
+status Fmt_Tests(MemCh *m);
+status Hash_Tests(MemCh *gm);
+status Histo_Tests(MemCh *m);
+status IoUtilsRelativize_Tests(MemCh *m);
+status IterMax_Tests(MemCh *gm);
+status IterPrevRemove_Tests(MemCh *gm);
+status Iter_Tests(MemCh *gm);
+status MemChLevel_Tests(MemCh *gm);
+status MemCh_Tests(MemCh *gm);
+status Parity_Tests(MemCh *m);
+status Path_Tests(MemCh *gm);
+status Slate_Tests(MemCh *m);
 status SpanClone_Tests(MemCh *gm);
 status SpanMax_Tests(MemCh *gm);
-status Path_Tests(MemCh *gm);
-status MemCh_Tests(MemCh *gm);
-status MemChLevel_Tests(MemCh *gm);
-status Hash_Tests(MemCh *gm);
-status Cursor_Tests(MemCh *gm);
+status Span_Tests(MemCh *gm);
+status Stash_Tests(MemCh *gm);
+status StrVec_Tests(MemCh *gm);
+status Str_EndMatchTests(MemCh *gm);
+status Str_Tests(MemCh *gm);
+status Stream_Tests(MemCh *gm);
+status TableHKey_Tests(MemCh *gm);
+status TableResize_Tests(MemCh *gm);
+status TableUtilKey_Tests(MemCh *gm);
+status Table_Tests(MemCh *gm);
 status Templ_Tests(MemCh *gm);
-status CursorPos_Tests(MemCh *m);
-status Core_Tests(MemCh *gm);
-status Clone_Tests(MemCh *gm);
-status DebugStack_Tests(MemCh *gm);
-status Histo_Tests(MemCh *m);
-status Parity_Tests(MemCh *m);
-status IoUtilsRelativize_Tests(MemCh *m);
+status Time_Tests(MemCh *gm);
 
 static TestSet BaseTests[] = {
     {
@@ -110,6 +111,12 @@ static TestSet BaseTests[] = {
         "Templ",
         Templ_Tests,
         "Testing String Templates",
+        FEATURE_COMPLETE,
+    },
+    {
+        "Slate",
+        Slate_Tests,
+        "Testing Slate Queuing",
         FEATURE_COMPLETE,
     },
     {

@@ -552,6 +552,15 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
+    cmd[0] = "rm";
+    cmd[1] = "-f";
+    cmd[2] = "./build/lib/libcaneka-base-mod/libcaneka-base-mod.a";
+    cmd[3] =  NULL;
+
+    if(run("Removing old binary if it exists", cmd) == -1){
+        exit(1);
+    }
+
     cmd[0] = _gen_CC;
     cmd[1] = "-g";
     cmd[2] = "-Isrc/mod/base/include";

@@ -6,6 +6,7 @@
 #include "sequence/table_utils.h"
 #include "sequence/sequence_tos.h"
 #include "sequence/arr.h"
+#include "sequence/slate.h"
 #include "sequence/path.h"
 #include "sequence/ident.h"
 #include "sequence/sequence_exact.h"

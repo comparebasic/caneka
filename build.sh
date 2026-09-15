@@ -13,11 +13,6 @@ else
     echo "Using environment variable for CC of ${CC}"
 fi
 
-if [ -e ./dist/bootstrap ]; then
-    echo "dist/bootstrap found running clean"
-    ./dist/bootstrap --clean
-fi
-
 cmd="mkdir -p ./dist/bin"
 echo "making dir $cmd"
 $cmd;

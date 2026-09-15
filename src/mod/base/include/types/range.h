@@ -58,6 +58,7 @@ enum types {
     TYPE_STR,
     TYPE_STRVEC,
     TYPE_TEMPL,
+    TYPE_SLATE,
     TYPE_IDENT,
     TYPE_HISTO,
     TYPE_COORD,

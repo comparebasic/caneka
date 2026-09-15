@@ -6,6 +6,53 @@ static boolean Table_Empty(void *_a){
     return tbl->nvalues == 0;
 }
 
+status Slate_Print(Buff *bf, void *a, cls type, word flags){
+    MemCh *m = bf->m;
+    Slate *sl = (Slate *)Ifc(bf->m, a, TYPE_SLATE);
+
+    void *args[5];
+
+    args[0] = Type_StateVec(m, sl->type.of, sl->type.state);
+    args[1] = NULL;
+
+    Fmt(bf, "Slate<@ [", args);
+    for(i16 i = 0; i < sl->rangeType.range; i++){
+        if(sl->slots[i] != NULL){
+            args[0] = sl->slots[i];
+        }else{
+            args[0] = S(m, "");
+        }
+        args[1] = NULL;
+        if(i < sl->rangeType.range-1){
+            Fmt(bf, "$,", args);
+        }else{
+            Fmt(bf, "$", args);
+        }
+    }
+
+    Buff_AddBytes(bf, (byte *)"] [", 3);
+    for(i16 i = 0; i < sl->rangeType.range; i++){
+        if(sl->available.start[i] != -1){
+            args[0] = I16_Wrapped(m, sl->available.start[i]);
+        }else{
+            args[0] = S(m, "");
+        }
+        args[1] = NULL;
+        if((sl->available.start+i) == sl->available.next){
+            Fmt(bf, "next$", args);
+        }else{
+            Fmt(bf, "$", args);
+        }
+
+        if(i < sl->rangeType.range-1){
+            Buff_AddBytes(bf, (byte *)", ", 2);
+        }
+    }
+    Buff_AddBytes(bf, (byte *)"]>", 2);
+
+    return ZERO;
+}
+
 status HKey_Print(Buff *bf, void *a, cls type, word flags){
     HKey *hk = (HKey *)Ifc(bf->m, a, TYPE_HKEY);
     if(flags & (MORE|DEBUG)){
@@ -197,6 +244,7 @@ status Sequence_ToSInit(MemCh *m, Lookup *lk){
     r |= Lookup_Add(m, lk, TYPE_ARRAY, (void *)Array_Print);
     r |= Lookup_Add(m, lk, TYPE_CSTR_ARRAY, (void *)CstrArray_Print);
     r |= Lookup_Add(m, lk, TYPE_IDENT, (void *)Ident_Print);
+    r |= Lookup_Add(m, lk, TYPE_SLATE, (void *)Slate_Print);
 
     r |= Lookup_Add(m, EmptyLookup, TYPE_TABLE, (void *)Table_Empty);
     return r;
