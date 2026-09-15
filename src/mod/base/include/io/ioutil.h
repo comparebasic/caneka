@@ -1,9 +1,14 @@
+Str *IoUtil_StrBasePath(MemCh *m, Str *path);
+Str *IoUtil_StrSwapExt(MemCh *m, Str *path, Str *ext);
+
 status IoUtil_Relativise(MemCh *m, StrVec *path);
-status IoUtil_Exists(Str *path);
-status IoUtil_Unlink(Str *path);
 status IoUtil_AddSlash(StrVec *path);
 Str *IoUtil_GetCwdPath(MemCh *m, Str *path);
 Str *IoUtil_GetAbsPath(MemCh *m, Str *path);
+StrVec *IoUtil_GetExt(MemCh *m, StrVec *path);
+
+status IoUtil_Exists(Str *path);
+status IoUtil_Unlink(Str *path);
 boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b);
 Str *IoUtil_FnameStr(MemCh *m, StrVec *path);
 StrVec *IoUtil_BasePath(MemCh *m, StrVec *path);
@@ -12,12 +17,7 @@ StrVec *IoUtil_GetAbsVec(MemCh *m, Str *path);
 StrVec *IoUtil_AbsVec(MemCh *m, StrVec *v);
 status IoUtil_AddVec(MemCh *m, StrVec *path, StrVec *v);
 status IoUtil_AddStr(MemCh *m, StrVec *path, Str *s);
-StrVec *IoUtil_GetExt(MemCh *m, StrVec *path);
 StrVec *IoAbsPath(MemCh *m, char *cstr);
-StrVec *IoPath(MemCh *m, char *cstr);
-StrVec *IoPath_From(MemCh *m, Str *s);
-StrVec *IoPath_FromStr(MemCh *m, Str *s);
-StrVec *IoPath_FromVec(MemCh *m, StrVec *v);
 Span *IoUtil_AbsCmdArr(MemCh *m, StrVec *v);
 StrVec *IoUtil_AbsPathBuilder(MemCh *m, char *args[]);
 Str *IoUtil_PathSep(MemCh *m);
@@ -34,5 +34,8 @@ Str *IoUtil_ExtSep(MemCh *m);
 void IoUtil_TrimDir(MemCh *m, StrVec *v);
 boolean IoUtil_IsSep(Str *s);
 status IoUtils_Init(MemCh *m);
-Str *IoUtil_StrBasePath(MemCh *m, Str *path);
-Str *IoUtil_StrSwapExt(MemCh *m, Str *path, Str *ext);
+
+StrVec *IoPath(MemCh *m, char *cstr);
+StrVec *IoPath_From(MemCh *m, Str *s);
+StrVec *IoPath_FromStr(MemCh *m, Str *s);
+StrVec *IoPath_FromVec(MemCh *m, StrVec *v);

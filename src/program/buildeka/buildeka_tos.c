@@ -83,6 +83,9 @@ status BuildCtx_ToSInit(MemCh *m){
         moduleLabels = (Str **)Arr_Make(m, 17);
         moduleLabels[9] = Str_CstrRef(m, "INC");
         moduleLabels[10] = Str_CstrRef(m, "SATISFIED");
+        moduleLabels[11] = Str_CstrRef(m, "SOURCE_CHANGE");
+        moduleLabels[12] = Str_CstrRef(m, "HEADER_CHANGE");
+        moduleLabels[13] = Str_CstrRef(m, "UPSTREAM_CHANGE");
         Lookup_Add(m, ToSFlagLookup, TYPE_BUILD_MODULE, (void *)moduleLabels);
     }
     if(objectLabels == NULL){

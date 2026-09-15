@@ -109,12 +109,12 @@ status IoUtil_Relativise(MemCh *m, StrVec *path){
     return r;
 }
 
-Str *IoUtil_PathSep(MemCh *m){
-    return Str_Ref(m, (byte *)"/", 1, 1, STRING_COPY|MORE);
-}
-
 Str *IoUtil_ExtSep(MemCh *m){
     return Str_Ref(m, (byte *)".", 1, 1, STRING_COPY|LAST);
+}
+
+Str *IoUtil_PathSep(MemCh *m){
+    return Str_Ref(m, (byte *)"/", 1, 1, STRING_COPY|MORE);
 }
 
 void IoUtil_TrimDir(MemCh *m, StrVec *v){
@@ -417,6 +417,18 @@ StrVec *IoUtil_GetAbsVec(MemCh *m, Str *path){
     return v;
 }
 
+i32 IoUtil_BasePathAnchor(StrVec *path){
+    Iter it;
+    Iter_Init(&it, path->p);
+    while((Iter_Prev(&it) & END) == 0){
+        Str *s = Iter_Get(&it);
+        if(s->type.state & MORE){
+            return it.idx;
+        }
+    }
+    return 0;
+}
+
 Str *IoUtil_GetAbsPath(MemCh *m, Str *path){
     if(path != NULL && path->bytes[0] != '/'){
         if(path->length >= 2 && path->bytes[0] == '.' && path->bytes[1] == '/'){
@@ -461,18 +473,6 @@ boolean IoUtil_CmpUpdated(MemCh *m, Str *a, Str *b){
     }else{
         Return(m, FALSE);
     }
-}
-
-i32 IoUtil_BasePathAnchor(StrVec *path){
-    Iter it;
-    Iter_Init(&it, path->p);
-    while((Iter_Prev(&it) & END) == 0){
-        Str *s = Iter_Get(&it);
-        if(s->type.state & MORE){
-            return it.idx;
-        }
-    }
-    return 0;
 }
 
 Str *IoUtil_FnameStr(MemCh *m, StrVec *path){

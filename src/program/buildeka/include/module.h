@@ -20,6 +20,7 @@ typedef struct build_module {
     Span *flags;
     Span *libs;
     Node *config;
+    Span *deps;
     struct timespec latest;
     struct  {
         i32 total;
@@ -35,6 +36,7 @@ typedef struct build_module {
 
 BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name);
 BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident);
+void BuildModule_SetDepStatus(BuildCtx *ctx, BuildModule *md);
 void BuildModule_Load(BuildCtx *ctx, BuildModule *md);
 void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md);
 void BuildModule_SetFlags(BuildCtx *ctx, BuildModule *md);

@@ -133,23 +133,41 @@ void BuildModule_Build(BuildCtx *ctx, BuildModule *md){
 
     Iter it;
     Iter_Init(&it, md->sel->dest);
-    while((Iter_Next(&it) & END) == 0){
-        StrVec *v = Iter_Get(&it);
-        /* skip exec files for now */
-        if(v->type.state & LAST){
-            continue;
+    Slate *slate = Slate_Make(m, ctx->settings.parallel);
+    while(TRUE){
+        if((slate->type.state & LAST) == 0 && (it.type.state & END) == 0){
+            if((Iter_Next(&it) & END) == 0){
+                StrVec *v = Iter_Get(&it);
+                if((v->type.state & LAST) == 0){ /* skip exec files for now */
+                    BuildObject *obj = BuildObject_From(m, ctx, md, v);
+                    if((v->type.state & MORE) &&
+                            (obj->type.state & BUILDOBJ_SATISFIED) == 0){
+                        BuildObject_Build(m, ctx, obj);
+                        obj->idx = Slate_Add(m, slate, obj);
+                    }
+                }
+            }
+        }else{
+            for(i16 i = 0; i < slate->rangeType.range; i++){
+                BuildObject *obj = slate->slots[i];
+                if(obj != NULL){
+                    if(SubStatus(&obj->pd) & SUCCESS){
+                        BuildObject_Link(m, ctx, obj);
+                        md->metrics.built++;
+                        ctx->metrics.built++;
+
+                        Slate_Remove(m, slate, obj->idx);
+                    }
+                }
+            }
+            if((it.type.state & END) && (slate->type.state & END)){
+                break;
+            }
         }
 
-        BuildObject *obj = BuildObject_From(m, ctx, md, v);
-        obj->idx = it.idx;
-
-        if((v->type.state & MORE) &&
-                (obj->type.state & BUILDOBJ_SATISFIED) == 0){
-            BuildObject_Build(m, ctx, obj);
-        }
-        BuildObject_Link(m, ctx, obj);
-        md->metrics.built++;
-        ctx->metrics.built++;
+        struct timespec ts = {0, 5000000};
+        struct timespec remaining;
+        Time_Delay(&ts, &remaining);
     }
 
     if(md->execTbl != NULL){
@@ -169,6 +187,16 @@ void BuildModule_Build(BuildCtx *ctx, BuildModule *md){
     ctx->metrics.modulesBuilt++;
 
     ReturnVoid(m);
+}
+
+void BuildModule_SetDepStatus(BuildCtx *ctx, BuildModule *md){
+    MemCh *m = md->m;
+    Iter it;
+    Iter_Init(&it, md->deps);
+    while((Iter_Next(&it) & END) == 0){
+        BuildModule *omd = Iter_Get(&it);
+        md->type.state |= (omd->type.state & (BUILDMODULE_UPSTREAM_CHANGE|BUILDMODULE_HEADER_CHANGE));
+    }
 }
 
 void BuildModule_SetStatus(BuildCtx *ctx, BuildModule *md){
@@ -260,6 +288,14 @@ void BuildModule_Gather(MemCh *m, BuildCtx *ctx, BuildModule *md){
     md->sel->type.state &= ~DIR_SELECTOR_INVERT;
     Dir_GatherFilterDir(m, Ifc(m, md->src, TYPE_STR), md->sel);
 
+    void *ar[] = {
+        md->name,
+        Time_ToRStr(m, &hdrSel->time),
+        Time_ToRStr(m, &md->sel->time),
+        NULL
+    };
+    Out("^c.Latest Times for @: Header @ vs Source @^0\n", ar);
+
     if(Time_Greater(&hdrSel->time, &md->sel->time)){
         memcpy(&md->latest, &hdrLatest, sizeof(struct timespec));
         md->type.state |= BUILDMODULE_HEADER_CHANGE;
@@ -316,11 +352,10 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
             while((Iter_Next(&it) & END) == 0){
                 Hashed *h = Iter_Get(&it);
                 if(h != NULL){
-
-                    if(Table_Get(ctx->deps, h->key) == NULL){
-                        BuildModule *omd = NULL;
-                        if(Equals(h->value, K(m, "option")) || 
-                                Equals(h->value, K(m, "implied-option"))){
+                    BuildModule *omd = Table_Get(ctx->deps, h->key);
+                    if(Equals(h->value, K(m, "option")) || 
+                            Equals(h->value, K(m, "implied-option"))){
+                        if(omd == NULL){
                             i32 idx = Span_Has(ctx->options, h->key);
                             if(idx != -1){
                                 Abstract *opt = Span_Get(ctx->options, idx);
@@ -333,11 +368,15 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
                                 Table_Set(ctx->deps, h->key, omd);
                                 BuildModule_Load(ctx, omd);
                             }
-                        }else{
+                        }
+                        Span_Add(md->deps, omd);
+                    }else{
+                        if(omd == NULL){
                             omd = BuildModule_Make(MemCh_Make(), ctx, h->key);
                             Table_Set(ctx->deps, h->key, omd);
                             BuildModule_Load(ctx, omd);
                         }
+                        Span_Add(md->deps, omd);
                     }
                 }
             }
@@ -384,14 +423,24 @@ void BuildModule_Load(BuildCtx *ctx, BuildModule *md){
         if(Time_Greater(&targetModified, &md->latest)){
             void *ar[] = {
                 md->name,
+                Type_StateVec(m, md->type.of, md->type.state),
                 Time_ToRStr(m, &targetModified),
                 Time_ToRStr(m, &md->latest),
                 NULL
             };
-            Out("Not modified ^D.$^d. $ vs $^0\n", ar);
+            Out("Not modified ^D.$^d. @ = target:$ vs latest:$^0\n", ar);
+            md->type.state &= ~(BUILDMODULE_HEADER_CHANGE|BUILDMODULE_SOURCE_CHANGE);
             md->type.state |= BUILDMODULE_SATISFIED;
             md->metrics.built = md->metrics.total;
         }else{
+            void *ar[] = {
+                md->name,
+                Type_StateVec(m, md->type.of, md->type.state),
+                Time_ToRStr(m, &targetModified),
+                Time_ToRStr(m, &md->latest),
+                NULL
+            };
+            Out("Modified ^D.$^d. @ = target:$ vs latest:$^0\n", ar);
             BuildModule_SetStatus(ctx, md); 
         }
     }else{
@@ -406,6 +455,7 @@ BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
     md->type.of = TYPE_BUILD_MODULE;
     md->m = m;
     md->name = name;
+    md->deps = Span_Make(m);
 
     Debug_Push(m, md);
 
@@ -441,6 +491,7 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
     md->type.of = TYPE_BUILD_MODULE;
     md->m = m;
     md->name = StrVec_From(m, Ident_NameStr(m, ident));
+    md->deps = Span_Make(m);
 
     Debug_Push(m, md);
 

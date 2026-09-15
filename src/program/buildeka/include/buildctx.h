@@ -27,6 +27,9 @@ typedef struct buildctx {
         i32 modules;
         i32 modulesBuilt;
     } metrics;
+    struct {
+        i16 parallel;
+    } settings;
     CliStatus *cli;
     SourceFunc log;
 } BuildCtx;

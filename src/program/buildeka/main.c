@@ -34,6 +34,8 @@ i32 main(int argc, char **argv){
     Str *debugKey = K(m, "debug");
     Str *libDirKey = K(m, "libDirs");
     Str *srcPrefixKey = K(m, "src-prefix");
+    Str *statusKey = K(m, "status");
+    Str *parallelKey = K(m, "parallel");
 
     Args_Add(cli, helpKey, NULL, ARG_OPTIONAL, Sv(m, "Show this help message."));
     Args_Add(cli, noColorKey, NULL, ARG_OPTIONAL,
@@ -51,10 +53,16 @@ i32 main(int argc, char **argv){
     Args_Add(cli, debugKey, NULL, ARG_OPTIONAL,
         Sv(m, "Optionaly add debug objects to objects."));
 
+    Args_Add(cli, statusKey, NULL, ARG_OPTIONAL,
+        Sv(m, "Show the status of what to build only."));
+
     Span *libDirs = Span_Make(m);
     Span_Add(libDirs, S(m, "/usr/lib64"));
     Args_Add(cli, libDirKey, libDirs, ARG_MULTIPLE|ARG_DEFAULT,
         Sv(m, "lib directories to source static or linked libraries from."));
+
+    Args_Add(cli, parallelKey, I32_Wrapped(m, 8), ARG_DEFAULT|ARG_NUMBER,
+        Sv(m, "Number of build processes to run in parallel."));
 
     Args_Add(cli, dirKey, S(m, "build"), ARG_DEFAULT,
         Sv(m, "Build directory to use for objects and binary assets/executables."));
@@ -92,6 +100,8 @@ i32 main(int argc, char **argv){
     StrVec *targetV = StrVec_From(m, CliArgs_Get(cli, targetKey));
     ctx->ident = Ident_FromVec(m, targetV);
     ctx->options = CliArgs_Get(cli, optionsKey);
+    Single *sg = CliArgs_Get(cli, parallelKey);
+    ctx->settings.parallel = (i16)sg->val.i;
 
     if(CliArgs_Get(cli, quietKey)){
         Ansi_SetColor(OutStream, FALSE);
@@ -104,12 +114,13 @@ i32 main(int argc, char **argv){
 
     BuildCtx_Setup(ctx);
     BuildCtx_ShowStatus(ctx);
-    BuildCtx_Build(ctx);
-
-    args[0] = CliArgs_Get(cli, targetKey);
-    args[1] = CliArgs_Get(cli, dirKey);
-    args[2] = NULL;
-    Out("^g.Build succeeded $ -> ./$/bin/^0\n", args);
+    if(CliArgs_Get(cli, statusKey) == NULL){
+        BuildCtx_Build(ctx);
+        args[0] = CliArgs_Get(cli, targetKey);
+        args[1] = CliArgs_Get(cli, dirKey);
+        args[2] = NULL;
+        Out("^g.Build succeeded $ -> ./$/bin/^0\n", args);
+    }
 
     CliArgs_Free(cli);
 

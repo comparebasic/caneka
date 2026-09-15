@@ -18,6 +18,7 @@ Slate *Slate_Make(MemCh *m, i16 count){
 
     sl->available.last = sl->available.start+(count-1);
     sl->available.next = sl->available.last;
+
     return sl;
 }
 
@@ -27,11 +28,11 @@ i16 Slate_Add(MemCh *m, Slate *sl, void *item){
     if(sl->available.next == sl->available.start){
         sl->type.state |= LAST;
     }else{
-        *(sl->available.next) = -1;
         sl->available.next--;
     }
 
     sl->slots[idx] = item;
+    sl->type.state &= ~END;
     return idx;
 }
 
@@ -50,4 +51,7 @@ void Slate_Remove(MemCh *m, Slate *sl, i16 idx){
         sl->available.next++;
     }
     *sl->available.next = idx;
+    if(sl->available.next == sl->available.last){
+        sl->type.state |= END;
+    }
 }

@@ -4,6 +4,7 @@ enum argflags {
     ARG_MULTIPLE = 1 << 10,
     ARG_ABS_PATH = 1 << 11,
     ARG_CHOICE = 1 << 12,
+    ARG_NUMBER = 1 << 13,
 };
 
 typedef struct cli_args {

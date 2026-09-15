@@ -73,6 +73,7 @@ status BuildCtx_Setup(BuildCtx *ctx){
     Debug_Push(m, ctx);
 
     BuildCtx_Config(ctx);
+    BuildCtx_SetStatus(ctx);
     BuildCtx_SetLogging(ctx);
     BuildCtx_SetFlags(ctx);
 
@@ -86,14 +87,7 @@ status BuildCtx_SetStatus(BuildCtx *ctx){
     Iter_Init(&it, ctx->depsOrdered);
     while((Iter_Next(&it) & END) == 0){
         BuildModule *md = (BuildModule *)Iter_Get(&it);
-        if(md->type.state & BUILDMODULE_HEADER_CHANGE){
-            r |= BUILDMODULE_UPSTREAM_CHANGE;
-            continue;
-        }
-        if(r != ZERO){
-            md->type.state &= ~BUILDMODULE_SATISFIED;
-        }
-        md->type.state |= r;
+        BuildModule_SetDepStatus(ctx, md);
     }
     return ZERO;
 }
