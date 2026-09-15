@@ -17,20 +17,27 @@ static DirSel *BuildModule_makeDirSel(MemCh *m, BuildCtx *ctx, Str *ext, StrVec 
 
 static void BuildModule_makeDestDir(MemCh *m, BuildCtx *ctx, BuildModule *md){
     StrVec *path = IoUtil_BasePath(m, md->target);
-    IoUtil_AddVec(m, path, Sv(m, "object"));
+    IoUtil_AddVec(m, path, Sv(m, "objects"));
     Dir_CheckCreate(m, Ifc(m, path, TYPE_STR));
 }
 
 static void BuildModule_setTempls(BuildCtx *ctx, BuildModule *md){
     MemCh *m = ctx->m;
 
-    StrVec *src = Cone(m, ctx->src);
-    StrVec_Add(src, S(m, "/%"));
-    md->templ.src = Templ_FromVec(m, src);
+    md->templ.src = Templ_Make(m);
+    Str *src = Ifc(m, md->src, TYPE_STR);
+    Templ_Add(md->templ.src, src);
+    Templ_Add(md->templ.src, S(m, "%"));
 
-    StrVec *dest = IoUtil_BasePath(m, md->target);
-    StrVec_Add(dest, S(m, "/objects/%"));
-    md->templ.dest = Templ_FromVec(m, dest);
+    Str *dest = Ifc(m, IoUtil_BasePath(m, md->target), TYPE_STR);
+    md->templ.dest = Templ_Make(m);
+    Templ_Add(md->templ.dest, dest);
+    Templ_Add(md->templ.dest, S(m, "objects/%"));
+
+    Str *exec = Ifc(m, ctx->dest, TYPE_STR);
+    md->templ.exec = Templ_Make(m);
+    Templ_Add(md->templ.exec, exec);
+    Templ_Add(md->templ.exec, S(m, "/bin/%"));
 }
 
 void BuildModule_SetFlags(BuildCtx *ctx, BuildModule *md){
@@ -193,12 +200,12 @@ void BuildModule_SetStatus(BuildCtx *ctx, BuildModule *md){
                 v->type.state |= LAST;
             }
 
-            StrVec *out = BuildObject_GetDest(m, ctx, md, path);
+            Str *out = BuildObject_GetDest(m, ctx, md, path);
 
             struct stat sourceSt;
             struct stat st;
             File_Stat(m, Ifc(m, v, TYPE_STR), &sourceSt);
-            if((File_Stat(m, Ifc(m, out, TYPE_STR), &st) & ERROR)
+            if((File_Stat(m, out, &st) & ERROR)
                     || (sourceSt.st_mtime > st.st_mtime)){
                 v->type.state |= MORE;
             }else{
@@ -423,6 +430,7 @@ BuildModule *BuildModule_Make(MemCh *m, BuildCtx *ctx, StrVec *name){
     IoUtil_AddVec(m, md->target, target);
     StrVec_AddVec(md->target, Sv(m, ".a"));
 
+    BuildModule_setTempls(ctx, md);
     md->m->level++;
 
     Return(m, md);
@@ -466,6 +474,7 @@ BuildModule *BuildModule_FromIdent(MemCh *m, BuildCtx *ctx, Ident *ident){
     IoUtil_AddVec(m, md->target, target);
     StrVec_AddVec(md->target, Sv(m, ".a"));
 
+    BuildModule_setTempls(ctx, md);
     md->m->level++;
 
     Return(m, md);

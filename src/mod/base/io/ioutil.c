@@ -3,6 +3,35 @@
 
 static Span *pathSeps = NULL;
 
+Str *IoUtil_StrBasePath(MemCh *m, Str *path){
+    for(i32 i = path->length-1; i >= 0; i--){
+        if(*(path->bytes+i) == '/'){
+            return Str_Ref(m, path->bytes, i, i+1, path->type.state); 
+        }
+    }
+    return NULL;
+}
+
+Str *IoUtil_StrSwapExt(MemCh *m, Str *path, Str *ext){
+    for(i32 i = path->length-1; i >= 0; i--){
+        if(*(path->bytes+i) == '.'){
+            word length = i;
+            if(ext != NULL){
+                i += ext->length;
+            }else{
+                i--;
+            }
+
+            Str *s = Str_Ref(m, path->bytes, i, i+length, path->type.state); 
+            memcpy(s->bytes+i, ext->bytes, ext->length);
+            return s;
+        }
+    }
+
+    Error(m, FUNCNAME, FILENAME, LINENUMBER, "Expected path sep '.'", NULL);
+    return NULL;
+}
+
 boolean IoUtil_IsSep(Str *s){
     return s != NULL && (s->type.state & MORE) && s->length == 1 && s->bytes[0] == '/';
 }

@@ -184,7 +184,7 @@ Str *StrVec_ToStr(MemCh *m, StrVec *v, word length){
     void *args[2];
     if(v->total+1 > STR_MAX || v->total+1 > length){
         void *args[] = {
-            I64_Wrapped(m, v->total),
+            I64_Wrapped(m, v->total+1),
             I16_Wrapped(m, length),
             NULL,
         };

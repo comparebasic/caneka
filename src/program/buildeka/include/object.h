@@ -6,8 +6,9 @@ enum object_flags {
 typedef struct build_object {
     Type type;
     i32 idx;
-    StrVec *src;
-    StrVec *dest;
+    Str *src;
+    Str *dest;
+    Str *dir;
     BuildModule *md;
 } BuildObject;
 
@@ -16,4 +17,4 @@ BuildObject *BuildObject_Exec(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *
 BuildObject *BuildObject_Inc(MemCh *m, BuildCtx *ctx, BuildModule *md);
 void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj);
 void BuildObject_Link(MemCh *m, BuildCtx *ctx, BuildObject *obj);
-StrVec *BuildObject_GetDest(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *path);
+Str *BuildObject_GetDest(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *path);

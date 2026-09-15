@@ -29,6 +29,7 @@ typedef struct build_module {
     struct {
         Templ *src;
         Templ *dest;
+        Templ *exec;
     } templ;
 } BuildModule;
 

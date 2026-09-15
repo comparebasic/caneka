@@ -1,7 +1,7 @@
 #include <external.h>
 #include <base_module.h>
 
-static void Templ_render(Buff *bf, Templ *templ, TypedArr *args, void *_a){
+static void Templ_render(Buff *bf, Templ *templ, void *args[], void *_a){
     MemCh *m = bf->m;
     Abstract *a = (Abstract *)_a;
 
@@ -13,14 +13,7 @@ static void Templ_render(Buff *bf, Templ *templ, TypedArr *args, void *_a){
         Hashed *h = (Hashed *)a;
         Single *sg = (Single *)h->value;
 
-        if(templ->currentIdx > args->rangeType.range){
-            Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                "Array for Templ has fewer items than requested index", NULL);
-            templ->type.state |= ERROR;
-            return;
-        }
-
-        Abstract *item = TypedArr_Get(m, args, templ->currentIdx);
+        Abstract *item = args[h->orderIdx];
         if(item != NULL && h->key != NULL && item->type.of == TYPE_TABLE){
             Table *tbl = (Table *)item;
             item = Table_Get(tbl, h->key);
@@ -28,15 +21,14 @@ static void Templ_render(Buff *bf, Templ *templ, TypedArr *args, void *_a){
 
         if(item == NULL){
             void *ar[] = {
-                I32_Wrapped(m, templ->currentIdx),
+                I32_Wrapped(m, h->orderIdx),
+                templ,
                 NULL
             };
-            Error(m, FUNCNAME, FILENAME, LINENUMBER, "Item $ is NULL", ar);
+            Error(m, FUNCNAME, FILENAME, LINENUMBER, "Item $ is NULL for @", ar);
             templ->type.state |= ERROR;
             return;
         }
-
-        templ->currentIdx++;
 
         ToSFunc func = NULL; 
         if(sg->val.ptr != NULL && item->type.of == sg->objType.of){
@@ -68,13 +60,12 @@ static void Templ_render(Buff *bf, Templ *templ, TypedArr *args, void *_a){
     }
 }
 
-status Templ_Render(Buff *bf, Templ *templ, TypedArr *args){
-    templ->currentIdx = 0;
+status Templ_Render(Buff *bf, Templ *templ, void *args[]){
     Templ_render(bf, templ, args, templ->p);
     return templ->type.state;
 }
 
-StrVec *Templ_ToVec(MemCh *m, Templ *templ, TypedArr *args){
+StrVec *Templ_ToVec(MemCh *m, Templ *templ, void *args[]){
 
     Buff bf;
     memset(&bf, 0, sizeof(Buff));
@@ -82,30 +73,21 @@ StrVec *Templ_ToVec(MemCh *m, Templ *templ, TypedArr *args){
     bf.m = m;
     Buff_InitVec(m, &bf, StrVec_Make(m));
 
-    templ->currentIdx = 0;
     Templ_render(&bf, templ, args, templ->p);
 
     return bf.v;
 }
 
-Str *Templ_ToStr(MemCh *m, Templ *templ, TypedArr *args){
+Str *Templ_ToStr(MemCh *m, Templ *templ, void *args[]){
     return Ifc(m, Templ_ToVec(m, templ, args), TYPE_STR);
 }
 
-Templ *Templ_FromCstr(MemCh *m, char *cstr){
-    Str *s = S(m, cstr);
-    return Templ_From(m, s->bytes, s->length);
+void Templ_Add(Templ *templ, Str *s){
+    Templ_AddBytes(templ, s->bytes, s->length);
 }
 
-Templ *Templ_FromVec(MemCh *m, StrVec *v){
-    return NULL;
-}
-
-Templ *Templ_From(MemCh *m, byte *b, i16 length){
-    Templ *templ = (Templ *)MemCh_Alloc(m, sizeof(Templ));
-    templ->type.of = TYPE_TEMPL;
-    templ->p = Span_Make(m);
-
+Templ *Templ_AddBytes(Templ *templ, byte *b, i16 length){
+    MemCh *m = templ->m;
     Str *s = NULL;
     status r = READY;
 
@@ -115,13 +97,11 @@ Templ *Templ_From(MemCh *m, byte *b, i16 length){
     byte *token = b;
     word tlength = 0;
 
-    i32 idx = 0;
-
     byte *end = b+length-1;
     while(b <= end){
         byte c = *b;
 
-        if(b == end && (c == '^' || c == '\\' || c == '%' || c == '@' || c == '&')){
+        if(b == end && (c == '^' || c == '\\' || c == '{')){
             s = Str_Ref(m, b, length, length, ZERO);
             void *ar[] = {s, NULL};
             Error(m, FUNCNAME, FILENAME, LINENUMBER,
@@ -136,7 +116,7 @@ Templ *Templ_From(MemCh *m, byte *b, i16 length){
                 r &= ~(PROCESSING|SUCCESS);
                 h->objType.state = r;
                 h->value = Func_Wrapped(m, NULL, ZERO);
-                h->orderIdx = idx++;
+                h->orderIdx = templ->nextIdx++;
                 Iter_Add(&it, h);
                 token = b+1;
                 tlength = 0;
@@ -155,7 +135,7 @@ Templ *Templ_From(MemCh *m, byte *b, i16 length){
                 r &= ~PROCESSING;
                 h->objType.state = r;
                 h->value = Func_Wrapped(m, NULL, ZERO);
-                h->orderIdx = idx++;
+                h->orderIdx = templ->nextIdx++;
                 Iter_Add(&it, h);
                 r = READY;
             }
@@ -199,6 +179,34 @@ next:
         b++;
     }
 
+    if(r == READY && tlength > 0){
+        s = Str_Ref(m, token, tlength, tlength, ZERO);
+        Iter_Add(&it, s);
+        token = b+1;
+        tlength = 0;
+    }else if (r & (PROCESSING|SUCCESS)){
+        Hashed *h = Hashed_Make(m, NULL);
+        r &= ~PROCESSING;
+        h->objType.state = r;
+        h->value = Func_Wrapped(m, NULL, ZERO);
+        h->orderIdx = templ->nextIdx++;
+        Iter_Add(&it, h);
+        r = READY;
+    }
+
     return templ;
 }
 
+Templ *Templ_FromCstr(MemCh *m, char *cstr){
+    Templ *templ = Templ_Make(m);
+    Str *s = S(m, cstr);
+    return Templ_AddBytes(templ, s->bytes, s->length);
+}
+
+Templ *Templ_Make(MemCh *m){
+    Templ *templ = (Templ *)MemCh_Alloc(m, sizeof(Templ));
+    templ->type.of = TYPE_TEMPL;
+    templ->p = Span_Make(m);
+    templ->m = m;
+    return templ;
+}

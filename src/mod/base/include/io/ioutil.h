@@ -34,3 +34,5 @@ Str *IoUtil_ExtSep(MemCh *m);
 void IoUtil_TrimDir(MemCh *m, StrVec *v);
 boolean IoUtil_IsSep(Str *s);
 status IoUtils_Init(MemCh *m);
+Str *IoUtil_StrBasePath(MemCh *m, Str *path);
+Str *IoUtil_StrSwapExt(MemCh *m, Str *path, Str *ext);

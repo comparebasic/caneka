@@ -1,17 +1,18 @@
 #include <external.h>
 #include "buildeka_module.h"
 
-StrVec *BuildObject_GetDest(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *path){
-    StrVec *local = Clone(m, path);
-    StrVec_Incr(local, ctx->src->total+1);
-    StrVec *dest = IoUtil_BasePath(m, md->target);
-    IoUtil_AddVec(m, dest, Sv(m, "object"));
+Str *BuildObject_GetDest(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *path){
 
-    StrVec *out = Clone(m, local);
-    StrVec_Incr(out, md->local->total+1);
-    IoUtil_SwapExt(m, out, S(m, "o"));
-    IoUtil_AddVec(m, dest, out);
-    return dest;
+    Str *local = StrVec_ToStr(m, path, path->total+1);
+    Str_Incr(local, md->src->total+1);
+    IoUtil_StrSwapExt(m, local, S(m, "o"));
+
+    void *args[] = {
+        local,
+        NULL
+    };
+
+    return Templ_ToStr(m, md->templ.dest, args);
 }
 
 void BuildObject_Link(MemCh *m, BuildCtx *ctx, BuildObject *obj){
@@ -87,7 +88,7 @@ void BuildObject_Build(MemCh *m, BuildCtx *ctx, BuildObject *obj){
     ProcDets pd;
     ProcDets_Init(m, &pd);
 
-    Dir_CheckCreateFor(m, obj->dest);
+    Dir_CheckCreate(m, obj->dir);
     r |= SubProcess(m, cmd, &pd);
     if(r & ERROR){
         void *args[] = {
@@ -105,12 +106,16 @@ BuildObject *BuildObject_Inc(MemCh *m, BuildCtx *ctx, BuildModule *md){
     BuildObject *obj = MemCh_AllocOf(m, 
         sizeof(BuildObject), TYPE_BUILD_OBJECT);
     obj->type.of = TYPE_BUILD_OBJECT;
+
     Debug_Push(m, obj);
+
     obj->md = md;
 
-    obj->src = Clone(m, md->src);
-    IoUtil_AddVec(m, obj->src, Sv(m, "inc.c"));
-    obj->dest = md->target;
+    StrVec *path = Clone(m, md->src);
+    StrVec_Add(path, S(m, "/inc.c"));
+    obj->src = Ifc(m, path, TYPE_STR);
+    obj->dest = Ifc(m, md->target, TYPE_STR);
+    obj->dir = IoUtil_StrBasePath(m, obj->dest);
 
     Return(m, obj);
 }
@@ -124,10 +129,7 @@ BuildObject *BuildObject_Exec(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *
     Debug_Push(m, obj);
 
     obj->md = md;
-
-    obj->src = IoUtil_Annotate(m, path);
-    obj->dest = Clone(m, ctx->dest);
-    IoUtil_AddVec(m, obj->dest, Sv(m, "bin"));
+    obj->src = Ifc(m, path, TYPE_STR);
 
     StrVec *local = Clone(m, path);
     StrVec_Incr(local, ctx->src->total+1);
@@ -136,7 +138,15 @@ BuildObject *BuildObject_Exec(MemCh *m, BuildCtx *ctx, BuildModule *md, StrVec *
     if(Equals(local, K(m, "main"))){
         local = md->name;
     }
-    IoUtil_AddVec(m, obj->dest, local);
+
+    void *args[] = {
+        local,
+        NULL
+    };
+
+    obj->dest = Templ_ToStr(m, md->templ.exec, args);
+    obj->dir = IoUtil_StrBasePath(m, obj->dest);
+
     Return(m, obj);
 }
 
@@ -149,13 +159,6 @@ BuildObject *BuildObject_From(MemCh *m,
     Debug_Push(m, obj);
 
     obj->md = md;
-    if(obj->md == NULL){
-        Error(m, FUNCNAME, FUNCNAME, LINENUMBER, 
-            "Error no module found as current in Iter", NULL);
-        obj->type.state |= ERROR;
-        Return(m, obj);
-    }
-
     if(obj->md->sel == NULL || obj->md->sel->dest == NULL){
         Error(m, FUNCNAME, FUNCNAME, LINENUMBER, 
             "Error no source files in module", NULL);
@@ -163,8 +166,10 @@ BuildObject *BuildObject_From(MemCh *m,
         Return(m, obj);
     }
 
-    obj->src = IoUtil_Annotate(m, path);
-    obj->dest = BuildObject_GetDest(m, ctx, obj->md, obj->src);
+    obj->src = Ifc(m, path, TYPE_STR);
+
+    obj->dest = BuildObject_GetDest(m, ctx, obj->md, path);
+    obj->dir = IoUtil_StrBasePath(m, obj->dest);
 
     struct stat sourceSt;
     struct stat st;

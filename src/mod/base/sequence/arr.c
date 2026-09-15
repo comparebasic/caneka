@@ -56,33 +56,3 @@ void **Arr_Make(MemCh *m, i32 nvalues){
     size_t sz = sizeof(void *) * (nvalues+1);
     return (void **)Bytes_Alloc((m), sz, TYPE_POINTER_ARRAY);
 }
-
-void *TypedArr_Get(MemCh *m, TypedArr *arr, i32 idx){
-    if(idx >= arr->rangeType.range){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Idx is our of range", NULL);
-        arr->type.state |= ERROR;
-        return NULL;
-    }
-    void **dptr = arr->data+idx;
-    return *dptr;
-}
-
-void TypedArr_Set(MemCh *m, TypedArr *arr, i32 idx, void *value){
-    if(idx >= arr->rangeType.range){
-        Error(m, FUNCNAME, FILENAME, LINENUMBER,
-            "Idx is our of range", NULL);
-        arr->type.state |= ERROR;
-        return;
-    }
-    void **dptr = arr->data+idx;
-    *dptr = value;
-}
-
-TypedArr *TypedArr_Make(MemCh *m, cls typeOf, i16 size){
-    TypedArr *arr = MemCh_Alloc(m, sizeof(TypedArr));
-    arr->type.of = TYPE_TYPED_ARR;
-    arr->data = (void **)Bytes_Alloc(m, size *sizeof(void *), TYPE_BYTES_POINTER);
-    arr->rangeType.range = size;
-    return arr;
-}

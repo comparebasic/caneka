@@ -103,7 +103,7 @@ i64 Str_AddCstr(Str *s, char *cstr){
 char *Str_Cstr(MemCh *m, Str *s){
     if(TextCharFilter(s->bytes, s->length)){
         byte *b;
-        if(s->alloc == s->length+1){
+        if(s->alloc == s->length+1 && s->bytes[s->length] == '0'){
             b = s->bytes;
         }else{
             b = Bytes_Alloc(m, s->length+1, TYPE_BYTES_POINTER);

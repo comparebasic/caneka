@@ -8,13 +8,13 @@ status Templ_Tests(MemCh *m){
     m->level++;
 
     Templ *templ = Templ_FromCstr(m, 
-        "^D.Hi there &, it's % degrees in @{location}^d.\n");
+        "^D.Hi there &, it's % degrees in @{location}^d.");
 
-    TypedArr *arr = TypedArr_Make(m, ZERO, 3);
+    void *arr[3];
 
     Table *tbl = Table_Make(m);
     Table_Set(tbl, K(m, "location"), S(m, "Everywhere"));
-    TypedArr_Set(m, arr, 2, tbl);
+    arr[2] = tbl;
 
     char *names[] = { "Samual", "Shin", "Sara", "Sataya" };
     i32 nums[] = {73, 80, 20, -12};
@@ -27,8 +27,8 @@ status Templ_Tests(MemCh *m){
     };
 
     for(i32 i = 0; i < 4; i++){
-        TypedArr_Set(m, arr, 0, S(m, names[i]));
-        TypedArr_Set(m, arr, 1,  I32_Wrapped(m, nums[i]));
+        arr[0] = S(m, names[i]);
+        arr[1] = I32_Wrapped(m, nums[i]);
         Table_Set(tbl, K(m, "location"), S(m, locations[i]));
         
         StrVec *v = Templ_ToVec(m, templ, arr);
