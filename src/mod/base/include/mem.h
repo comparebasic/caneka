@@ -1,3 +1,4 @@
+#include "mem/slab.h"
 #include "mem/span.h"
 #include "mem/iter.h"
 #include "mem/mem_page.h"

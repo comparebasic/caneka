@@ -17,7 +17,7 @@ typedef struct iter {
     i32 idx;
     struct span *p;
     void *value;
-    void *stack[SPAN_MAX_DIMS+1];
+    Slab *stack[SPAN_MAX_DIMS+1];
     i32 stackIdx[SPAN_MAX_DIMS+1];
     struct {
         i32 get;
