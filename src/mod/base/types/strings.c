@@ -77,7 +77,6 @@ static char *baseTypeStrings[] = {
     "CURSOR",
     "TESTSUITE",
     "SPAN",
-    "TABLE",
     "ARRAY",
     "CSTR_ARRAY",
     "COORDS",

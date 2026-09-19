@@ -418,6 +418,17 @@ status Mem_InitLabels(MemCh *m, Lookup *lk){
         Lookup_Add(m, lk, TYPE_ITER, (void *)iterLabels);
         r |= SUCCESS;
     }
+    if(iterLabels == NULL){
+        spanLabels = (Str **)Arr_Make(m, 17);
+        spanLabels[9] = Str_CstrRef(m, "INLINE");
+        spanLabels[10] = Str_CstrRef(m, "GROWER");
+        spanLabels[11] = Str_CstrRef(m, "QUEUE");
+        spanLabels[12] = Str_CstrRef(m, "TABLE");
+        spanLabels[13] = Str_CstrRef(m, "HAS_GAPS");
+        spanLabels[14] = Str_CstrRef(m, "ORDERED");
+        Lookup_Add(m, lk, TYPE_ITER, (void *)spanLabels);
+        r |= SUCCESS;
+    }
     return r;
 }
 

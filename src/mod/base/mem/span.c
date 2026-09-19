@@ -1,69 +1,75 @@
 #include <external.h>
 #include "base_module.h"
 
-i32 dim_max_idx[SPAN_MAX_DIMS+1] = {15, 255, 4095, 65535, 1048575};
-
-status Span_Set(Span *p, i32 idx, void *t){
-    if(idx < 0){
-        return NOOP;
+i32 Span_Add(Span *p, void *t){
+    if(p->range.range == 0 && (p->maxIdx+1) < SPAN_STRIDE){
+        p->maxIdx++;
+        p->root[p->maxIdx] = t;
+        p->count++;
+    }else{
+        i32 idx = p->maxIdx+1;
+        Iter_Init(IT, p);
+        Iter_Set(IT, idx, t);
     }
 
-    if(p->dims == 0 && idx < SPAN_STRIDE){
-        void **arr = (void *)p->root;
-        arr[idx] = t;
-        p->nvalues++;
-        if(idx > p->max_idx){
-            p->max_idx = idx;
-        }
-        return SUCCESS;
-    }
-
-    Iter it;
-    Iter_Init(&it, p);
-    return Iter_SetByIdx(&it, idx, t);
+    return p->maxIdx;
 }
 
-boolean Span_IsBlank(Span *p){
-    return p->nvalues == 0;
+void Span_Set(Span *p, i32 idx, void *t){
+    if(idx < 0){
+        p->type.state |= ERROR;
+        return;
+    }
+
+    if(p->range.range == 0 && idx < SPAN_STRIDE){
+        p->root[idx] = t;
+        return;
+    }
+
+    Iter_Init(IT, p);
+    Iter_Set(IT, idx, t);
 }
 
 void *Span_Get(Span *p, i32 idx){
     if(idx < 0){
+        p->type.state |= ERROR;
         return NULL;
     }
 
-    if(p->dims == 0 && idx < SPAN_STRIDE){
-        void **arr = (void *)p->root;
-        return arr[idx];
+    if(p->range.range == 0 && idx < SPAN_STRIDE){
+        return p->root[idx];
     }
 
-    Iter it;
-    Iter_Init(&it, p);
-    return Iter_GetByIdx(&it, idx);
-}
-
-status Span_Remove(Span *p, i32 idx){
-    if(idx < 0 ){
-        return NOOP;
+    Iter_Init(IT, p);
+    Iter_GoToIdx(IT, idx);
+    if((IT->type.state & NOOP) == 0){
+        return IT->value;
     }
-    Iter it;
-    Iter_Init(&it, p);
-    return Iter_RemoveByIdx(&it, idx);
+
+    return NULL;
 }
 
-status Span_Setup(Span *p){
-    p->type.of = TYPE_SPAN;
-    p->max_idx = -1;
-    p->nvalues = 0;
-    return SUCCESS;
+void Span_Remove(Span *p, i32 idx){
+    if(idx < 0){
+        p->type.state |= ERROR;
+        return;
+    }
+
+    if(p->range.range == 0 && idx < SPAN_STRIDE){
+        if(p->root[idx] != NULL){
+            p->root[idx] = NULL;
+            p->count--;
+        }
+    }
+
+    Iter_Init(IT, p);
+    Iter_Remove(IT, idx);
 }
 
 Span *Span_Make(MemCh *m){
     Span *p = MemCh_AllocOf(m, sizeof(Span), TYPE_SPAN);
     p->type.of = TYPE_SPAN;
-    p->memLevel = m->level;
-    p->max_idx = -1;
     p->m = m;
-    p->root = (slab *)Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);
+    p->root = (Slab *)Bytes_Alloc((m), sizeof(Slab), TYPE_POINTER_ARRAY);
     return p;
 }

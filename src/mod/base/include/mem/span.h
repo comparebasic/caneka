@@ -1,31 +1,31 @@
 enum span_flags {
-    FLAG_SPAN_INLINE_SLOTS = 1 << 8,
-    FLAG_SPAN_HAS_GAPS = 1 << 9,
-    FLAG_SPAN_ORDERED = 1 << 10,
-    FLAG_SPAN_RAW = 1 << 11,
-    FLAG_SPAN_TABLE = 1 << 12,
+    SPAN_INLINE = 1 << 8,
+    SPAN_EXPAND = 1 << 9,
+    SPAN_QUEUE = 1 << 10,
+    SPAN_TABLE = 1 << 11,
+    SPAN_HAS_GAPS = 1 << 12,
+    SPAN_ORDERED = 1 << 13,
 };
 
-typedef util *slab[SPAN_STRIDE];
-extern i32 dim_max_idx[SPAN_MAX_DIMS+1];
+typedef void **Slab[SPAN_STRIDE];
+typedef i8 NextSet[SPAN_STRIDE];
 
 typedef struct span {
     Type type;
-    byte _;
-    i8 dims;
-    i16 memLevel;
+    RangeType range; /* type/dims */
     struct mem_ctx *m;
-    slab *root;
-	i32 nvalues;
-    i32 max_idx;
+    i32 count;
+    i32 maxIdx;
+    Slab *root;
+    /* first data: Slab */
 } Span;
 
-status Span_Set(Span *p, i32 idx, void *t);
 void *Span_Get(Span *p, i32 idx);
-status Span_Remove(Span *p, i32 idx);
-status Span_Setup(Span *p);
-Span *Span_Make(struct mem_ctx *m);
-boolean Span_IsBlank(Span *p);
+void Span_Set(Span *p, i32 idx, void *t);
+void Span_Remove(Span *p, i32 idx);
+i32 Span_Add(Span *p, void *t);
 
-util *Span_SetSlot(Span *p, i32 idx, util u);
-util *Span_GetSlot(Span *p, i32 idx);
+util Span_SetSlot(Span *p, i32 idx, util u);
+util Span_GetSlot(Span *p, i32 idx);
+
+Span *Span_Make(struct mem_ctx *m);

@@ -5,14 +5,14 @@ extern word OUTCOME_FLAGS;
 
 enum status_types {
     READY = 0,
-    SUCCESS = 1,
-    ERROR = 1 << 1,
-    NOOP = 1 << 2,
-    DEBUG = 1 << 3,
+    ERROR = 1,
+    PROCESS = 1 << 1,
+    FOCUS = 1 << 2,
+    NOOP = 1 << 3,
     MORE = 1 << 4,
-    LAST = 1 << 5,
-    END = 1 << 6,
-    PROCESSING = 1 << 7,
+    WAIT = 1 << 5,
+    TAIL = 1 << 6,
+    FINISH = 1 << 7,
     /* class speciric */
     CLS_FLAG_ALPHA = 1 << 8,
     CLS_FLAG_BRAVO = 1 << 9,
