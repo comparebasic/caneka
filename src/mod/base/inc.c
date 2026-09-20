@@ -20,6 +20,7 @@
 #include "./mem/span.c"
 #include "./mem/slate.c"
 #include "./mem/iter.c"
+#include "./mem/iter_utils.c"
 #include "./mem/byteslit.c"
 #include "./mem/mem_page.c"
 #include "./mem/mem_book.c"

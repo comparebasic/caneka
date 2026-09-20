@@ -19,11 +19,6 @@ typedef struct iter {
     i64 selected;
 } Iter;
 
-extern Iter IT;
-
-void Iter_AddSpanRev(Iter *it, Span *p);
-void Iter_AddSpan(Iter *it, Span *p);
-
 void Iter_Init(Iter *it, Span *p);
 status Iter_Incr(Iter *it);
 status Iter_Next(Iter *it);

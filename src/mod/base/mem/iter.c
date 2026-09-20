@@ -1,8 +1,6 @@
 #include <external.h>
 #include "base_module.h"
 
-Iter IT;
-
 static inline Slab *Iter_newSlab(MemCh *m, Span *p){
     i16 level = m->level;
     m->level = p->memLevel;
@@ -145,22 +143,6 @@ static status Iter_Query(Iter *it){
     }
 
     return it->type.state;
-}
-
-void Iter_AddSpan(Iter *it, Span *p){
-    Iter it2;
-    Iter_Init(&it2, p);
-    while((Iter_Next(&it2) & END) == 0){
-        Iter_Add(it, it2.value);
-    }
-}
-
-void Iter_AddSpanRev(Iter *it, Span *p){
-    Iter it2;
-    Iter_Init(&it2, p);
-    while((Iter_Prev(&it2) & END) == 0){
-        Iter_Add(it, it2.value);
-    }
 }
 
 status Iter_Incr(Iter *it){
