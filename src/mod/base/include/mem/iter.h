@@ -5,6 +5,7 @@ enum iter_flags {
     ITER_RESERVE = 1 << 11,
     ITER_ADD = 1 << 12,
     ITER_REVERSE = 1 << 13,
+    ITER_SKIP_NULL = 1 << 14,
 };
 
 typedef struct iter {
@@ -24,8 +25,7 @@ status Iter_AddSpanRev(Iter *it, Span *p);
 status Iter_AddSpan(Iter *it, Span *p);
 
 void Iter_Init(Iter *it, Span *p);
-status Iter_Next(Iter *it);
-status Iter_Prev(Iter *it);
+status Iter_Incr(Iter *it);
 
 void Iter_Pop(Iter *it);
 void Iter_Reset(Iter *it);
@@ -36,5 +36,6 @@ void Iter_Set(Iter *it, i32 idx, void *value);
 void Iter_Insert(Iter *it, i32 idx, void *value);
 void Iter_Push(Iter *it, void *value);
 void Iter_Remove(Iter *it, i32 idx);
+void Iter_Reserve(Iter *it, i32 idx);
 
 Iter *Iter_Make(struct mem_ctx *m, Span *p);
