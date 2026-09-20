@@ -38,7 +38,7 @@ static status Iter_Query(Iter *it){
     Span *p = it->p;
 
     if(it->type.state & SPAN_OP_ADD){
-        it->idx = it->p->max_idx+1;
+        it->idx = it->p->maxIdx+1;
         it->type.state &= ~END;
     }
 
@@ -142,7 +142,7 @@ static status Iter_Query(Iter *it){
                     }
                     *ptr = NULL;
                     if(it->idx == p->maxIdx){
-                        p->max_idx--;
+                        p->maxIdx--;
                     }
                 }
             }
@@ -298,8 +298,8 @@ status Iter_Next(Iter *it){
     void **ptr = NULL;
 
     if(it->type.state & SPAN_OP_ADD){
-        if(it->idx != it->p->max_idx){
-            idx = it->idx = it->p->max_idx;
+        if(it->idx != it->p->maxIdx){
+            idx = it->idx = it->p->maxIdx;
             Iter_Query(it);
             it->type.state |= PROCESSING;
         }
@@ -425,7 +425,7 @@ status Iter_Remove(Iter *it){
 }
 
 void *Iter_Pop(Iter *it){
-    void *value = Iter_GetByIdx(it, it->p->max_idx);
+    void *value = Iter_GetByIdx(it, it->p->maxIdx);
     Iter_Remove(it);
     Iter_Prev(it);
     return value;
