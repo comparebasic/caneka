@@ -4,7 +4,7 @@
 i32 Span_Add(Span *p, void *t){
     if(p->range.range == 0 && (p->maxIdx+1) < SPAN_STRIDE){
         p->maxIdx++;
-        p->root[p->maxIdx] = t;
+        *(p->root[p->maxIdx]) = t;
         p->count++;
     }else{
         i32 idx = p->maxIdx+1;
@@ -22,7 +22,7 @@ void Span_Set(Span *p, i32 idx, void *t){
     }
 
     if(p->range.range == 0 && idx < SPAN_STRIDE){
-        p->root[idx] = t;
+        *(p->root[idx]) = t;
         return;
     }
 
@@ -57,7 +57,7 @@ void Span_Remove(Span *p, i32 idx){
 
     if(p->range.range == 0 && idx < SPAN_STRIDE){
         if(p->root[idx] != NULL){
-            p->root[idx] = NULL;
+            *(p->root[idx]) = NULL;
             p->count--;
         }
     }

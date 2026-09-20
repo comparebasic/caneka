@@ -1,195 +1,147 @@
 #include <external.h>
 #include "base_module.h"
 
+NextSet queueInitialSet = {
+    15, 14, 13, 12,
+    11, 10, 9, 8, 
+    7, 6, 5, 4,
+    3, 2, 1, 0
+};
+
 i32 _increments[SPAN_MAX_DIMS+2] = {1, 16, 256, 4096, 65536, 1048576};
 i32 _modulos[SPAN_MAX_DIMS+1] = {0, 15, 255, 4095, 65535};
 i32 _capacity[SPAN_MAX_DIMS+1] = {16, 256, 4096, 65536, 1048576};
 
 static status Iter_Query(Iter *it);
 
-static inline void *Iter_newSlab(MemCh *m){
+static inline void *Iter_newSlab(MemCh *m, Span *p){
+    i16 level = m->level;
+    m->level = p->memLevel;
+
+    if(m->type.state & SPAN_QUEUE){
+        QueueSlab *sl = MemCh_Alloc(m, SizeW(QueueSlab));
+        sl->type.of = TYPE_QUEUE_SLAB;
+        memcpy(&sl->set, &queueInitialSet, sizeof(NextSet));
+        s->next = &(sl->set[SPAN_LOCAL_MAX]);
+
+        m->level = level;
+        return sl;
+    }
+
+    m->level = level;
     return Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);
-}
-
-static inline void *Iter_newSlabForMem(Iter *it){
-    return Bytes_AllocOnPage((MemPage *)it->value,
-        sizeof(slab), TYPE_POINTER_ARRAY);
-}
-
-static inline void Iter_expand(Iter *it, i8 dimsNeeded){
-    if((it->type.state &
-            (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD)) == 0){
-        it->type.state |= NOOP;
-        return it->type.state;
-    }
-    slab *exp_sl = NULL;
-    slab *shelf_sl = NULL;
-    while(it->p->dims < dimsNeeded){
-        Guard_Incr(it->p->m, &guard, ITER_MAX, FUNCNAME, FILENAME, LINENUMBER);
-        slab *new_sl = NULL;
-        if(it->p->nvalues > 0 && it->p->m->it.p == it->p){
-            MemPage *pg = it->value;
-            i16 level = pg->level;
-            pg->level = 0;
-            new_sl = (slab *)Iter_newSlabForMem(it);
-            pg->level = level;
-        }else{
-            i16 level = m->level;
-            m->level = p->memLevel;
-            new_sl = (slab *)Iter_newSlab(m);
-            m->level = level;
-        }
-
-        if(exp_sl == NULL){
-            shelf_sl = it->p->root;
-            it->p->root = new_sl;
-        }else{
-            exp_sl[0] = new_sl;
-        }
-
-        exp_sl = new_sl;
-        p->dims++;
-    }
-    exp_sl[0] = shelf_sl;
-    it->type.state |= MORE;
-}
-
-static inline i32 Iter_SetStack(MemCh *m, Iter *it, i8 dim, i32 offset){
-    Span *p = it->p; 
-    void **ptr = NULL;
-    void *debug = NULL;
-    i32 localIdx = 0;
-    i32 increment = _increments[dim];
-    localIdx = (offset / increment);
-
-    if(localIdx > SPAN_STRIDE){
-        void *args[] = {
-            I32_Wrapped(m, localIdx), 
-            NULL
-        };
-        Fatal(m, FUNCNAME, FILENAME, LINENUMBER, 
-            "Error localIdx larger than span stride $", args);
-        return -1;
-    }
-
-    if(dim == p->dims){
-        ptr = (void **)p->root;
-        it->stackIdx[dim] = 0;
-    }else{
-        if(it->stack[dim+1] == NULL){
-            Fatal(m, FUNCNAME, FILENAME, LINENUMBER, 
-                "Error expected ptr to span in SetStack", NULL);
-        }
-        ptr = *((void **)it->stack[dim+1]); 
-        it->stackIdx[dim] = localIdx;
-    }
-
-    word fl = (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD);
-    if((it->p->type.state & fl) == 0 && ptr == NULL){
-        it->type.state |= NOOP;
-        return 0;
-    }
-
-    ptr += localIdx;
-    it->stack[dim] = ptr;
-    it->stackIdx[dim] = localIdx;
-    if(dim > 0 && *ptr == NULL){
-        if((it->type.state & fl) == 0){
-            it->type.state |= FLAG_ITER_CONTINUE;
-            return 0;
-        }
-        if(p->nvalues > 0 && p->m->it.p == p){
-            MemPage *pg = (MemPage *)it->value;
-            pg->level = 0;
-            *ptr = (slab *)Bytes_AllocOnPage(it->value, sizeof(slab), TYPE_POINTER_ARRAY);
-        }else{
-            i16 level = m->level;
-            m->level = p->memLevel;
-            *ptr = (slab *)Bytes_Alloc((m), sizeof(slab), TYPE_POINTER_ARRAY);
-            m->level = level;
-        }
-    }
-
-    return offset & _modulos[dim];
 }
 
 static status Iter_Query(Iter *it){
     it->type.state &= ~(SUCCESS|NOOP|MORE|LAST);
     MemCh *m = it->p->m;
-    i16 guard = 0;
+    Span *p = it->p;
 
     if(it->type.state & SPAN_OP_ADD){
         it->idx = it->p->max_idx+1;
         it->type.state &= ~END;
     }
 
-    i8 dimsNeeded = 0;
-    while(_increments[dimsNeeded+1] <= it->idx){
-        if(++dimsNeeded > SPAN_MAX_DIMS){
-            void *args[] = {
-                I32_Wrapped(m, it->idx),
-                I32_Wrapped(m, it->p->nvalues), 
-                NULL
-            };
-            Error(m, FUNCNAME, FILENAME, LINENUMBER,
-                "idx too large $ for nvalues $", args);
-            it->type.state |= ERROR;
+    boolean fill = ((it->type.state & (SPAN_OP_SET|SPAN_OP_RESERVE|SPAN_OP_ADD)) != 0);
+
+    if(idx > p->size){
+        if(!fill){
+            it->type.state |= NOOP;
             return it->type.state;
         }
-    }
 
-    Span *p = it->p;
-    if(dimsNeeded > p->dims){
-        Iter_expand(it, dimsNeeded);
-    }
-
-    i8 dim = p->dims;
-    i32 offset = it->idx;
-    void **ptr = NULL;
-    guard = 0;
-    while(dim >= 0){
-        Guard_Incr(it->p->m, &guard, ITER_MAX, FUNCNAME, FILENAME, LINENUMBER);
-        offset = Iter_SetStack(p->m, it, dim, offset);
-        if(it->type.state & NOOP){
-            break;
+        i8 dims = p->range.range;
+        i64 size = p->size;
+        while(((size *= SPAN_STRIDE)-1) < idx){
+            if(dims >= 255){
+                Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
+                    "Span unable to grow to that many  dimemsions", NULL);
+            }
+            dims++;
         }
+
+        Slab *prev_sl = NULL;
+        Slab *shelf_sl = NULL;
+        while(p->range.range < dims){
+            Slab *new_sl = (slab *)Iter_newSlab(m, Span *p);
+            if(prev_sl == NULL){
+                shelf_sl = it->p->root;
+                it->p->root = new_sl;
+            }else{
+                prev_sl[0] = new_sl;
+            }
+
+            prev_sl = new_sl;
+            p->range.range++;
+        }
+
+        prev_sl[0] = shelf_sl;
+        p->size = size;
+        p->rang.range = dims;
+    }
+
+    i8 dim = (i8)p->range.range;
+    if(it->range.range != p->range.range){
+        it->stack = (Span **)MemCh_Alloc(m, SizeW(Slab **)*(p->range.range*2));
+        it->stackIdx = MemCh_Alloc(m, SizeW(i8)*(p->range.range*2));
+        it->range.range = p->range.range;
+    }
+
+    while(dim >= 0){
+        i64 local = (it->idx >> (SPAN_DIM_SHIFT*dim)) & (SPAN_LOCAL_MAX);
+
+        Slab *sl = NULL;
+        if(dim == p->rang.range){
+            it->stack[dim] = p->root;
+            it->localIdx[dim] = local;
+        }else{
+            sl = *(it->stack[dim+1])[it->localIdx[dim+1]];
+            if(sl == NULL){
+                if(!fill){
+                    it->type.state |= NOOP;
+                    break;
+                }else{
+                    sl = Iter_newSlab(m, p);
+                    *(*(it->stack[dim+1])[it->localIdx[dim+1]]) = sl;
+                }
+            }
+            *(it->stack[dim]) = sl;
+            it->localIdx[dim] = local;
+        }
+
         if(dim == 0){
-            if(it->type.state & (SPAN_OP_SET|SPAN_OP_REMOVE|SPAN_OP_ADD)){
-                ptr = (void **)it->stack[0][it->stackIdx[0]];
-                it->type.state |= SUCCESS;
+            void *ptr = sl[local];
+            if(!fill){
+                it->value = *ptr;
+                if(*ptr == NULL){
+                    it->type.state |= NOOP;
+                    break;
+                }
+            }else{
                 if(it->type.state & (SPAN_OP_SET|SPAN_OP_ADD)){
                     if(*ptr == NULL){
                         p->nvalues++;
                     }
                     *ptr = it->value;
-                    it->metrics.set = it->idx;
-                    if(it->idx > p->max_idx){
-                        p->max_idx = it->idx;
+                    if(it->idx > p->maxIdx){
+                        p->maxIdx = it->idx;
                     }
+                    
                 }else if(it->type.state & SPAN_OP_REMOVE){
+                    if(*ptr != NULL){
+                        p->nvalues--;
+                    }
                     *ptr = NULL;
-                    p->nvalues--;
-                    if(it->idx == p->max_idx){
+                    if(it->idx == p->maxIdx){
                         p->max_idx--;
                     }
-                }
-            }else if(it->type.state & (SPAN_OP_GET|SPAN_OP_RESERVE)){
-                ptr = (void **)it->stack[dim][it->stackIdx[dim]];
-                if(ptr != NULL){
-                    it->value = *ptr;
-                    it->type.state |= SUCCESS;
-                    it->metrics.get = it->idx;
-                }else{
-                    it->value = NULL;
-                    it->type.state |= NOOP;
                 }
             }
         }
         dim--;
     }
 
-end:
-    if(it->idx == p->max_idx){
+    if(it->idx == p->maxIdx){
         it->type.state |= LAST;
     }else{
         it->type.state &= ~LAST;

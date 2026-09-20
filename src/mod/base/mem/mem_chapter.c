@@ -22,38 +22,11 @@ void MemCh_CountBytes(MemCh *m, i64 *_count){
     *_count = count;
 }
 
-void *MemCh_Alloc(MemCh *m, size_t sz){
-    return MemCh_AllocOf(m, sz, 0);
-}
+void *MemCh_Alloc(MemCh *m, word sz){
 
-void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
-    void *args[3];
-    if(m == NULL){
-        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "MemCh is NULL", NULL);
-        return NULL;
-    }
-    if(m->type.of != TYPE_MEMCTX){
-        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "MemCh is missing type.of", NULL);
-        return NULL;
-    }
-    if(sz > MEM_SLAB_SIZE){
-        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Trying to allocation too much memory at once", NULL);
-    }
-
-    if(m->it.p == NULL){
-        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Whaaaaat m->it.p is NULL?", NULL);
-    }
-
-    if(!Guard(&m->guard, MEM_GUARD_MAX, "MemCh_Alloc", FILENAME, LINENUMBER)){
-        byte _b[128];
-        memset(_b, 0, 128);
-        Str s;
-        s.type.of = TYPE_STR;
-        s.bytes = _b;
-        s.alloc = 128;
-        Str_AddCstr(&s, "Guard Error allocating ");
-        Str_AddCstr(&s, Type_ToChars(typeOf));
-        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, (char *)s.bytes, NULL);
+    if(sz > MEM_SLAB_SIZE || m == NULL || m->type.of != TYPE_MEMCTX){
+        Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, 
+            "Error with allocation size or MemCh is NULL not of type MemCh", NULL);
         return NULL;
     }
 
@@ -62,14 +35,11 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
         level = m->level;
     }
 
-    word _sz = (word)sz;
-
     MemPage *sl = NULL;
-    word prev = m->type.state;
-    m->type.state |= MEMCH_BASE;
+    Iter_Reset(&m->it);
     while((Iter_Next(&m->it) & END) == 0){
         MemPage *_sl = (MemPage *)m->it.value;
-        if(_sl != NULL && (level == 0 || _sl->level == level) && _sl->remaining >= _sz){
+        if(_sl != NULL && (_sl->level == level) && _sl->remaining >= sz){
             sl = _sl;
             break;
         }
@@ -77,24 +47,9 @@ void *MemCh_AllocOf(MemCh *m, size_t sz, cls typeOf){
 
     if(sl == NULL){
         sl = MemCh_AddPage(m, level);
-        if(m->type.state & DEBUG){
-            args[0] = sl;
-            args[1] = I32_Wrapped(ErrStream->m, m->it.p->nvalues);
-            args[2] = NULL;
-            Out("New slab @ slabs $\n", args);
-        }
     }
 
-    if(sl->level != level){
-        sl = MemCh_AddPage(m, level);
-    }
-
-    m->it.type.state = (m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET;
-    Iter_Reset(&m->it);
-
-    Guard_Reset(&m->guard);
-    m->type.state = prev;
-    return MemPage_Alloc(sl, _sz);
+    return MemPage_Alloc(sl, sz);
 }
 
 void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize){
@@ -102,7 +57,7 @@ void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize){
         Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Asking to copy more than newly allocated", NULL);
         return NULL;
     }
-    void *p = MemCh_Alloc(m, s);
+    void *p = MemCh_Alloc(m, (word)s);
     memcpy(p, orig, origsize);
     return p; 
 }
@@ -116,7 +71,7 @@ status MemCh_FreeTemp(MemCh *m){
         MemPage *pg = (MemPage *)m->it.value;
         if(pg != NULL && pg->level >= level){
             r |= MemBook_FreePage(m, pg);
-            r |= Iter_Remove(&m->it);
+            r |= Iter_Remove(&m->it, m->it.idx);
         }
     }
 
@@ -145,7 +100,7 @@ status MemCh_Setup(MemCh *m, MemPage *pg){
     p->max_idx = -1;
     p->root = (slab *)Bytes_AllocOnPage(pg, sizeof(slab), TYPE_POINTER_ARRAY);
     Iter_Init(&m->it, p);
-    status r = Iter_SetByIdx(&m->it, 0, (void *)pg);
+    status r = Iter_Set(&m->it, 0, (void *)pg);
     m->it.type.state = ((m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET);
     return r;
 }

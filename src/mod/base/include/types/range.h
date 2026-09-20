@@ -70,6 +70,7 @@ enum types {
     TYPE_CURSOR,
     TYPE_TESTSUITE,
     TYPE_SPAN,
+    TYPE_QUEUE_SLAB,
     TYPE_ARRAY,
     TYPE_CSTR_ARRAY,
     TYPE_COORDS,

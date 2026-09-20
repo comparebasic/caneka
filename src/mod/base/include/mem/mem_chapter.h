@@ -1,5 +1,7 @@
 extern struct lookup *ExtFreeLookup;
 
+#define SizeW(s) ((word)sizeof(s))
+
 enum memch_flags {
     MEMCH_BASE = 1 << 8,
     MEMCH_STASHED = 1 << 9,

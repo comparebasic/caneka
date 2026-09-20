@@ -12,10 +12,10 @@ typedef struct iter {
     RangeType range;
     struct span *p;
     void *value;
-    Slab *stack;
-    i32 *stackIdx;
-    i32 idx;
-    i32 selected;
+    Slab **stack;
+    i8 *stackIdx;
+    i64 idx;
+    i64 selected;
 } Iter;
 
 extern Iter *IT;
@@ -24,9 +24,9 @@ status Iter_AddSpanRev(Iter *it, Span *p);
 status Iter_AddSpan(Iter *it, Span *p);
 
 void Iter_Init(Iter *it, Span *p);
+status Iter_Next(Iter *it);
+status Iter_Prev(Iter *it);
 
-void Iter_Next(Iter *it);
-void Iter_Prev(Iter *it);
 void Iter_Pop(Iter *it);
 void Iter_Reset(Iter *it);
 void Iter_GoToIdx(Iter *it, i32 idx);
