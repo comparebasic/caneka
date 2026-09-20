@@ -1,4 +1,5 @@
 #include "mem/span.h"
+#include "mem/slate.h"
 #include "mem/iter.h"
 #include "mem/mem_page.h"
 #include "mem/mem_chapter.h"

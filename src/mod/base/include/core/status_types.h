@@ -12,7 +12,7 @@ enum status_types {
     MORE = 1 << 4,
     WAIT = 1 << 5,
     TAIL = 1 << 6,
-    FINISH = 1 << 7,
+    END = 1 << 7,
     /* class speciric */
     CLS_FLAG_ALPHA = 1 << 8,
     CLS_FLAG_BRAVO = 1 << 9,

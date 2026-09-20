@@ -8,14 +8,6 @@ enum span_flags {
 };
 
 typedef void *Slab[SPAN_STRIDE];
-typedef i8 NextSet[SPAN_STRIDE];
-
-typedef struct queue_slab {
-    Type type;
-    Slab slab;
-    i8 *next;
-    NextSet set;
-} QueueSlab;
 
 typedef struct span {
     Type type;

@@ -1,3 +1,4 @@
+/*
 #include "./core/init.c"
 #include "./debug/init.c"
 #include "./debug/debug_stack.c"
@@ -15,12 +16,15 @@
 #include "./io/stash_item.c"
 #include "./io/stash.c"
 #include "./mem/extfree.c"
+*/
 #include "./mem/span.c"
+#include "./mem/slate.c"
 #include "./mem/iter.c"
 #include "./mem/byteslit.c"
 #include "./mem/mem_page.c"
 #include "./mem/mem_book.c"
 #include "./mem/mem_chapter.c"
+/*
 #include "./mem/mem_chapter_utils.c"
 #include "./mem/mem_tos.c"
 #include "./mem/mem_maps.c"
@@ -96,3 +100,4 @@
 #include "./util/util_tos.c"
 #include "./util/util_eq.c"
 #include "./util/util_exact.c"
+*/
