@@ -3,7 +3,7 @@
 
 status Guard_Reset(i16 *g){
     *g = 0;
-    return SUCCESS;
+    return ZERO;
 }
 
 boolean Guard(i16 *g, i16 max, char *func, char *file, int line){
@@ -16,7 +16,7 @@ boolean Guard(i16 *g, i16 max, char *func, char *file, int line){
 
 status Guard_Incr(MemCh *m, i16 *g, i16 max, char *func, char *file, int line){
     if(Guard(g, max, func, file, line)){
-        return SUCCESS;
+        return ZERO;
     }
     Single sg = {.type = {TYPE_WRAPPED_I16, 0}, .val.w = *g};
     Single max_sg = {.type = {TYPE_WRAPPED_I16, 0}, .val.w = max};

@@ -4,8 +4,8 @@
 static MemPage *MemCh_AddPage(MemCh *m, i16 level){
     MemPage *pg = MemPage_Make(m, level);
     Iter_Add(&m->it, (void *)pg);
-    if(m->it.p->nvalues > m->metrics.totalCeiling){
-        m->metrics.totalCeiling = m->it.p->nvalues;
+    if(m->it.p->count > m->metrics.totalCeiling){
+        m->metrics.totalCeiling = m->it.p->count;
     }
     return pg;
 }
@@ -16,7 +16,7 @@ void MemCh_CountBytes(MemCh *m, i64 *_count){
     Iter_Reset(&it);
     i64 count = 0;
     while((Iter_Next(&it) & END) == 0){
-        MemPage *sl = (MemPage *)Iter_Get(&it); 
+        MemPage *sl = (MemPage *)it.value; 
         count += (PAGE_SIZE - sl->remaining);
     }
     *_count = count;
@@ -52,7 +52,7 @@ void *MemCh_Alloc(MemCh *m, word sz){
     return MemPage_Alloc(sl, sz);
 }
 
-void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize){
+void *MemCh_Realloc(MemCh *m, word s, void *orig, word origsize){
     if(s > origsize){
         Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, "Asking to copy more than newly allocated", NULL);
         return NULL;
@@ -63,7 +63,7 @@ void *MemCh_Realloc(MemCh *m, size_t s, void *orig, size_t origsize){
 }
 
 status MemCh_FreeTemp(MemCh *m){
-    status r = READY;
+    status r = ZERO;
     i16 level = m->level+1;
 
     Iter_Reset(&m->it);
@@ -80,7 +80,7 @@ status MemCh_FreeTemp(MemCh *m){
 }
 
 status MemCh_Free(MemCh *m){
-    status r = READY;
+    status r = ZERO;
     Iter_Reset(&m->it);
     while((Iter_Next(&m->it) & END) == 0){
         MemPage *pg = (MemPage *)m->it.value;
@@ -95,14 +95,14 @@ status MemCh_Free(MemCh *m){
 status MemCh_Setup(MemCh *m, MemPage *pg){
     m->type.of = TYPE_MEMCTX;
     Span *p = MemPage_Alloc(pg, sizeof(Span));
-    Span_Setup(p);
+    p->type.of = TYPE_SPAN;
     p->m = m;
-    p->max_idx = -1;
-    p->root = (slab *)Bytes_AllocOnPage(pg, sizeof(slab), TYPE_POINTER_ARRAY);
+    p->root = (Slab *)Bytes_AllocOnPage(pg, sizeof(Slab), TYPE_POINTER_ARRAY);
+
     Iter_Init(&m->it, p);
-    status r = Iter_Set(&m->it, 0, (void *)pg);
-    m->it.type.state = ((m->it.type.state & NORMAL_FLAGS) | SPAN_OP_GET);
-    return r;
+    Iter_Set(&m->it, 0, (void *)pg);
+    m->it.type.state = ((m->it.type.state & NORMAL_FLAGS) | ITER_GET);
+    return ZERO;
 }
 
 MemCh *MemCh_OnPage(){

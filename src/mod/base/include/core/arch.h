@@ -28,4 +28,8 @@
 #define FILE_READ_LENGTH 1024
 #define DEBUGSTACK
 #define EXTENSIVE_DEBUG_STACK
+#define I16_MAX 32767
+#define TRUE 1
+#define FALSE 0
+#define MAX_BASE10 23
 #endif

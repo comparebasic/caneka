@@ -4,7 +4,7 @@ extern word GLOBAL_flags;
 extern word OUTCOME_FLAGS;
 
 enum status_types {
-    READY = 0,
+    ZERO = 0,
     ERROR = 1,
     PROCESS = 1 << 1,
     FOCUS = 1 << 2,

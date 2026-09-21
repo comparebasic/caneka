@@ -2,7 +2,7 @@
 #include "base_module.h"
 
 BytesLit *BytesLit_Make(MemCh *m, i16 alloc, cls typeOf){
-    BytesLit *sl = MemCh_AllocOf(m, sizeof(RangeType)+alloc, TYPE_BYTE);
+    BytesLit *sl = MemCh_Alloc(m, sizeof(RangeType)+alloc);
     sl->type.of = typeOf;
     sl->type.range = alloc;
     return sl;

@@ -239,7 +239,7 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
         return;
     }
     _error = TRUE;
-    status r = READY;
+    status r = ZERO;
     Abstract *a = NULL;
     i16 g = 0;
     while(m != NULL && m->owner != NULL){
@@ -289,11 +289,10 @@ void Exit(MemCh *m, Str *s){
 }
 
 status Error_Init(MemCh *m){
-    status r = READY;
+    status r = ZERO;
     setSigs();
     if(ErrorHandlers == NULL){
         ErrorHandlers = Lookup_Make(m, _TYPE_ZERO);
-        r |= SUCCESS;
     }
     return r;
 }

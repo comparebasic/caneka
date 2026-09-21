@@ -42,12 +42,8 @@ static status Iter_Query(Iter *it){
         i64 size = p->size;
         while(((size *= SPAN_STRIDE)-1) < it->idx){
             if(dims < 0){
-                void *ar[] = {
-                    I64_Wrapped(m, SPAN_STRIDE),
-                    NULL
-                };
                 Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
-                    "Span unable to grow to that many values: greater than $^255", ar);
+                    "Span unable to grow to greater than STRIDE^255", NULL);
             }
             dims++;
         }
