@@ -191,12 +191,16 @@ MemBook *MemBook_Make(MemBook *prev){
 
     Span *p = MemPage_Alloc(pg, sizeof(Span));
     p->type.of = TYPE_SPAN;
+    p->maxIdx = -1;
+    p->size = SPAN_STRIDE;
     p->m = &book->m;
     p->root = (Slab *)Bytes_AllocOnPage(pg, sizeof(Slab), TYPE_POINTER_ARRAY);
     Iter_Init(&book->retired, p);
 
     p = MemPage_Alloc(pg, sizeof(Span));
     p->type.of = TYPE_SPAN;
+    p->maxIdx = -1;
+    p->size = SPAN_STRIDE;
     p->m = &book->m;
     p->root = (Slab *)Bytes_AllocOnPage(pg, sizeof(Slab), TYPE_POINTER_ARRAY);
     Iter_Init(&book->recycled, p);

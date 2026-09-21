@@ -2,6 +2,7 @@
 #include "base_module.h"
 
 static inline Slab *Iter_newSlab(MemCh *m, Span *p){
+    /*
     i16 level = m->level;
     m->level = p->memLevel;
     Slab *sl = NULL;
@@ -15,6 +16,8 @@ static inline Slab *Iter_newSlab(MemCh *m, Span *p){
 
     m->level = level;
     return sl;
+    */
+    return malloc(sizeof(Slab));
 }
 
 static status Iter_Query(Iter *it){
@@ -32,7 +35,9 @@ static status Iter_Query(Iter *it){
         it->value = NULL;
     }
 
-    if(it->idx > p->size){
+    if(it->idx >= p->size){
+        printf("Resizing\n");
+        fflush(stdout);
         if(!fill){
             it->type.state |= NOOP;
             return it->type.state;
@@ -40,13 +45,19 @@ static status Iter_Query(Iter *it){
 
         i8 dims = p->range.range;
         i64 size = p->size;
-        while(((size *= SPAN_STRIDE)-1) < it->idx){
+        while((size-1) < it->idx){
+            size *= SPAN_STRIDE;
+            printf("dims resizing currently %d, size %ld\n", (i32)dims, size);
+            fflush(stdout);
             if(dims < 0){
                 Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
                     "Span unable to grow to greater than STRIDE^255", NULL);
             }
             dims++;
         }
+
+        printf("Resizing to dims %d size %ld\n", dims, size);
+        fflush(stdout);
 
         Slab *prev = NULL;
         Slab *shelf = NULL;
@@ -57,79 +68,97 @@ static status Iter_Query(Iter *it){
                 shelf = it->p->root;
                 it->p->root = sl;
             }else{
-                *(prev[0]) = sl;
+                (*prev)[0] = sl;
             }
 
             prev = sl;
             p->range.range++;
         }
 
-        *(prev[0]) = sl;
+        (*prev)[0] = sl;
         p->size = size;
+        printf("p->size is now %ld new slab is %p\n", size, sl);
+        fflush(stdout);
         p->range.range = dims;
     }
 
-    i8 dim = (i8)p->range.range;
     if(it->range.range != p->range.range){
         it->stack = (Slab **)MemCh_Alloc(m, SizeW(Slab **)*(p->range.range*2));
         it->localIdx = (i8 *)MemCh_Alloc(m, SizeW(i8)*(p->range.range*2));
         it->range.range = p->range.range;
     }
 
-    while(dim >= 0){
-        i64 local = (it->idx >> (SPAN_DIM_SHIFT*dim)) & (SPAN_LOCAL_MAX);
+    i8 idim = (i8)p->range.range;
+    while(idim >= 0){
+        i64 local = (it->idx >> (SPAN_DIM_SHIFT*idim)) & (SPAN_LOCAL_MAX);
+        printf("\x1b[33mFinding a place dim %d idx %ld local %ld\n", p->range.range - idim, it->idx, local);
+        for(i16 i = 0; i <= p->range.range; i++){
+            printf("  dim%d @%p + local %d\n", i, it->stack[i], (i32)it->localIdx[i]);
+        }
+        printf("\x1b[0m\n");
+        fflush(stdout);
 
         Slab *sl = NULL;
-        if(dim == p->range.range){
-            it->stack[dim] = p->root;
-            it->localIdx[dim] = local;
+        if(idim == p->range.range){
+            it->stack[idim] = p->root;
+            it->localIdx[idim] = local;
+            sl = p->root;
         }else{
-            Slab *parent = it->stack[dim+1];
-            Slab *sl = *(parent[it->localIdx[dim+1]]);
+            printf("    making non 0 idim sl\n");
+            fflush(stdout);
+            Slab *parent = it->stack[idim+1];
+            sl = *(parent[it->localIdx[idim+1]]);
             if(sl == NULL){
+                printf("    sl is NULL - making non 0 idim sl\n");
+                fflush(stdout);
                 if(!fill){
                     it->type.state |= NOOP;
                     break;
                 }else{
                     sl = Iter_newSlab(m, p);
-                    *(parent[it->localIdx[dim+1]]) = sl;
+                    *(parent)[it->localIdx[idim+1]] = sl;
+                    printf("    new mid sl is %p\n", sl);
+                    fflush(stdout);
                 }
             }
-            it->stack[dim] = sl;
-            it->localIdx[dim] = local;
+            it->stack[idim] = sl;
+            it->localIdx[idim] = local;
+            printf("    sl is %p\n", sl);
+            fflush(stdout);
         }
 
-        if(dim == 0){
-            void **dptr = sl[local];
+        if(idim == 0){
+            printf("    idim 0 sl = %p\n", sl);
+            fflush(stdout);
+            void *ptr = (*sl)[local];
             if(!fill){
-                if(*dptr == NULL){
+                if(ptr == NULL){
                     it->type.state |= NOOP;
                 }else{
-                    it->value = *dptr;
+                    it->value = ptr;
                 }
                 break;
             }else{
                 if(it->type.state & (ITER_SET|ITER_ADD)){
-                    if(*dptr == NULL){
+                    if(ptr == NULL){
                         p->count++;
                     }
-                    *dptr = it->value;
+                    (*sl)[local] = it->value;
                     if(it->idx > p->maxIdx){
                         p->maxIdx = it->idx;
                     }
-                    
                 }else if(it->type.state & ITER_REMOVE){
-                    if(*dptr != NULL){
+                    if(ptr != NULL){
                         p->count--;
                     }
-                    *dptr = NULL;
+                    (*sl)[local] = NULL;
                     if(it->idx == p->maxIdx){
                         p->maxIdx--;
                     }
                 }
             }
         }
-        dim--;
+        idim--;
     }
 
     if(it->idx == p->maxIdx){

@@ -24,6 +24,10 @@ void MemCh_CountBytes(MemCh *m, i64 *_count){
 
 void *MemCh_Alloc(MemCh *m, word sz){
 
+    return malloc(sz);
+
+
+
     if(sz > MEM_SLAB_SIZE || m == NULL || m->type.of != TYPE_MEMCTX){
         Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER, 
             "Error with allocation size or MemCh is NULL not of type MemCh", NULL);
