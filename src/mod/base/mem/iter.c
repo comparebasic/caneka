@@ -75,7 +75,7 @@ static status Iter_Query(Iter *it){
             p->range.range++;
         }
 
-        (*prev)[0] = sl;
+        (*prev)[0] = shelf;
         p->size = size;
         printf("p->size is now %ld new slab is %p\n", size, sl);
         fflush(stdout);
@@ -104,26 +104,31 @@ static status Iter_Query(Iter *it){
             it->localIdx[idim] = local;
             sl = p->root;
         }else{
-            printf("    making non 0 idim sl\n");
-            fflush(stdout);
             Slab *parent = it->stack[idim+1];
-            sl = *(parent[it->localIdx[idim+1]]);
+            sl = (*parent)[it->localIdx[idim+1]];
+            printf("    non 0 idim parent %p sl %p local %d\n", 
+                parent,
+                sl,
+                it->localIdx[idim+1]);
+            fflush(stdout);
             if(sl == NULL){
-                printf("    sl is NULL - making non 0 idim sl\n");
+                printf("    sl is NULL - MAKING non 0 idim sl\n");
                 fflush(stdout);
                 if(!fill){
                     it->type.state |= NOOP;
                     break;
                 }else{
                     sl = Iter_newSlab(m, p);
-                    *(parent)[it->localIdx[idim+1]] = sl;
-                    printf("    new mid sl is %p\n", sl);
+                    (*parent)[it->localIdx[idim+1]] = sl;
+                    printf("    new mid sl is %p/%p\n", 
+                        sl, 
+                        (*parent)[it->localIdx[idim+1]]);
                     fflush(stdout);
                 }
             }
             it->stack[idim] = sl;
             it->localIdx[idim] = local;
-            printf("    sl is %p\n", sl);
+            printf("> parent is %p  sl is %p\n", parent, sl);
             fflush(stdout);
         }
 
