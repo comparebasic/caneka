@@ -16,16 +16,16 @@ MemPage *MemPage_Attach(MemCh *m, i16 level){
     return pg;
 }
 
-MemPage *MemPage_Make(MemCh *m, i16 level){
-    void *bytes = MemBook_GetPage(m);
-    if(bytes == NULL){
+MemPage *MemPage_Make(){
+    MemPage *pg = MemBook_GetPage();
+    if(pg == NULL){
         Fatal(NULL, FUNCNAME, FILENAME, LINENUMBER,
             "Error allocating page bytes are null", NULL);
         return NULL;
     }
-    MemPage *pg = (MemPage *)bytes;
+
     pg->type.of = TYPE_MEMSLAB;
     pg->remaining = MEM_SLAB_SIZE;
-    pg->level = level;
+
     return pg;
 }

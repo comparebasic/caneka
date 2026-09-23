@@ -1,25 +1,6 @@
 #include <external.h>
 #include "base_module.h"
 
-static inline Slab *Iter_newSlab(MemCh *m, Span *p){
-    /*
-    i16 level = m->level;
-    m->level = p->memLevel;
-    Slab *sl = NULL;
-
-    if(m->type.state & SPAN_QUEUE){
-        Slate *slate = Slate_Make(m);
-        sl = &slate->slab;
-    }else{
-        sl = (Slab *)Bytes_Alloc((m), sizeof(Slab), TYPE_POINTER_ARRAY);
-    }
-
-    m->level = level;
-    return sl;
-    */
-    return malloc(sizeof(Slab));
-}
-
 static status Iter_Query(Iter *it){
     it->type.state &= ~(NOOP|MORE|TAIL);
     MemCh *m = it->p->m;
@@ -49,9 +30,9 @@ static status Iter_Query(Iter *it){
             size *= SPAN_STRIDE;
             printf("dims resizing currently %d, size %ld\n", (i32)dims, size);
             fflush(stdout);
-            if(dims < 0){
+            if(dims >= DIM_MAX){
                 Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
-                    "Span unable to grow to greater than STRIDE^255", NULL);
+                    "Span unable to grow to greater than STRIDE^DIM_MAX", NULL);
             }
             dims++;
         }
@@ -59,23 +40,23 @@ static status Iter_Query(Iter *it){
         printf("Resizing to dims %d size %ld\n", dims, size);
         fflush(stdout);
 
-        Slab *prev = NULL;
-        Slab *shelf = NULL;
-        Slab *sl = NULL;
+        Slate *prev = NULL;
+        Slate *shelf = NULL;
+        Slate *sl = NULL;
         while(p->range.range < dims){
-            sl = (Slab *)Iter_newSlab(m, p);
+            sl = Slate_Make(m);
             if(prev == NULL){
                 shelf = it->p->root;
                 it->p->root = sl;
             }else{
-                (*prev)[0] = sl;
+                prev->slots[0] = sl;
             }
 
             prev = sl;
             p->range.range++;
         }
 
-        (*prev)[0] = shelf;
+        prev->slots[0] = shelf;
         p->size = size;
         printf("p->size is now %ld new slab is %p\n", size, sl);
         fflush(stdout);
@@ -83,8 +64,8 @@ static status Iter_Query(Iter *it){
     }
 
     if(it->range.range != p->range.range){
-        it->stack = (Slab **)MemCh_Alloc(m, SizeW(Slab **)*(p->range.range*2));
-        it->localIdx = (i8 *)MemCh_Alloc(m, SizeW(i8)*(p->range.range*2));
+        it->stack = (Slate *)MemCh_Alloc(m, SizeOf(void *)*(p->range.range*2));
+        it->localIdx = (i8 *)MemCh_Alloc(m, SizeOf(i8)*(p->range.range*2));
         it->range.range = p->range.range;
     }
 
@@ -98,14 +79,14 @@ static status Iter_Query(Iter *it){
         printf("\x1b[0m\n");
         fflush(stdout);
 
-        Slab *sl = NULL;
+        Slate *sl = NULL;
         if(idim == p->range.range){
             it->stack[idim] = p->root;
             it->localIdx[idim] = local;
             sl = p->root;
         }else{
-            Slab *parent = it->stack[idim+1];
-            sl = (*parent)[it->localIdx[idim+1]];
+            Slate *parent = it->stack[idim+1];
+            sl = parent->slots[it->localIdx[idim+1]];
             printf("    non 0 idim parent %p sl %p local %d\n", 
                 parent,
                 sl,
@@ -118,11 +99,11 @@ static status Iter_Query(Iter *it){
                     it->type.state |= NOOP;
                     break;
                 }else{
-                    sl = Iter_newSlab(m, p);
-                    (*parent)[it->localIdx[idim+1]] = sl;
+                    sl = Slate_Make(m);
+                    parent->slots[it->localIdx[idim+1]] = sl;
                     printf("    new mid sl is %p/%p\n", 
                         sl, 
-                        (*parent)[it->localIdx[idim+1]]);
+                        parent->slots[it->localIdx[idim+1]]);
                     fflush(stdout);
                 }
             }
@@ -135,7 +116,7 @@ static status Iter_Query(Iter *it){
         if(idim == 0){
             printf("    idim 0 sl = %p\n", sl);
             fflush(stdout);
-            void *ptr = (*sl)[local];
+            void *ptr = sl->slots[local];
             if(!fill){
                 if(ptr == NULL){
                     it->type.state |= NOOP;
@@ -146,19 +127,35 @@ static status Iter_Query(Iter *it){
             }else{
                 if(it->type.state & (ITER_SET|ITER_ADD)){
                     if(ptr == NULL){
-                        p->count++;
+                        sl->idx.count++;
                     }
-                    (*sl)[local] = it->value;
-                    if(it->idx > p->maxIdx){
-                        p->maxIdx = it->idx;
+                    sl->slots[local] = it->value;
+                    if(local > sl->idx.max){
+                        sl->idx.max = local;
+                    }
+                    if(local < sl->idx.min){
+                        sl->idx.min = local;
                     }
                 }else if(it->type.state & ITER_REMOVE){
                     if(ptr != NULL){
-                        p->count--;
+                        sl->idx.count--;
                     }
-                    (*sl)[local] = NULL;
-                    if(it->idx == p->maxIdx){
-                        p->maxIdx--;
+                    sl->slots[local] = NULL;
+                    if(local == sl->idx.min){
+                       for(i64 i = local; i < SPAN_STRIDE; i++){
+                            if(sl->slots[i] != NULL){
+                                sl->idx.min = i;
+                                break;
+                            }
+                       }
+                    }
+                    if(local == sl->idx.max){
+                        for(i64 i = local; i > 0; i--){
+                            if(sl->slots[i] != NULL){
+                                sl->idx.max = i;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -179,8 +176,8 @@ status Iter_Incr(Iter *it){
     i8 dim = 0;
     i8 topDim = it->p->range.range;
     i64 idx = it->idx;
-    Slab *sl;
-    Slab *parent;
+    Slate *sl;
+    Slate *parent;
 
     it->value = NULL;
 
@@ -216,7 +213,7 @@ status Iter_Incr(Iter *it){
                 if((incr > 0) && (it->localIdx[dim] + incr) < SPAN_STRIDE || (it->localIdx[dim] + incr) < 0){
                     it->localIdx[dim] -= incr;
                     parent = it->stack[dim+1];
-                    it->stack[dim] = (Slab *)parent[it->localIdx[dim]];
+                    it->stack[dim] = (Slate *)parent[it->localIdx[dim]];
                     void **dptr = *(it->stack[dim]);
 
                     idx += factor;
@@ -232,7 +229,7 @@ status Iter_Incr(Iter *it){
                             factor *= SPAN_STRIDE;
                             it->localIdx[dim] = incr > 0 ? 0 : (SPAN_STRIDE-1);
                             parent = it->stack[dim+incr];
-                            it->stack[dim] = (Slab *)parent[it->localIdx[dim]];
+                            it->stack[dim] = (Slate *)parent[it->localIdx[dim]];
                             if(*(it->stack[dim]) == NULL){
                                 dim++;
                                 factor /= SPAN_STRIDE;

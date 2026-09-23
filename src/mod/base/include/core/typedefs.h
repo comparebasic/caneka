@@ -10,9 +10,9 @@ typedef uint64_t util;
 typedef word cls;
 typedef word status;
 typedef byte boolean;
-typedef byte flags8;
-typedef word flags16;
-typedef quad flags32;
+typedef byte field8;
+typedef word field16;
+typedef quad field32;
 
 typedef struct typehdr {
     cls of;

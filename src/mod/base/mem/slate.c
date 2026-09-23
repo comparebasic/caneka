@@ -8,18 +8,6 @@ SlateSet slateInitialSet = {
     3, 2, 1, 0
 };
 
-void Slate_Init(Slate *slate){
-    slate->type.of = TYPE_SLATE;
-    memcpy(&slate->set, &slateInitialSet, sizeof(SlateSet));
-    slate->next = SPAN_LOCAL_MAX;
-}
-
-Slate *Slate_Make(MemCh *m){
-    Slate *slate = (Slate *)MemCh_Alloc(m, sizeof(Slate));
-    Slate_Init(slate);
-    return slate;
-}
-
 i8 Slate_Add(Slate *slate, void *item){
     i8 *ptr = &slate->set[slate->next];
     i8 idx = *ptr;
@@ -54,3 +42,16 @@ void Slate_Remove(Slate *slate, i16 idx){
         slate->type.state |= END;
     }
 }
+
+void Slate_Init(Slate *slate){
+    slate->type.of = TYPE_SLATE;
+    memcpy(&slate->queue, &slateInitialSet, sizeof(SlateSet));
+    slate->idx.nextInQueue = SPAN_LOCAL_MAX;
+}
+
+Slate *Slate_Make(MemCh *m){
+    Slate *slate = (Slate *)MemCh_Alloc(m, sizeof(Slate));
+    Slate_Init(slate);
+    return slate;
+}
+

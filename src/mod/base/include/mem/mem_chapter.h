@@ -1,6 +1,6 @@
 extern struct lookup *ExtFreeLookup;
 
-#define SizeW(s) ((word)sizeof(s))
+#define SizeOf(s) ((quad)sizeof(s))
 
 enum memch_flags {
     MEMCH_BASE = 1 << 8,
@@ -9,26 +9,21 @@ enum memch_flags {
 
 typedef struct mem_ctx {
     Type type;
-    i16 level;
-    i16 guard;
-    Iter it;
-    void *owner;
-    struct {
-        i32 totalCeiling;
-    } metrics;
-    Span *extFree;
+    MemPage *page;
+    Iter *backlog;
+    MemCh *next;
 #ifdef DEBUGSTACK
     Iter debugIt;
 #endif
 } MemCh;
 
-void *MemCh_Alloc(MemCh *m, word sz);
-void *MemCh_AllocOf(MemCh *m, word sz, cls typeOf);
-void *MemCh_Realloc(MemCh *m, word s, void *orig, word origsize);
+void MemCh_CountBytes(MemCh *m, i64 *count);
+
+void *MemCh_Alloc(MemCh *m, quad sz);
+void *MemCh_Realloc(MemCh *m, quad s, void *orig, quad origsize);
 status MemCh_Free(MemCh *m);
 status MemCh_FreeTemp(MemCh *m);
 MemCh *MemCh_OnPage();
 status MemCh_Setup(MemCh *m, MemPage *pg);
 MemCh *MemCh_Make();
 
-void MemCh_CountBytes(MemCh *m, i64 *count);

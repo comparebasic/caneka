@@ -13,7 +13,7 @@ typedef struct iter {
     RangeType range;
     struct span *p;
     void *value;
-    Slab **stack;
+    Slate **stack;
     i8 *localIdx;
     i64 idx;
     i64 selected;
