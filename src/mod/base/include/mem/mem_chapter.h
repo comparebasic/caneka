@@ -11,7 +11,7 @@ typedef struct mem_ctx {
     Type type;
     MemPage *page;
     Iter *backlog;
-    MemCh *next;
+    struct mem_ctx *next;
 #ifdef DEBUGSTACK
     Iter debugIt;
 #endif

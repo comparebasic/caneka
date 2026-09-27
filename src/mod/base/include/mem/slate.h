@@ -7,12 +7,14 @@ typedef struct slate {
         i8 count;
     } idx;
     i8 queue[SPAN_STRIDE];
+    status flags[SPAN_STRIDE];
     void *slots[SPAN_STRIDE];
 } Slate;
 
 extern i8 slateInitialSet[SPAN_STRIDE];
 
 i8 Slate_Add(Slate *slate, void *item);
-void Slate_Remove(Slate *slate, i16 idx);
-void Slate_Init(Slate *slate);
+i8 Slate_Enqueue(Slate *slate, void *item);
+i8 Slate_Insert(Slate *slate, i8 idx, void *item);
+void Slate_Remove(Slate *slate, i8 idx);
 Slate *Slate_Make(struct mem_ctx *m);

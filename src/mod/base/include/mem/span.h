@@ -3,8 +3,8 @@
 enum span_flags {
     SPAN_RAW = 1 << 8, /* non Abstract data items such as i8, i64 or func* */
     SPAN_SORTED = 1 << 9, /* ordered according to a type comparison Func */
-    SPAN_EXPAND = 1 << 10, /* adds to the max regardless of availability */
-    SPAN_HASHED = 1 << 11, /* non-dim related Slates of Slates by collision */
+    SPAN_QUEUED = 1 << 10, /* re-uses indexes in a hotel style way */
+    SPAN_DICT = 1 << 11, /* non-dim related Slates of Slates by collision */
 };
 
 typedef struct span {
@@ -12,7 +12,7 @@ typedef struct span {
     RangeType range; /* type/dims */
     struct mem_ctx *m;
     i64 size;
-    Slate *root;
+    struct slate *root;
 } Span;
 
 void *Span_Get(Span *p, i64 idx);

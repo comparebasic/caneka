@@ -2,39 +2,41 @@
 #include "base_module.h"
 
 i64 Span_Add(Span *p, void *t){
-    if(p->range.range == 0 && (p->maxIdx+1) < SPAN_STRIDE){
-        p->maxIdx++;
-        printf("Slab at %p value at %p diff %lu\n", 
-            p->root,
-            &(*p->root)[p->maxIdx],
-            (void *)&((*p->root)[p->maxIdx]) - (void *)p->root);
-        fflush(stdout);
-        (*p->root)[p->maxIdx] = t;
-        p->count++;
+    i64 idx = -1;
+    if(p->range.range == 0 &&
+            (p->root->idx.max+1) < SPAN_STRIDE &&
+            (p->type.state & SPAN_DICT) == 0){
+        if(p->type.state & SPAN_QUEUED){
+            idx = (i64)Slate_Enqueue(p->root, t);
+        }else{
+            idx = (i64)Slate_Add(p->root, t);
+        }
     }else{
-        i64 idx = p->maxIdx+1;
-        printf("Iter Stuff for %ld\n", idx);
-        fflush(stdout);
         Iter_Init(&IT, p);
-        Iter_Set(&IT, idx, t);
+        Iter_Add(&IT, t);
+        p->type.state &= (IT.type.state & ERROR);
+        idx = IT.idx;
     }
 
-    return p->maxIdx;
+    return idx;
 }
 
-void Span_Set(Span *p, i64 idx, void *t){
+i64 Span_Set(Span *p, i64 idx, void *t){
     if(idx < 0){
         p->type.state |= ERROR;
-        return;
+        return -1;
     }
 
     if(p->range.range == 0 && idx < SPAN_STRIDE){
-        *(p->root[idx]) = t;
-        return;
+        Slate_Insert(p->root, (i8)idx, t);
+        p->type.state &= (p->root->type.state & ERROR);
+        return idx;
     }
 
     Iter_Init(&IT, p);
     Iter_Set(&IT, idx, t);
+    p->type.state &= (IT.type.state & ERROR);
+    return IT.idx;
 }
 
 void *Span_Get(Span *p, i64 idx){
@@ -44,11 +46,12 @@ void *Span_Get(Span *p, i64 idx){
     }
 
     if(p->range.range == 0 && idx < SPAN_STRIDE){
-        return (*p->root)[idx];
+        return p->root->slots[idx];
     }
 
     Iter_Init(&IT, p);
     Iter_GoToIdx(&IT, idx);
+    p->type.state &= (IT.type.state & ERROR);
     if((IT.type.state & NOOP) == 0){
         return IT.value;
     }
@@ -56,29 +59,31 @@ void *Span_Get(Span *p, i64 idx){
     return NULL;
 }
 
-void Span_Remove(Span *p, i64 idx){
+i64 Span_Remove(Span *p, i64 idx){
     if(idx < 0){
         p->type.state |= ERROR;
-        return;
+        return -1;
     }
 
     if(p->range.range == 0 && idx < SPAN_STRIDE){
-        if(p->root[idx] != NULL){
-            (*p->root)[idx] = NULL;
-            p->count--;
+        if(p->root->slots[idx] != NULL){
+            p->root->slots[idx] = NULL;
+            p->root->idx.count--;
         }
     }
 
     Iter_Init(&IT, p);
     Iter_Remove(&IT, idx);
+    p->type.state &= (IT.type.state & ERROR);
+    return IT.idx;
 }
 
-Span *Span_Make(MemCh *m){
+Span *Span_Make(MemCh *m, field16 flags){
     Span *p = MemCh_Alloc(m, sizeof(Span));
     p->type.of = TYPE_SPAN;
+    p->type.state = flags;
     p->m = m;
-    p->maxIdx = -1;
-    p->root = (Slab *)Bytes_Alloc((m), sizeof(Slab), TYPE_POINTER_ARRAY);
     p->size = SPAN_STRIDE;
+    p->root = Slate_Make(m);
     return p;
 }

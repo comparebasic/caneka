@@ -1,57 +1,68 @@
 #include <external.h>
 #include "base_module.h"
 
-SlateSet slateInitialSet = {
+i8 slateInitialSet[SPAN_STRIDE] = {
     15, 14, 13, 12,
     11, 10, 9, 8, 
     7, 6, 5, 4,
     3, 2, 1, 0
 };
 
-i8 Slate_Add(Slate *slate, void *item){
-    i8 *ptr = &slate->set[slate->next];
-    i8 idx = *ptr;
-    *ptr = -1;
-    if(idx == 0){
-        slate->type.state |= TAIL;
-    }else{
-        slate->next--;
+i8 Slate_Add(Slate *sl, void *item){
+    if(sl->idx.max+1 > SPAN_LOCAL_MAX){
+        sl->type.state |= ERROR;
+        return -1;
     }
-    slate->slab[idx] = item;
-    slate->type.state &= ~END;
+    sl->idx.max++;
+    sl->slots[sl->idx.max] = item;
+    sl->idx.count++;
+    return sl->idx.max;
+}
+
+i8 Slate_Insert(Slate *sl, i8 idx, void *item){
+    if(idx > SPAN_LOCAL_MAX){
+        sl->type.state |= ERROR;
+        return -1;
+    }
+
+    if(sl->slots[idx] == NULL){
+        sl->idx.count++;
+    }
+
+    sl->slots[idx] = item;
 
     return idx;
 }
 
-void Slate_Remove(Slate *slate, i16 idx){
+i8 Slate_Enqueue(Slate *slate, void *item){
+    return -1;
+}
+
+void Slate_Remove(Slate *sl, i8 idx){
     if(idx > SPAN_LOCAL_MAX){ 
-        slate->type.state |= ERROR;
+        sl->type.state |= ERROR;
         return;
     }
 
-    slate->slab[idx] = NULL;
-    i8 *ptr = &slate->set[slate->next];
-    *ptr = idx;
-    if(slate->type.state & TAIL){
-        slate->type.state &= ~TAIL;
+    sl->slots[idx] = NULL;
+    if(sl->type.state & TAIL){
+        sl->type.state &= ~TAIL;
     }else{
-        slate->next++;
+        sl->idx.nextInQueue++;
     }
 
-    if(slate->next == SPAN_LOCAL_MAX){
-        slate->type.state |= END;
-    }
-}
+    sl->queue[sl->idx.nextInQueue] = idx;
 
-void Slate_Init(Slate *slate){
-    slate->type.of = TYPE_SLATE;
-    memcpy(&slate->queue, &slateInitialSet, sizeof(SlateSet));
-    slate->idx.nextInQueue = SPAN_LOCAL_MAX;
+    if(sl->idx.nextInQueue == SPAN_LOCAL_MAX){
+        sl->type.state |= NOOP;
+    }
 }
 
 Slate *Slate_Make(MemCh *m){
     Slate *slate = (Slate *)MemCh_Alloc(m, sizeof(Slate));
-    Slate_Init(slate);
+    slate->type.of = TYPE_SLATE;
+    slate->type.state = NOOP;
+    memcpy(&slate->queue, &slateInitialSet, sizeof(slateInitialSet));
+    slate->idx.nextInQueue = SPAN_LOCAL_MAX;
     return slate;
 }
-
