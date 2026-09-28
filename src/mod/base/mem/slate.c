@@ -58,11 +58,15 @@ void Slate_Remove(Slate *sl, i8 idx){
     }
 }
 
-Slate *Slate_Make(MemCh *m){
-    Slate *slate = (Slate *)MemCh_Alloc(m, sizeof(Slate));
+void Slate_Init(Slate *slate){
     slate->type.of = TYPE_SLATE;
     slate->type.state = NOOP;
     memcpy(&slate->queue, &slateInitialSet, sizeof(slateInitialSet));
     slate->idx.nextInQueue = SPAN_LOCAL_MAX;
+}
+
+Slate *Slate_Make(MemCh *m){
+    Slate *slate = (Slate *)MemCh_Alloc(m, sizeof(Slate));
+    Slate_Init(slate);
     return slate;
 }

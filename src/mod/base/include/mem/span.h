@@ -12,6 +12,7 @@ typedef struct span {
     RangeType range; /* type/dims */
     struct mem_ctx *m;
     i64 size;
+    i64 maxIdx;
     struct slate *root;
 } Span;
 
@@ -22,5 +23,7 @@ i64 Span_Add(Span *p, void *t);
 
 util Span_SetSlot(Span *p, i64 idx, util u);
 util Span_GetSlot(Span *p, i64 idx);
+
+void Span_Init(Span *p, field16 flags);
 
 Span *Span_Make(struct mem_ctx *m, field16 flags);

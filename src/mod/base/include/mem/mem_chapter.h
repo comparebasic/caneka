@@ -24,6 +24,5 @@ void *MemCh_Realloc(MemCh *m, quad s, void *orig, quad origsize);
 status MemCh_Free(MemCh *m);
 status MemCh_FreeTemp(MemCh *m);
 MemCh *MemCh_OnPage();
-status MemCh_Setup(MemCh *m, MemPage *pg);
+void MemCh_Init(MemCh *m);
 MemCh *MemCh_Make();
-

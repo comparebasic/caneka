@@ -81,14 +81,18 @@ status MemCh_Free(MemCh *m){
     return r;
 }
 
-MemCh *MemCh_Make(){
-    MemPage *pg = MemPage_Make(NULL);
-    MemCh *m = (Slab *)MemPage_Alloc(pg, sizeof(MemCh), TYPE_MEMCTX);
+void MemCh_Init(MemCh *m){
     m->type.of = TYPE_MEMCTX;
     m->page = pg;
     Iter_Init(&m->backlog, Span_Make(m));
 #ifdef DEBUGSTACK
     Iter_Init(&m->debugIt, Span_Make(m));
 #endif
+}
+
+MemCh *MemCh_Make(){
+    MemPage *pg = MemPage_Make(NULL);
+    MemCh *m = (MemCh *)MemPage_Alloc(pg, sizeof(MemCh), TYPE_MEMCTX);
+    MemCh_Init(m);
     return m;
 }

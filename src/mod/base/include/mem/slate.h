@@ -17,4 +17,5 @@ i8 Slate_Add(Slate *slate, void *item);
 i8 Slate_Enqueue(Slate *slate, void *item);
 i8 Slate_Insert(Slate *slate, i8 idx, void *item);
 void Slate_Remove(Slate *slate, i8 idx);
+void Slate_Init(Slate *slate);
 Slate *Slate_Make(struct mem_ctx *m);

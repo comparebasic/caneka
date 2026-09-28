@@ -63,8 +63,8 @@ static status Iter_Query(Iter *it){
         p->range.range = dims;
     }
 
-    if(it->range.range != p->range.range){
-        it->stack = (Slate *)MemCh_Alloc(m, SizeOf(void *)*(p->range.range*2));
+    if(it->range.range == 0 || it->range.range < p->range.range){
+        it->stack = (Slate **)MemCh_Alloc(m, SizeOf(Slate *)*(p->range.range*2));
         it->localIdx = (i8 *)MemCh_Alloc(m, SizeOf(i8)*(p->range.range*2));
         it->range.range = p->range.range;
     }
@@ -187,7 +187,7 @@ status Iter_Incr(Iter *it){
     }
     i64 factor = incr;
 
-    if(it->p == NULL || it->p->count == 0){
+    if(it->p == NULL || it->p->root->idx.count == 0){
         it->type.state |= END; 
         return it->type.state;
     }
@@ -213,32 +213,32 @@ status Iter_Incr(Iter *it){
                 if((incr > 0) && (it->localIdx[dim] + incr) < SPAN_STRIDE || (it->localIdx[dim] + incr) < 0){
                     it->localIdx[dim] -= incr;
                     parent = it->stack[dim+1];
-                    it->stack[dim] = (Slate *)parent[it->localIdx[dim]];
-                    void **dptr = *(it->stack[dim]);
+                    it->stack[dim] = (Slate *)parent->slots[it->localIdx[dim]];
 
                     idx += factor;
                     if(dim == 0){
-                        it->value = *dptr;
-                        if(*dptr != NULL || (it->type.state & ITER_SKIP_NULL) == 0){
+                        it->value = (void *)it->stack[0];
+                        if(it->value != NULL || (it->type.state & ITER_SKIP_NULL) == 0){
                             break;
                         }
-                    }else if(*dptr != NULL){
+                    }else if(it->stack[dim] != NULL){
+                        Slate *current = it->stack[dim];
                         idx += factor-1;
                         while(dim-1 >= 0){
                             dim--;
                             factor *= SPAN_STRIDE;
                             it->localIdx[dim] = incr > 0 ? 0 : (SPAN_STRIDE-1);
                             parent = it->stack[dim+incr];
-                            it->stack[dim] = (Slate *)parent[it->localIdx[dim]];
-                            if(*(it->stack[dim]) == NULL){
+                            it->stack[dim] = (Slate *)parent->slots[it->localIdx[dim]];
+                            if(it->stack[dim] == NULL){
                                 dim++;
                                 factor /= SPAN_STRIDE;
                                 break;
                             }else if(dim == 0){
-                                if(*(it->stack[dim]) == NULL && (it->type.state & ITER_SKIP_NULL)){
+                                if(it->stack[dim] == NULL && (it->type.state & ITER_SKIP_NULL)){
                                     continue;
                                 }else{
-                                    it->value = *(it->stack[dim]);
+                                    it->value = (void *)it->stack[dim];
                                     break;
                                 }
                             }

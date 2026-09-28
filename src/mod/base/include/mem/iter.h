@@ -24,6 +24,7 @@ status Iter_Incr(Iter *it);
 status Iter_Next(Iter *it);
 status Iter_Prev(Iter *it);
 status Iter_Remove(Iter *it, i64 idx);
+i64 Iter_NextIdx(Iter *it);
 
 void *Iter_Pop(Iter *it);
 void Iter_Reset(Iter *it);
