@@ -4,15 +4,18 @@
 void MemCh_CountBytes(MemCh *m, i64 *_count){
     i64 count = *_count + (PAGE_SIZE - m->page->remaining);
     Iter_Reset(&m->backlog);
-    while((Iter_Next(&it) & END) == 0){
-        MemPage *sl = (MemPage *)it.value; 
+    while((Iter_Next(&m->backlog) & END) == 0){
+        MemPage *sl = (MemPage *)m->backlog.value; 
         count += (PAGE_SIZE - sl->remaining);
     }
 
     *_count = count;
 
-    if(m->next != NULL){
-        MemCh_CountBytes(m->next, _count);
+    if(m->nested != NULL){
+        Iter_Reset(m->nested);
+        while((Iter_Next(m->nested) & END) == 0){
+            MemCh_CountBytes(m->nested->value, _count);
+        }
     }
 }
 
@@ -28,15 +31,11 @@ void *MemCh_Realloc(MemCh *m, quad sz, void *orig, quad origsize){
     return p; 
 }
 
-MemCh *MemCh_Nest(MemCh *m, quad sz){
-    MemCh *latest = m->next;
-    while(m->next != NULL){
-        latest = m->next;
-    }
-
-    MemCh *next = MemCh_Make();
-    latest->next = next;
-    return next;
+MemCh *MemCh_Nest(MemCh *m){
+    MemCh *nest = MemCh_Make();
+    Iter_Add(m->nested, nest); 
+    m->level = (i32)m->nested->p->maxIdx;
+    return nest;
 }
 
 void *MemCh_Alloc(MemCh *m, quad sz){
@@ -59,40 +58,38 @@ void *MemCh_Alloc(MemCh *m, quad sz){
 }
 
 void MemCh_FreeTemp(MemCh *m){
-    MemCh *temp = m->next;
-    MemCh *next = temp;
-    while(next != NULL){
-        next = temp->next;
-        MemCh_Free(temp);
-        temp = next;
+    if(m->nested != NULL){
+        while((Iter_Prev(m->nested) & END) == 0 && m->nested->idx >= m->level){
+            MemCh_Free(m->nested->value);
+            Iter_Remove(m->nested, m->nested->idx);
+        }
     }
 
-    MemBook_WipePages(m);
+    MemBook_RecycleAll();
 }
 
-status MemCh_Free(MemCh *m){
-    Iter_Reset(&m->it);
-    while((Iter_Next(&m->it) & END) == 0){
-        MemPage *pg = (MemPage *)m->it.value;
-        MemBook_FreePage(m, pg);
+void MemCh_Free(MemCh *m){
+    Iter_Reset(&m->backlog);
+    while((Iter_Next(&m->backlog) & END) == 0){
+        MemPage *pg = (MemPage *)m->backlog.value;
+        MemBook_FreePage(pg);
     }
-    MemBook_FreePage(m, m->page);
-    MemBook_WipePages(m);
-    return r;
+    MemBook_FreePage(m->page);
+    MemBook_RecycleAll();
 }
 
-void MemCh_Init(MemCh *m){
+void MemCh_Init(MemCh *m, MemPage *pg){
     m->type.of = TYPE_MEMCTX;
     m->page = pg;
-    Iter_Init(&m->backlog, Span_Make(m));
+    Iter_Init(&m->backlog, Span_Make(m, ZERO));
 #ifdef DEBUGSTACK
-    Iter_Init(&m->debugIt, Span_Make(m));
+    Iter_Init(&m->debugIt, Span_Make(m, ZERO));
 #endif
 }
 
 MemCh *MemCh_Make(){
     MemPage *pg = MemPage_Make(NULL);
-    MemCh *m = (MemCh *)MemPage_Alloc(pg, sizeof(MemCh), TYPE_MEMCTX);
-    MemCh_Init(m);
+    MemCh *m = (MemCh *)MemPage_Alloc(pg, sizeof(MemCh));
+    MemCh_Init(m, pg);
     return m;
 }

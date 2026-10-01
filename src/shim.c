@@ -15,7 +15,7 @@ void Error(MemCh *m, char *func, char *file, int line, char *fmt, void *args[]){
 
 i32 main(i32 argv, char *args[]){
     MemCh *m = NULL;
-    Span *p = Span_Make(m);
+    Span *p = Span_Make(m, ZERO);
 
     for(i32 i = 0; i < 24; i++){
         printf("Adding %d\n", i);

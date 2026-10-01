@@ -98,7 +98,7 @@ i64 Span_Remove(Span *p, i64 idx){
     return IT.idx;
 }
 
-void Span_Init(Span *p, field16 flags, Slate *root){
+void Span_Init(MemCh *m, Span *p, field16 flags, Slate *root){
     p->type.of = TYPE_SPAN;
     p->type.state = flags;
     p->m = m;
@@ -108,6 +108,6 @@ void Span_Init(Span *p, field16 flags, Slate *root){
 
 Span *Span_Make(MemCh *m, field16 flags){
     Span *p = MemCh_Alloc(m, sizeof(Span));
-    Span_Init(p, flags, Slate_Make(m));
+    Span_Init(m, p, flags, Slate_Make(m));
     return p;
 }

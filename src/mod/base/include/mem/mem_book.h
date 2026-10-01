@@ -1,7 +1,5 @@
-extern Span *MemBook_books;
-extern Iter *MemBook_recycled;
-
-byte 
+extern Iter MemBook_books;
+extern Iter MemBook_recycled;
 
 typedef struct mem_book {
     Type type;
@@ -21,10 +19,12 @@ typedef struct mem_book_stats {
     } idx;
 } MemBookStats;
 
-status MemBook_GetStats(MemBook *book, MemBookStats *st);
+status MemBook_GetStats(void *addr, MemBookStats *st);
 status MemBook_FreePage(MemPage *pg);
 
 void *MemBook_GetPage(void *addr);
 void MemBook_Free(MemBook *book);
+void MemBook_Recycle(MemBook *book);
+void MemBook_RecycleAll();
 
 MemBook *MemBook_Make();

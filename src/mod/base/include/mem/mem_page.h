@@ -2,7 +2,7 @@ enum mem_page_flags {
     MEM_PAGE_PERSIST_ARRAY = 1 << 8,
 };
 
-byte Memory[PAGE_SIZE];
+typedef byte Memory[PAGE_SIZE];
 
 typedef struct mem_page {
     Type type;

@@ -24,6 +24,6 @@ i64 Span_Add(Span *p, void *t);
 util Span_SetSlot(Span *p, i64 idx, util u);
 util Span_GetSlot(Span *p, i64 idx);
 
-void Span_Init(Span *p, field16 flags);
+void Span_Init(struct mem_ctx *m, Span *p, field16 flags, struct slate *root);
 
 Span *Span_Make(struct mem_ctx *m, field16 flags);

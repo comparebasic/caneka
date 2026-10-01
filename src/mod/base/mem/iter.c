@@ -279,6 +279,16 @@ status Iter_Next(Iter *it){
     return Iter_Incr(it);
 }
 
+i64 Iter_NextIdx(Iter *it){
+    if(it->type.state & SPAN_QUEUED){
+        /* queue algorithm for finding next here */
+        return -1;
+    }else{
+        return it->p->maxIdx+1;
+    }
+}
+
+
 status Iter_Prev(Iter *it){
     it->type.state |= ITER_REVERSE;
     return Iter_Incr(it);
