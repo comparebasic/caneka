@@ -8,14 +8,24 @@ i8 slateInitialSet[SPAN_STRIDE] = {
     3, 2, 1, 0
 };
 
+void *Slate_Get(Slate *slate, i8 idx){
+    return slate->slots[idx];
+}
+
 i8 Slate_Add(Slate *sl, void *item){
     if(sl->idx.max+1 > SPAN_LOCAL_MAX){
         sl->type.state |= ERROR;
         return -1;
     }
-    sl->idx.max++;
+    if(sl->type.state & NOOP){
+        sl->type.state &= ~NOOP;
+    }else{
+        sl->idx.max++;
+    }
     sl->slots[sl->idx.max] = item;
     sl->idx.count++;
+    printf("Adding idx %d\n", (i32)sl->idx.max);
+    fflush(stdout);
     return sl->idx.max;
 }
 

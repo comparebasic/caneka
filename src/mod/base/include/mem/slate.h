@@ -13,6 +13,7 @@ typedef struct slate {
 
 extern i8 slateInitialSet[SPAN_STRIDE];
 
+void *Slate_Get(Slate *slate, i8 idx);
 i8 Slate_Add(Slate *slate, void *item);
 i8 Slate_Enqueue(Slate *slate, void *item);
 i8 Slate_Insert(Slate *slate, i8 idx, void *item);

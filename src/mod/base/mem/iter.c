@@ -17,8 +17,10 @@ static status Iter_Query(Iter *it){
     }
 
     if(it->idx >= p->size){
+        /*
         printf("Resizing\n");
         fflush(stdout);
+        */
         if(!fill){
             it->type.state |= NOOP;
             return it->type.state;
@@ -28,8 +30,10 @@ static status Iter_Query(Iter *it){
         i64 size = p->size;
         while((size-1) < it->idx){
             size *= SPAN_STRIDE;
+            /*
             printf("dims resizing currently %d, size %ld\n", (i32)dims, size);
             fflush(stdout);
+            */
             if(dims >= DIM_MAX){
                 Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
                     "Span unable to grow to greater than STRIDE^DIM_MAX", NULL);
@@ -37,8 +41,10 @@ static status Iter_Query(Iter *it){
             dims++;
         }
 
+        /*
         printf("Resizing to dims %d size %ld\n", dims, size);
         fflush(stdout);
+        */
 
         Slate *prev = NULL;
         Slate *shelf = NULL;
@@ -58,8 +64,10 @@ static status Iter_Query(Iter *it){
 
         prev->slots[0] = shelf;
         p->size = size;
+        /*
         printf("p->size is now %ld new slab is %p\n", size, sl);
         fflush(stdout);
+        */
         p->range.range = dims;
     }
 
@@ -72,12 +80,14 @@ static status Iter_Query(Iter *it){
     i8 idim = (i8)p->range.range;
     while(idim >= 0){
         i64 local = (it->idx >> (SPAN_DIM_SHIFT*idim)) & (SPAN_LOCAL_MAX);
+        /*
         printf("\x1b[33mFinding a place dim %d idx %ld local %ld\n", p->range.range - idim, it->idx, local);
         for(i16 i = 0; i <= p->range.range; i++){
             printf("  dim%d @%p + local %d\n", i, it->stack[i], (i32)it->localIdx[i]);
         }
         printf("\x1b[0m\n");
         fflush(stdout);
+        */
 
         Slate *sl = NULL;
         if(idim == p->range.range){
@@ -87,76 +97,61 @@ static status Iter_Query(Iter *it){
         }else{
             Slate *parent = it->stack[idim+1];
             sl = parent->slots[it->localIdx[idim+1]];
+            /*
             printf("    non 0 idim parent %p sl %p local %d\n", 
                 parent,
                 sl,
                 it->localIdx[idim+1]);
             fflush(stdout);
+            */
             if(sl == NULL){
+                /*
                 printf("    sl is NULL - MAKING non 0 idim sl\n");
                 fflush(stdout);
+                */
                 if(!fill){
                     it->type.state |= NOOP;
                     break;
                 }else{
                     sl = Slate_Make(m);
                     parent->slots[it->localIdx[idim+1]] = sl;
+                    /*
                     printf("    new mid sl is %p/%p\n", 
                         sl, 
                         parent->slots[it->localIdx[idim+1]]);
                     fflush(stdout);
+                    */
                 }
             }
             it->stack[idim] = sl;
             it->localIdx[idim] = local;
+            /*
             printf("> parent is %p  sl is %p\n", parent, sl);
             fflush(stdout);
+            */
         }
 
         if(idim == 0){
             printf("    idim 0 sl = %p\n", sl);
             fflush(stdout);
-            void *ptr = sl->slots[local];
             if(!fill){
-                if(ptr == NULL){
+                if(sl->slots[local] == NULL){
+                    printf("ptr is null\n");
                     it->type.state |= NOOP;
                 }else{
-                    it->value = ptr;
+                    printf("Get local %d\n", (i32)local);
+                    it->value = Slate_Get(sl, local);
                 }
                 break;
             }else{
                 if(it->type.state & (ITER_SET|ITER_ADD)){
-                    if(ptr == NULL){
-                        sl->idx.count++;
-                    }
-                    sl->slots[local] = it->value;
-                    if(local > sl->idx.max){
-                        sl->idx.max = local;
-                    }
-                    if(local < sl->idx.min){
-                        sl->idx.min = local;
-                    }
+                    printf("Add to local %d\n", (i32)local);
+                    i8 slIdx = Slate_Add(sl, it->value);
+                    it->idx = (it->idx & SPAN_LOCAL_MASK) & (i64)slIdx;
+                }else if(it->type.state & (ITER_SET)){
+                    Slate_Insert(sl, local, it->value);
                 }else if(it->type.state & ITER_REMOVE){
-                    if(ptr != NULL){
-                        sl->idx.count--;
-                    }
-                    sl->slots[local] = NULL;
-                    if(local == sl->idx.min){
-                       for(i64 i = local; i < SPAN_STRIDE; i++){
-                            if(sl->slots[i] != NULL){
-                                sl->idx.min = i;
-                                break;
-                            }
-                       }
-                    }
-                    if(local == sl->idx.max){
-                        for(i64 i = local; i > 0; i--){
-                            if(sl->slots[i] != NULL){
-                                sl->idx.max = i;
-                                break;
-                            }
-                        }
-                    }
+                    Slate_Remove(sl, local);
                 }
             }
         }
