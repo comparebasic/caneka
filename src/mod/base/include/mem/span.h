@@ -16,6 +16,8 @@ typedef struct span {
     struct slate *root;
 } Span;
 
+status Span_Resize(Span *p, i64 size);
+
 void *Span_Get(Span *p, i64 idx);
 i64 Span_Set(Span *p, i64 idx, void *t);
 i64 Span_Remove(Span *p, i64 idx);

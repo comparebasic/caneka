@@ -1,6 +1,40 @@
 #include <external.h>
 #include "base_module.h"
 
+status Span_Resize(Span *p, i64 size){
+    MemCh *m = p->m;
+    i8 dims = p->range.range;
+    i64 current = p->size;
+    while((current-1) < size){
+        current *= SPAN_STRIDE;
+        if(dims >= DIM_MAX){
+            Fatal(m, FUNCNAME, FILENAME, LINENUMBER,
+                "Span unable to grow to greater than STRIDE^DIM_MAX", NULL);
+        }
+        dims++;
+    }
+
+    Slate *prev = NULL;
+    Slate *shelf = NULL;
+    Slate *sl = NULL;
+    while(p->range.range < dims){
+        sl = Slate_Make(m);
+        if(prev == NULL){
+            shelf = p->root;
+            p->root = sl;
+        }else{
+            prev->slots[0] = sl;
+        }
+
+        prev = sl;
+        p->range.range++;
+    }
+
+    prev->slots[0] = shelf;
+    p->size = current;
+    p->range.range = dims;
+}
+
 i64 Span_Add(Span *p, void *t){
     i64 idx = -1;
     if(p->range.range == 0 &&
