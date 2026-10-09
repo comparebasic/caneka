@@ -2,6 +2,7 @@
 #include "base_module.h"
 
 status Span_Resize(Span *p, i64 size){
+    status r = ZERO;
     MemCh *m = p->m;
     i8 dims = p->range.range;
     i64 current = p->size;
@@ -28,11 +29,13 @@ status Span_Resize(Span *p, i64 size){
 
         prev = sl;
         p->range.range++;
+        r = PROCESS;
     }
 
     prev->slots[0] = shelf;
     p->size = current;
     p->range.range = dims;
+    return r;
 }
 
 i64 Span_Add(Span *p, void *t){

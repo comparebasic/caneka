@@ -9,8 +9,6 @@ i8 slateInitialSet[SPAN_STRIDE] = {
 };
 
 void *Slate_Get(Slate *slate, i8 idx){
-    printf("Get %d\n", idx);
-    fflush(stdout);
     return slate->slots[idx];
 }
 
@@ -32,8 +30,7 @@ i8 Slate_Add(Slate *sl, void *item){
     }else{
         sl->type.state &= ~END;
     }
-    printf("Adding idx %d\n", (i32)sl->idx.max);
-    fflush(stdout);
+
     return sl->idx.max;
 }
 
