@@ -1,19 +1,6 @@
 #include <external.h>
 #include "base_module.h"
 
-static inline Slate *Iter_getMakeSlate(Slate *parent, i8 local, boolean fill){
-    Slate *sl = parent->slots[local];
-    if(sl == NULL){
-        if(!fill){
-            return NULL;
-        }else{
-            sl = Slate_Make(m);
-            parent->slots[it->localIdx[idim+1]] = sl;
-        }
-    }
-    return sl;
-}
-
 static inline status Iter_resize(Iter *it){
     Span *p = it->p;
     MemCh *m = p->m;
@@ -24,101 +11,6 @@ static inline status Iter_resize(Iter *it){
         it->range.range = p->range.range;
         r = PROCESS;
     }
-    return r;
-}
-
-static inline status Iter_Add(Iter *it){
-    status r = ZERO;
-    Span *p = it->p;
-    i64 local = 0;
-    it->idx = 0;
-
-    Slate *sl = p->root;
-    i8 idim = (i8)p->range.range;
-    while(idim >= 0){
-        if(idim == p->range.range){
-            sl = p->root;
-            it->stack[idim] = p->root;
-            local = sl->idx.max;
-            it->localIdx[idim] = local;
-        }else{
-            Slate *parent = it->stack[idim+1];
-            sl = parent->slots[it->localIdx[idim+1]];
-            if(sl->type.state & END){
-                it->localIdx[idim+1]++;
-                sl = Iter_getMakeSlate(parent, it->localIdx[idim+1], TRUE);
-            }
-
-            local = sl->idx.max;
-            it->stack[idim] = sl;
-            it->localIdx[idim] = local;
-        }
-
-        it->idx |= (local << (SPAN_DIM_SHIFT*(p->range.range-idim)));
-
-        if(idim == 0){
-            local = Slate_Add(sl, it->value);
-            it->idx |= local;
-            r |= PROCESS;
-        }
-
-        idim--;
-    }
-
-    return r;
-}
-
-static inline status Iter_getSetRemove(Iter *it){
-    status r = ZERO;
-    Span *p = it->p;
-
-    i8 idim = (i8)p->range.range;
-    while(idim >= 0){
-        i64 local = 0;
-        it->idx = 0;
-
-        i64 local = it->idx;
-        local = (local >> (SPAN_DIM_SHIFT*idim)) & (SPAN_LOCAL_MAX);
-
-        Slate *sl = NULL;
-        if(idim == p->range.range){
-            sl = p->root;
-            it->stack[idim] = p->root;
-            it->localIdx[idim] = local;
-        }else{
-            Slate *parent = it->stack[idim+1];
-            sl = Iter_getMakeSlate(parent, it->localIdx[idim+1], fill);
-            if(sl == NULL){
-                it->type.state |= NOOP;
-                break;
-            }
-            it->stack[idim] = sl;
-            it->localIdx[idim] = local;
-        }
-
-        if(idim == 0){
-            if(!fill){
-                if(sl->slots[local] == NULL){
-                    it->type.state |= NOOP;
-                }else{
-                    it->value = Slate_Get(sl, local);
-                }
-                break;
-            }else{
-                if(it->type.state & (ITER_SET|ITER_ADD)){
-                    i8 slIdx = Slate_Add(sl, it->value);
-                    it->idx = (it->idx & SPAN_LOCAL_MASK) & (i64)slIdx;
-                }else if(it->type.state & (ITER_SET)){
-                    Slate_Insert(sl, local, it->value);
-                }else if(it->type.state & ITER_REMOVE){
-                    Slate_Remove(sl, local);
-                }
-                r |= PROCESS;
-            }
-        }
-        idim--;
-    }
-
     return r;
 }
 
@@ -137,7 +29,7 @@ static status Iter_Query(Iter *it){
         it->value = NULL;
     }
 
-    if((it->type.state & ITER_ADD) && (p->root->type.state & END)){
+    if((it->type.state & ITER_ADD) && (p->type.state & END)){
         it->idx = p->size;
     }
 
@@ -153,9 +45,68 @@ static status Iter_Query(Iter *it){
     Iter_resize(it);
 
     if(it->type.state & ITER_ADD){
-        it->type.state |= Iter_Add(it);
-    }else if(it->type.state & (ITER_SET|ITER_GET|ITER_REMOVE)){
-        it->type.state |= Iter_getSetRemove(it);
+        it->idx = 0;
+    }
+
+    i64 local = 0;
+
+    i8 idim = (i8)p->range.range;
+    while(idim >= 0){
+        i64 local = 0;
+
+        Slate *sl = NULL;
+        if(idim == p->range.range){
+            sl = p->root;
+        }else{
+            Slate *parent = it->stack[idim+1];
+            sl = parent->slots[local];
+            if(sl == NULL){
+                if(!fill){
+                    it->type.state |= NOOP;
+                    break;
+                }else{
+                    sl = Slate_Make(m);
+                    parent->slots[it->localIdx[idim+1]] = sl;
+                }
+            }
+        }
+
+        if(it->type.state & ITER_ADD){
+            local = sl->idx.max;
+            it->idx |= local << (SPAN_DIM_SHIFT*(p->range.range-idim));
+        }else{
+            local = it->idx;
+            local = (local >> (SPAN_DIM_SHIFT*idim)) & (SPAN_LOCAL_MAX);
+        }
+
+        it->stack[idim] = p->root;
+        it->localIdx[idim] = local;
+
+        if(idim == 0){
+            if(!fill){
+                if(sl->slots[local] == NULL){
+                    it->type.state |= NOOP;
+                }else{
+                    it->value = Slate_Get(sl, local);
+                }
+                break;
+            }else{
+                if(it->type.state & (ITER_ADD)){
+                    i8 slIdx = Slate_Add(sl, it->value);
+                    it->idx |= (i64)slIdx;
+                    if(sl->type.state & END){
+                        p->type.state |= END;
+                    }else{
+                        p->type.state &= ~END;
+                    }
+                }else if(it->type.state & (ITER_SET)){
+                    Slate_Insert(sl, local, it->value);
+                }else if(it->type.state & ITER_REMOVE){
+                    Slate_Remove(sl, local);
+                }
+            }
+        }
+        idim--;
     }
 
     if(it->idx == p->maxIdx){
